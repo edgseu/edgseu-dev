@@ -463,9 +463,9 @@ main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 .article-grid { display: grid; grid-template-columns: 16rem minmax(0, 46rem); gap: 2rem; align-items: start; padding-bottom: 4rem; }
 .article-outline { position: sticky; top: 5.5rem; width: 16rem; max-height: calc(100vh - 6.5rem); padding: 1rem; border: 1px solid var(--border); border-radius: 0.5rem; overflow: auto; background: var(--surface); }
 .article-outline h2 { margin: 0 0 0.6rem; font-size: 0.9rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; font-family: var(--font-mono); font-weight: 600; }
-.outline-list-wrap { position: relative; padding-left: 0.65rem; }
-.outline-progress-track { position: absolute; top: 0.25rem; left: 0; bottom: 0.25rem; width: 2px; background: var(--subtle); border-radius: 9999px; overflow: hidden; }
-.outline-progress-bar { width: 100%; height: 0%; background: var(--accent); transition: height 80ms ease-out; }
+.outline-list-wrap { position: relative; padding-left: 0.85rem; }
+.outline-progress-track { position: absolute; top: 0.25rem; left: 0; bottom: 0.25rem; width: 3px; background: var(--subtle); border-radius: 9999px; overflow: hidden; }
+.outline-progress-bar { width: 100%; height: 0%; background: var(--accent); border-radius: 9999px; transition: height 60ms ease-out; box-shadow: 0 0 6px rgba(56, 189, 248, 0.4); }
 .article-outline ol { display: grid; gap: 0.25rem; margin: 0; padding: 0; list-style: none; }
 .article-outline a { display: block; padding: 0.25rem 0.4rem; color: var(--muted); font-size: 0.82rem; text-decoration: none; border-left: 2px solid transparent; transition: color 0.15s ease, border-color 0.15s ease; line-height: 1.35; }
 .article-outline a:hover { color: var(--text); }

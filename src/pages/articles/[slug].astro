@@ -115,11 +115,12 @@ const jsonLd = {
   const progressBars = document.querySelectorAll<HTMLElement>('.outline-progress-bar');
   const outlineButton = document.querySelector<HTMLButtonElement>('.outline-disclosure > button');
   const mobileOutline = document.querySelector<HTMLElement>('#mobile-outline');
-  const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>('.article-outline a')];
-  const headings = outlineLinks
+  const allOutlineLinks = [...document.querySelectorAll<HTMLAnchorElement>('.article-outline a')];
+  const firstOutline = document.querySelector<HTMLElement>('.article-outline');
+  const uniqueOutlineLinks = [...(firstOutline?.querySelectorAll<HTMLAnchorElement>('ol a') ?? [])];
+  const headings = uniqueOutlineLinks
     .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
     .filter((heading): heading is HTMLElement => Boolean(heading));
-
   if (mobileOutline) mobileOutline.hidden = true;
 
   const closeOutline = (restoreFocus = false) => {
@@ -137,7 +138,7 @@ const jsonLd = {
     outlineButton.setAttribute('aria-expanded', String(opening));
   });
 
-  outlineLinks.forEach((link) => link.addEventListener('click', () => closeOutline()));
+  allOutlineLinks.forEach((link) => link.addEventListener('click', () => closeOutline()));
   document.addEventListener('edgseu:disclosure', ((event: CustomEvent<string>) => {
     if (event.detail !== 'outline') closeOutline();
   }) as EventListener);
@@ -156,32 +157,34 @@ const jsonLd = {
       }
     }
 
-    outlineLinks.forEach((link, idx) => {
-      if (idx === activeIndex) {
-        link.setAttribute('aria-current', 'location');
-      } else {
-        link.removeAttribute('aria-current');
-      }
-    });
+    document.querySelectorAll<HTMLElement>('.article-outline').forEach((outlineNav) => {
+      const links = [...outlineNav.querySelectorAll<HTMLAnchorElement>('ol a')];
+      const wrap = outlineNav.querySelector<HTMLElement>('.outline-list-wrap');
+      const progressBar = outlineNav.querySelector<HTMLElement>('.outline-progress-bar');
 
-    if (progressBars.length > 0 && outlineLinks.length > 0) {
-      const wrap = outlineLinks[0]?.closest('.outline-list-wrap');
-      if (wrap) {
+      links.forEach((link, idx) => {
+        if (idx === activeIndex) {
+          link.setAttribute('aria-current', 'location');
+        } else {
+          link.removeAttribute('aria-current');
+        }
+      });
+
+      if (progressBar && wrap && wrap.offsetHeight > 0) {
         const wrapRect = wrap.getBoundingClientRect();
         let targetHeight = 0;
 
-        if (activeIndex >= 0) {
-          const activeLink = outlineLinks[activeIndex];
+        if (activeIndex >= 0 && activeIndex < links.length) {
+          const activeLink = links[activeIndex];
           if (activeLink) {
             const linkRect = activeLink.getBoundingClientRect();
             const linkTopInWrap = linkRect.top - wrapRect.top;
-            const linkHeight = linkRect.height;
-            const startY = linkTopInWrap + linkHeight * 0.5;
+            const startY = linkTopInWrap + linkRect.height * 0.5;
 
-            if (activeIndex < headings.length - 1) {
+            if (activeIndex < headings.length - 1 && activeIndex + 1 < links.length) {
               const currentH = headings[activeIndex]!;
               const nextH = headings[activeIndex + 1]!;
-              const nextLink = outlineLinks[activeIndex + 1]!;
+              const nextLink = links[activeIndex + 1]!;
               const nextLinkRect = nextLink.getBoundingClientRect();
               const nextY = nextLinkRect.top - wrapRect.top + nextLinkRect.height * 0.5;
 
@@ -205,11 +208,9 @@ const jsonLd = {
         }
 
         const percentage = wrapRect.height > 0 ? Math.max(0, Math.min(100, (targetHeight / wrapRect.height) * 100)) : 0;
-        progressBars.forEach((bar) => {
-          bar.style.height = `${percentage}%`;
-        });
+        progressBar.style.height = `${percentage}%`;
       }
-    }
+    });
   };
 
   document.addEventListener('scroll', updateReadingState, { passive: true });
