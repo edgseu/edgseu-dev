@@ -1,0 +1,40 @@
+name: Time-bounded quality exception
+description: Record a reviewable exception for an environment-sensitive release target.
+title: "Quality exception: "
+labels: [quality-exception]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Missing approved content, keyboard traps, and inaccessible navigation are nonwaivable.
+  - type: input
+    id: owner
+    attributes:
+      label: Owner
+    validations:
+      required: true
+  - type: textarea
+    id: scope
+    attributes:
+      label: Exact scope and evidence
+    validations:
+      required: true
+  - type: textarea
+    id: reason
+    attributes:
+      label: Reason release may proceed
+    validations:
+      required: true
+  - type: input
+    id: expires
+    attributes:
+      label: Expiration date
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+  - type: textarea
+    id: mitigation
+    attributes:
+      label: Mitigation and closure check
+    validations:
+      required: true

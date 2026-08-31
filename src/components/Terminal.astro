@@ -1,0 +1,89 @@
+---
+import { site } from '../data/site';
+---
+
+<section class="terminal" aria-labelledby="terminal-title">
+  <div class="terminal-bar">
+    <span class="terminal-dots" aria-hidden="true">● ● ●</span>
+    <h2 id="terminal-title">profile — edgseu</h2>
+  </div>
+  <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
+    <p><span class="prompt" aria-hidden="true">$</span> whoami</p>
+    <p>{site.person} — {site.role}, {site.location}</p>
+    <p class="hint">Type <code>help</code> after focusing the prompt.</p>
+  </div>
+  <form class="terminal-form" autocomplete="off">
+    <label for="terminal-input"><span class="prompt" aria-hidden="true">$</span><span class="sr-only">Terminal command</span></label>
+    <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
+  </form>
+  <noscript><p class="terminal-noscript">Interactive commands require JavaScript. All destinations are linked below.</p></noscript>
+</section>
+
+<script>
+  const form = document.querySelector<HTMLFormElement>('.terminal-form');
+  const input = document.querySelector<HTMLInputElement>('#terminal-input');
+  const output = document.querySelector<HTMLElement>('#terminal-output');
+  const history: string[] = [];
+  let historyIndex = 0;
+  const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
+
+  const responses: Record<(typeof commands)[number], string> = {
+    help: `Commands: ${commands.join(', ')}`,
+    whoami: 'Aman Bhushan Singh — Cloud & DevSecOps Engineer, India',
+    skills: 'Cloud infrastructure · DevSecOps · GitOps · Security automation',
+    projects: 'Open /projects/ to inspect selected public work.',
+    articles: 'Open /articles/ for technical writing.',
+    contact: 'Email mail@edgseu.dev',
+    theme: 'Theme switched.',
+    clear: '',
+  };
+
+  const appendLine = (text: string, className?: string) => {
+    if (!output) return;
+    const line = document.createElement('p');
+    if (className) line.className = className;
+    line.textContent = text;
+    output.append(line);
+    while (output.childElementCount > 24) output.firstElementChild?.remove();
+    output.scrollTop = output.scrollHeight;
+  };
+
+  form?.addEventListener('submit', (event) => {
+    event.preventDefault();
+    if (!input || !output) return;
+    const command = input.value.trim().toLowerCase();
+    input.value = '';
+    if (!command) return;
+    appendLine(`$ ${command}`, 'terminal-command');
+    if (!commands.includes(command as (typeof commands)[number])) {
+      appendLine(`Unknown command: ${command}. Type help.`);
+      return;
+    }
+    history.push(command);
+    if (history.length > 20) history.shift();
+    historyIndex = history.length;
+    if (command === 'clear') {
+      output.replaceChildren();
+      return;
+    }
+    if (command === 'theme') {
+      document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
+    }
+    appendLine(responses[command as (typeof commands)[number]]);
+  });
+
+  input?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+      event.preventDefault();
+      historyIndex = Math.max(0, Math.min(history.length, historyIndex + (event.key === 'ArrowUp' ? -1 : 1)));
+      input.value = history[historyIndex] ?? '';
+    }
+    if (event.key === 'Tab' && input.value) {
+      const matches = commands.filter((command) => command.startsWith(input.value.toLowerCase()));
+      if (matches.length === 1) {
+        event.preventDefault();
+        input.value = matches[0] ?? input.value;
+      }
+    }
+  });
+</script>

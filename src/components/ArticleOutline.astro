@@ -1,0 +1,26 @@
+---
+interface Heading {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
+interface Props {
+  headings: Heading[];
+  id?: string;
+}
+
+const { headings, id } = Astro.props;
+const outline = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+---
+
+<nav class="article-outline" id={id} aria-label="On this page">
+  <h2>On this page</h2>
+  <ol>
+    {outline.map((heading) => (
+      <li data-depth={heading.depth}>
+        <a href={`#${heading.slug}`}>{heading.text}</a>
+      </li>
+    ))}
+  </ol>
+</nav>

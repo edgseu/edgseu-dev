@@ -1,0 +1,39 @@
+---
+import { publishedArticles } from '../lib/articles';
+import { site } from '../data/site';
+
+export function getStaticPaths() {
+  return publishedArticles.flatMap((article) =>
+    (article.frontmatter.aliases ?? []).map((alias) => ({
+      params: { redirect: alias.replace(/^\//u, '').replace(/\/$/u, '') },
+      props: { destination: article.path, title: article.frontmatter.title },
+    })),
+  );
+}
+
+interface Props {
+  destination: string;
+  title: string;
+}
+
+const { destination, title } = Astro.props;
+const canonical = new URL(destination, site.canonicalUrl).href;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Article moved · edgseu</title>
+    <meta name="robots" content="noindex, follow" />
+    <link rel="canonical" href={canonical} />
+    <meta http-equiv="refresh" content={`0;url=${destination}`} />
+  </head>
+  <body>
+    <main>
+      <h1>Article moved</h1>
+      <p><a href={destination}>Continue to “{title}”</a>.</p>
+    </main>
+  </body>
+</html>

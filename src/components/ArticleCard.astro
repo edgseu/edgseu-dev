@@ -1,0 +1,27 @@
+---
+import type { Article } from '../lib/articles';
+
+interface Props {
+  article: Article;
+  headingLevel?: 2 | 3;
+}
+
+const { article, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+const { frontmatter } = article;
+---
+
+<article class="article-card">
+  <p class="eyebrow">Article{frontmatter.state === 'Draft' ? ' · Draft' : ''}</p>
+  <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
+  <p>{frontmatter.summary}</p>
+  <div class="metadata">
+    {frontmatter.publishedAt && <time datetime={frontmatter.publishedAt}>{frontmatter.publishedAt}</time>}
+    <span>{article.readingMinutes} min read</span>
+  </div>
+  {frontmatter.tags && frontmatter.tags.length > 0 && (
+    <ul class="tag-list" aria-label={`${frontmatter.title} tags`}>
+      {frontmatter.tags.map((tag) => <li>{tag}</li>)}
+    </ul>
+  )}
+</article>

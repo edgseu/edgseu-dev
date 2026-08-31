@@ -1,0 +1,222 @@
+---
+import ArticleOutline from '../../components/ArticleOutline.astro';
+import { site } from '../../data/site';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { articleNeighbors, visibleArticles } from '../../lib/articles';
+import type { Article } from '../../lib/articles';
+
+export function getStaticPaths() {
+  return visibleArticles(import.meta.env.DEV).map((article) => ({
+    params: { slug: article.slug },
+    props: { article },
+  }));
+}
+
+interface Props {
+  article: Article;
+}
+
+const { article } = Astro.props;
+const { frontmatter, Content, headings } = article;
+const { newer, older } = articleNeighbors(article);
+const isDraft = frontmatter.state === 'Draft';
+const giscusRepoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
+const giscusCategoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
+const commentsConfigured = Boolean(giscusRepoId && giscusCategoryId);
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  headline: frontmatter.title,
+  description: frontmatter.summary,
+  datePublished: frontmatter.publishedAt,
+  ...(frontmatter.revisedAt ? { dateModified: frontmatter.revisedAt } : {}),
+  author: { '@type': 'Person', name: site.person, url: site.canonicalUrl },
+  mainEntityOfPage: new URL(article.path, site.canonicalUrl).href,
+};
+---
+
+<BaseLayout
+  title={frontmatter.title}
+  description={frontmatter.summary}
+  type="article"
+  canonicalPath={article.path}
+  noindex={isDraft}
+  jsonLd={jsonLd}
+>
+  <div class="reading-progress" aria-hidden="true"></div>
+  <div class="article-context">
+    <a href="/articles/">Articles</a><span aria-hidden="true">/</span><span>{frontmatter.title}</span>
+  </div>
+  <article>
+    <header class="article-header">
+      {isDraft && <p class="draft-banner">Draft preview — this Article is not included in production.</p>}
+      <p class="eyebrow">Article</p>
+      <h1>{frontmatter.title}</h1>
+      <p class="summary">{frontmatter.summary}</p>
+      <div class="metadata">
+        <span>By {site.person}</span>
+        {frontmatter.publishedAt && <time datetime={frontmatter.publishedAt}>Published {frontmatter.publishedAt}</time>}
+        {frontmatter.revisedAt && <time datetime={frontmatter.revisedAt}>Revised {frontmatter.revisedAt}</time>}
+        <span>{article.readingMinutes} min read</span>
+      </div>
+    </header>
+
+    <div class="outline-disclosure">
+      <button type="button" aria-expanded="false" aria-controls="mobile-outline">On this page</button>
+      <ArticleOutline headings={headings} id="mobile-outline" />
+    </div>
+
+    <div class="article-grid">
+      <ArticleOutline headings={headings} />
+      <div class="prose" data-article-body>
+        <Content />
+        <section
+          class="comments"
+          aria-labelledby="comments-heading"
+          data-comments
+          data-configured={String(commentsConfigured)}
+          data-repo-id={giscusRepoId}
+          data-category-id={giscusCategoryId}
+        >
+          <h2 id="comments-heading">Discussion</h2>
+          <p class="comments-fallback">
+            Comments load from GitHub only when requested. The Article remains available if GitHub is blocked.
+            <a href="https://github.com/h1zardian/edgseu-dev/discussions/categories/article-comments">Open Article discussions on GitHub</a>.
+          </p>
+          {commentsConfigured && <button class="comments-load" type="button">Load comments</button>}
+          <div class="giscus-host" aria-live="polite"></div>
+        </section>
+        {(newer || older) && (
+          <nav class="article-sequence" aria-label="Article sequence">
+            {newer && <a href={newer.path}>← Newer<span class="sr-only"> Article:</span><br />{newer.frontmatter.title}</a>}
+            {older && <a class="older" href={older.path}>Older →<span class="sr-only"> Article:</span><br />{older.frontmatter.title}</a>}
+          </nav>
+        )}
+      </div>
+    </div>
+  </article>
+</BaseLayout>
+
+<script>
+  const body = document.querySelector<HTMLElement>('[data-article-body]');
+  const progress = document.querySelector<HTMLElement>('.reading-progress');
+  const outlineButton = document.querySelector<HTMLButtonElement>('.outline-disclosure > button');
+  const mobileOutline = document.querySelector<HTMLElement>('#mobile-outline');
+  const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>('.article-outline a')];
+  const headings = outlineLinks
+    .map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))))
+    .filter((heading): heading is HTMLElement => Boolean(heading));
+
+  if (mobileOutline) mobileOutline.hidden = true;
+
+  const closeOutline = (restoreFocus = false) => {
+    if (!outlineButton || !mobileOutline) return;
+    mobileOutline.hidden = true;
+    outlineButton.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) outlineButton.focus();
+  };
+
+  outlineButton?.addEventListener('click', () => {
+    if (!mobileOutline) return;
+    const opening = mobileOutline.hidden;
+    if (opening) document.dispatchEvent(new CustomEvent('edgseu:disclosure', { detail: 'outline' }));
+    mobileOutline.hidden = !opening;
+    outlineButton.setAttribute('aria-expanded', String(opening));
+  });
+
+  outlineLinks.forEach((link) => link.addEventListener('click', () => closeOutline()));
+  document.addEventListener('edgseu:disclosure', ((event: CustomEvent<string>) => {
+    if (event.detail !== 'outline') closeOutline();
+  }) as EventListener);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && mobileOutline && !mobileOutline.hidden) closeOutline(true);
+  });
+
+  const updateReadingState = () => {
+    if (body && progress) {
+      const rect = body.getBoundingClientRect();
+      const distance = Math.max(1, body.offsetHeight - innerHeight);
+      const percentage = Math.max(0, Math.min(100, (-rect.top / distance) * 100));
+      progress.style.width = `${percentage}%`;
+    }
+    let active: HTMLElement | undefined;
+    for (const heading of headings) {
+      if (heading.getBoundingClientRect().top <= 140) active = heading;
+    }
+    outlineLinks.forEach((link) => {
+      if (active && link.hash === `#${active.id}`) link.setAttribute('aria-current', 'location');
+      else link.removeAttribute('aria-current');
+    });
+  };
+
+  document.addEventListener('scroll', updateReadingState, { passive: true });
+  updateReadingState();
+
+  document.querySelectorAll<HTMLTableElement>('.prose table').forEach((table) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'table-scroll';
+    wrapper.tabIndex = 0;
+    wrapper.setAttribute('role', 'region');
+    wrapper.setAttribute('aria-label', 'Scrollable table');
+    table.before(wrapper);
+    wrapper.append(table);
+  });
+
+  document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'code-block';
+    pre.before(wrapper);
+    wrapper.append(pre);
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = 'copy-code';
+    button.textContent = 'Copy code';
+    button.addEventListener('click', async () => {
+      await navigator.clipboard.writeText(pre.textContent ?? '');
+      button.textContent = 'Copied';
+      window.setTimeout(() => { button.textContent = 'Copy code'; }, 2000);
+    });
+    wrapper.prepend(button);
+  });
+
+  const comments = document.querySelector<HTMLElement>('[data-comments]');
+  const loadButton = document.querySelector<HTMLButtonElement>('.comments-load');
+  let commentsLoaded = false;
+  const loadComments = () => {
+    if (!comments || commentsLoaded || comments.dataset.configured !== 'true') return;
+    commentsLoaded = true;
+    loadButton?.remove();
+    const script = document.createElement('script');
+    script.src = 'https://giscus.app/client.js';
+    script.async = true;
+    script.crossOrigin = 'anonymous';
+    script.dataset.repo = 'h1zardian/edgseu-dev';
+    script.dataset.repoId = comments.dataset.repoId ?? '';
+    script.dataset.category = 'Article comments';
+    script.dataset.categoryId = comments.dataset.categoryId ?? '';
+    script.dataset.mapping = 'pathname';
+    script.dataset.strict = '1';
+    script.dataset.reactionsEnabled = '1';
+    script.dataset.emitMetadata = '0';
+    script.dataset.inputPosition = 'top';
+    script.dataset.theme = document.documentElement.dataset.theme === 'light' ? 'light' : 'dark';
+    script.dataset.lang = 'en';
+    document.querySelector('.giscus-host')?.append(script);
+  };
+
+  loadButton?.addEventListener('click', loadComments);
+  if (comments && 'IntersectionObserver' in window) {
+    const observer = new IntersectionObserver((entries) => {
+      if (entries.some((entry) => entry.isIntersecting)) {
+        loadComments();
+        observer.disconnect();
+      }
+    }, { rootMargin: '400px' });
+    observer.observe(comments);
+  }
+  document.addEventListener('edgseu:theme', ((event: CustomEvent<string>) => {
+    document.querySelector<HTMLIFrameElement>('.giscus-frame')?.contentWindow?.postMessage({
+      giscus: { setConfig: { theme: event.detail === 'light' ? 'light' : 'dark' } },
+    }, 'https://giscus.app');
+  }) as EventListener);
+</script>

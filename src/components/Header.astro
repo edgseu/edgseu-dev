@@ -1,0 +1,109 @@
+---
+import { site } from '../data/site';
+
+interface Props {
+  pathname: string;
+}
+
+const { pathname } = Astro.props;
+const links = [
+  { href: '/', label: 'Overview', active: pathname === '/', current: 'page' as const },
+  {
+    href: '/projects/',
+    label: 'Projects',
+    active: pathname.startsWith('/projects/'),
+    current: 'page' as const,
+  },
+  {
+    href: '/articles/',
+    label: 'Articles',
+    active: pathname.startsWith('/articles/'),
+    current: pathname === '/articles/' ? ('page' as const) : ('location' as const),
+  },
+];
+---
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="wordmark" href="/" aria-label="edgseu">edgseu</a>
+    <nav class="desktop-nav" aria-label="Primary">
+      {links.map((link) => (
+        <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
+      ))}
+      <a href={`mailto:${site.email}`}>Contact</a>
+    </nav>
+    <div class="header-actions">
+      <button class="theme-toggle" type="button" aria-label="Use light theme" title="Use light theme">
+        <span aria-hidden="true">☼</span><span class="action-label">Light</span>
+      </button>
+      <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
+        Menu
+      </button>
+    </div>
+  </div>
+  <nav id="mobile-menu" class="mobile-menu" aria-label="Primary" hidden>
+    {links.map((link) => (
+      <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
+    ))}
+    <a href={`mailto:${site.email}`}>Contact</a>
+  </nav>
+</header>
+
+<script>
+  const root = document.documentElement;
+  const themeButton = document.querySelector<HTMLButtonElement>('.theme-toggle');
+  const menuButton = document.querySelector<HTMLButtonElement>('.menu-toggle');
+  const menu = document.querySelector<HTMLElement>('#mobile-menu');
+
+  const syncThemeControl = () => {
+    const useLight = root.dataset.theme === 'dark';
+    if (!themeButton) return;
+    const label = `Use ${useLight ? 'light' : 'dark'} theme`;
+    themeButton.setAttribute('aria-label', label);
+    themeButton.title = label;
+    const text = themeButton.querySelector<HTMLElement>('.action-label');
+    if (text) text.textContent = useLight ? 'Light' : 'Dark';
+  };
+
+  const closeMenu = (restoreFocus = false) => {
+    if (!menu || !menuButton) return;
+    menu.hidden = true;
+    menuButton.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) menuButton.focus();
+  };
+
+  themeButton?.addEventListener('click', () => {
+    root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('edgseu-theme', root.dataset.theme);
+    syncThemeControl();
+    document.dispatchEvent(new CustomEvent('edgseu:theme', { detail: root.dataset.theme }));
+  });
+
+  menuButton?.addEventListener('click', () => {
+    if (!menu) return;
+    const opening = menu.hidden;
+    if (opening) document.dispatchEvent(new CustomEvent('edgseu:disclosure', { detail: 'menu' }));
+    menu.hidden = !opening;
+    menuButton.setAttribute('aria-expanded', String(opening));
+  });
+
+  menu?.addEventListener('click', (event) => {
+    if ((event.target as Element).closest('a')) closeMenu();
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && menu && !menu.hidden) closeMenu(true);
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!menu || menu.hidden || !menuButton) return;
+    const target = event.target as Node;
+    if (!menu.contains(target) && !menuButton.contains(target)) closeMenu();
+  });
+
+  document.addEventListener('edgseu:disclosure', ((event: CustomEvent<string>) => {
+    if (event.detail !== 'menu') closeMenu();
+  }) as EventListener);
+
+  syncThemeControl();
+</script>

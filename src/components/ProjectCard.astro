@@ -1,0 +1,31 @@
+---
+import type { EnrichedProject } from '../lib/projects';
+
+interface Props {
+  project: EnrichedProject;
+  headingLevel?: 2 | 3;
+}
+
+const { project, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as const;
+---
+
+<article class="project-card">
+  <div class="card-heading">
+    <div>
+      <p class="eyebrow">Project</p>
+      <Heading><a href={project.url}>{project.title} <span aria-hidden="true">↗</span></a></Heading>
+    </div>
+    <span class={`status status-${project.lifecycle.toLowerCase()}`}>{project.lifecycle}</span>
+  </div>
+  <p>{project.summary}</p>
+  <ul class="tag-list" aria-label={`${project.title} technologies`}>
+    {project.tags.map((tag) => <li>{tag}</li>)}
+  </ul>
+  {project.enrichment && (
+    <p class="metadata">
+      {project.enrichment.language && <span>Primary language: {project.enrichment.language}</span>}
+      {project.enrichment.pushedAt && <span>Updated <time datetime={project.enrichment.pushedAt}>{project.enrichment.pushedAt}</time></span>}
+    </p>
+  )}
+</article>

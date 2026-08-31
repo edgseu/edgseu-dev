@@ -1,0 +1,20 @@
+---
+import { site } from '../data/site';
+---
+
+<aside class="profile-card" aria-labelledby="profile-name">
+  <img src={site.avatar} alt="Aman Bhushan Singh" width="320" height="320" decoding="async" />
+  <div>
+    <h1 id="profile-name">{site.person}</h1>
+    <p class="role">{site.role}</p>
+  </div>
+  <p class="location"><span aria-hidden="true">⌖</span> {site.location}</p>
+  <ul class="focus-list" aria-label="Focus areas">
+    {site.focusAreas.map((area) => <li>{area}</li>)}
+  </ul>
+  <nav class="profile-links" aria-label="Profile links">
+    <a href={site.github}>GitHub <span aria-hidden="true">↗</span></a>
+    <a href={site.linkedin}>LinkedIn <span aria-hidden="true">↗</span></a>
+    <a href={`mailto:${site.email}`}>Email</a>
+  </nav>
+</aside>

@@ -1,0 +1,50 @@
+{
+  "name": "edgseu-dev",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.24.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "validate": "tsx scripts/validate-content.ts",
+    "check": "pnpm validate && astro check",
+    "build": "pnpm check && astro build",
+    "preview": "astro preview",
+    "test:validation": "tsx --test --test-concurrency=1 tests/*.test.ts",
+    "test:e2e": "playwright test",
+    "test": "pnpm build && pnpm test:validation && playwright test",
+    "quality": "pnpm test && tsx scripts/check-artifact.ts",
+    "lighthouse": "tsx scripts/run-lighthouse.ts",
+    "check:external": "tsx scripts/check-external-links.ts"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "7.2.4",
+    "@tailwindcss/vite": "4.3.3",
+    "astro": "7.2.9",
+    "github-slugger": "2.0.0",
+    "remark-gfm": "4.0.1",
+    "sharp": "0.35.4",
+    "tailwindcss": "4.3.3",
+    "unist-util-visit": "5.1.0",
+    "zod": "4.5.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@axe-core/playwright": "4.13.0",
+    "@playwright/test": "1.62.1",
+    "@types/mdast": "^4.0.4",
+    "@types/node": "^24.13.3",
+    "cheerio": "1.2.0",
+    "gray-matter": "^4.0.3",
+    "lighthouse": "13.0.1",
+    "mdast-util-to-string": "^4.0.0",
+    "remark-parse": "^11.0.0",
+    "serve-handler": "6.1.7",
+    "tsx": "4.20.6",
+    "typescript": "6.0.3",
+    "unified": "^11.0.5"
+  }
+}

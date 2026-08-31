@@ -1,0 +1,67 @@
+---
+import ArticleCard from '../components/ArticleCard.astro';
+import ProfileRail from '../components/ProfileRail.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import Terminal from '../components/Terminal.astro';
+import { publishedProjects } from '../lib/projects';
+import { site } from '../data/site';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { publishedArticles } from '../lib/articles';
+
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  url: site.canonicalUrl,
+  mainEntity: {
+    '@type': 'Person',
+    name: site.person,
+    jobTitle: site.role,
+    image: new URL(site.avatar, site.canonicalUrl).href,
+    sameAs: [site.github, site.linkedin],
+    address: { '@type': 'PostalAddress', addressCountry: 'IN' },
+  },
+};
+---
+
+<BaseLayout
+  title={site.name}
+  description="Aman Bhushan Singh's Cloud and DevSecOps engineering profile, selected projects, and technical writing."
+  jsonLd={jsonLd}
+>
+  <div class="home-grid">
+    <ProfileRail />
+    <div class="home-main">
+      <Terminal />
+      <section class="profile-prose" aria-labelledby="profile-introduction">
+        <p class="eyebrow">Profile</p>
+        <h2 id="profile-introduction">Cloud systems with security in the delivery path</h2>
+        <p>
+          I build and document cloud infrastructure, GitOps delivery, and security automation. This Site collects selected public work and practical technical writing in one place.
+        </p>
+        <p>
+          The projects below show the current focus across AWS, Azure, Kubernetes, infrastructure as code, observability, and software supply-chain controls.
+        </p>
+      </section>
+
+      <section aria-labelledby="selected-projects">
+        <div class="section-heading">
+          <div><p class="eyebrow">Proof of work</p><h2 id="selected-projects">Selected projects</h2></div>
+          <a href="/projects/">View all projects</a>
+        </div>
+        <div class="cards">{publishedProjects.slice(0, 2).map((project) => <ProjectCard project={project} />)}</div>
+      </section>
+
+      <section aria-labelledby="latest-articles">
+        <div class="section-heading">
+          <div><p class="eyebrow">Writing</p><h2 id="latest-articles">Latest articles</h2></div>
+          <a href="/articles/">View all articles</a>
+        </div>
+        {publishedArticles.length > 0 ? (
+          <div class="cards">{publishedArticles.slice(0, 2).map((article) => <ArticleCard article={article} />)}</div>
+        ) : (
+          <p class="empty-state">No articles are published yet. Approved writing will appear here.</p>
+        )}
+      </section>
+    </div>
+  </div>
+</BaseLayout>
