@@ -20,7 +20,7 @@ test('terminal opts in to focus and supports only curated commands', async ({ pa
   await expect(page.locator('#terminal-input')).not.toBeFocused();
   await page.locator('#terminal-input').fill('skills');
   await page.locator('#terminal-input').press('Enter');
-  await expect(page.getByText('Cloud infrastructure · DevSecOps · GitOps · Security automation')).toBeVisible();
+  await expect(page.locator('#terminal-output p').filter({ hasText: 'Cloud infrastructure' })).toBeVisible();
   await page.locator('#terminal-input').fill('sudo');
   await page.locator('#terminal-input').press('Enter');
   await expect(page.getByText('Unknown command: sudo. Type help.')).toBeVisible();

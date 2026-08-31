@@ -1,24 +1,45 @@
 ---
+import { publishedProjects } from '../lib/projects';
+import { publishedArticles } from '../lib/articles';
+import { site } from '../data/site';
+
+const projectCount = publishedProjects.length;
+const articleCount = publishedArticles.length;
+const projectTitles = publishedProjects.map((p) => p.title).join(', ');
+const articleTitles = publishedArticles.map((a) => a.frontmatter.title).join(', ');
+
+const whoamiOutput = `edgseu@cloud
+------------
+󰋜 host     cloud-edge-node
+ user     ${site.person}
+ role     ${site.role}
+ loc      ${site.location}
+󰒍 focus    ${site.focusAreas.join(' · ')}
+󰈙 projects ${projectCount} contributed
+󰈚 articles ${articleCount} published
+󰅐 uptime   99.99%
+󰋽 hint     type 'help' for available commands`;
+
+const initialResponses = {
+  help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
+  whoami: whoamiOutput,
+  skills: `󰒍 ${site.focusAreas.join(' · ')}`,
+  projects: `󰈙 Selected projects: /projects/${projectTitles ? ` — ${projectTitles}` : ''}`,
+  articles: `󰈚 Technical writing: /articles/${articleTitles ? ` — ${articleTitles}` : ''}`,
+  contact: `󰇮 Email: ${site.email} · 󰌢 GitHub: ${site.github.replace(/^https?:\/\//, '')} · 󰌻 LinkedIn: ${site.linkedin.replace(/^https?:\/\//, '')}`,
+  theme: '󰔎 Switched color theme.',
+  clear: '',
+};
 ---
 
-<section class="terminal" aria-labelledby="terminal-title">
+<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)}>
   <div class="terminal-bar">
     <span class="terminal-close" aria-hidden="true">×</span>
     <h2 id="terminal-title">cloud-shell ~</h2>
   </div>
   <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
     <p><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span> whoami</p>
-    <pre class="terminal-pre">edgseu@cloud
-------------
-󰋜 host     cloud-edge-node
- user     Aman Bhushan Singh
- role     Cloud & DevSecOps Engineer
- loc      India
-󰒍 focus    Cloud Security · DevSecOps · GitOps
-󰈙 projects 2 published (devsecops-pipeline, cowrie-sentinel)
-󰈚 articles 1 published
-󰅐 uptime   99.99%
-󰋽 hint     type 'help' for available commands</pre>
+    <pre class="terminal-pre">{whoamiOutput}</pre>
   </div>
   <form class="terminal-form" autocomplete="off">
     <label for="terminal-input"><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span><span class="sr-only">Terminal command</span></label>
@@ -28,6 +49,7 @@
 </section>
 
 <script>
+  const terminalEl = document.querySelector<HTMLElement>('.terminal');
   const form = document.querySelector<HTMLFormElement>('.terminal-form');
   const input = document.querySelector<HTMLInputElement>('#terminal-input');
   const output = document.querySelector<HTMLElement>('#terminal-output');
@@ -35,28 +57,12 @@
   let historyIndex = 0;
   const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
 
-  const whoamiOutput = `edgseu@cloud
-------------
-󰋜 host     cloud-edge-node
- user     Aman Bhushan Singh
- role     Cloud & DevSecOps Engineer
- loc      India
-󰒍 focus    Cloud Security · DevSecOps · GitOps
-󰈙 projects 2 published (devsecops-pipeline, cowrie-sentinel)
-󰈚 articles 1 published
-󰅐 uptime   99.99%
-󰋽 hint     type 'help' for available commands`;
-
-  const responses: Record<(typeof commands)[number], string> = {
-    help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
-    whoami: whoamiOutput,
-    skills: '󰒍 Cloud infrastructure · DevSecOps · GitOps · Security automation · Terraform · Kubernetes',
-    projects: '󰈙 Selected projects: /projects/ — DevSecOps Pipeline Project, Cowrie Sentinel Lab',
-    articles: '󰈚 Technical writing: /articles/ — Building a verifiable DevSecOps delivery path',
-    contact: '󰇮 Email: mail@edgseu.dev · 󰌢 GitHub: github.com/h1zardian · 󰌻 LinkedIn: linkedin.com/in/amanbsingh',
-    theme: '󰔎 Switched color theme.',
-    clear: '',
-  };
+  let responses: Record<string, string> = {};
+  try {
+    responses = JSON.parse(terminalEl?.dataset.responses ?? '{}');
+  } catch {
+    responses = {};
+  }
 
   const appendLine = (text: string, className?: string) => {
     if (!output) return;
@@ -90,7 +96,7 @@
     if (command === 'theme') {
       document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
     }
-    appendLine(responses[command as (typeof commands)[number]]);
+    appendLine(responses[command] ?? '');
   });
 
   input?.addEventListener('keydown', (event) => {
