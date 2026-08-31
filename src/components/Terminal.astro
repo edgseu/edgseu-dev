@@ -1,19 +1,27 @@
 ---
-import { site } from '../data/site';
 ---
 
 <section class="terminal" aria-labelledby="terminal-title">
   <div class="terminal-bar">
-    <span class="terminal-dots" aria-hidden="true">● ● ●</span>
-    <h2 id="terminal-title">profile — edgseu</h2>
+    <span class="terminal-close" aria-hidden="true">×</span>
+    <h2 id="terminal-title">cloud-shell ~</h2>
   </div>
-  <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
-    <p><span class="prompt" aria-hidden="true">$</span> whoami</p>
-    <p>{site.person} — {site.role}, {site.location}</p>
-    <p class="hint">Type <code>help</code> after focusing the prompt.</p>
+  <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
+    <p><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span> whoami</p>
+    <pre class="terminal-pre">edgseu@cloud
+------------
+󰋜 host     cloud-edge-node
+ user     Aman Bhushan Singh
+ role     Cloud & DevSecOps Engineer
+ loc      India
+󰒍 focus    Cloud Security · DevSecOps · GitOps
+󰈙 projects 2 published (devsecops-pipeline, cowrie-sentinel)
+󰈚 articles 1 published
+󰅐 uptime   99.99%
+󰋽 hint     type 'help' for available commands</pre>
   </div>
   <form class="terminal-form" autocomplete="off">
-    <label for="terminal-input"><span class="prompt" aria-hidden="true">$</span><span class="sr-only">Terminal command</span></label>
+    <label for="terminal-input"><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span><span class="sr-only">Terminal command</span></label>
     <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
   </form>
   <noscript><p class="terminal-noscript">Interactive commands require JavaScript. All destinations are linked below.</p></noscript>
@@ -27,20 +35,33 @@ import { site } from '../data/site';
   let historyIndex = 0;
   const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
 
+  const whoamiOutput = `edgseu@cloud
+------------
+󰋜 host     cloud-edge-node
+ user     Aman Bhushan Singh
+ role     Cloud & DevSecOps Engineer
+ loc      India
+󰒍 focus    Cloud Security · DevSecOps · GitOps
+󰈙 projects 2 published (devsecops-pipeline, cowrie-sentinel)
+󰈚 articles 1 published
+󰅐 uptime   99.99%
+󰋽 hint     type 'help' for available commands`;
+
   const responses: Record<(typeof commands)[number], string> = {
-    help: `Commands: ${commands.join(', ')}`,
-    whoami: 'Aman Bhushan Singh — Cloud & DevSecOps Engineer, India',
-    skills: 'Cloud infrastructure · DevSecOps · GitOps · Security automation',
-    projects: 'Open /projects/ to inspect selected public work.',
-    articles: 'Open /articles/ for technical writing.',
-    contact: 'Email mail@edgseu.dev',
-    theme: 'Theme switched.',
+    help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
+    whoami: whoamiOutput,
+    skills: '󰒍 Cloud infrastructure · DevSecOps · GitOps · Security automation · Terraform · Kubernetes',
+    projects: '󰈙 Selected projects: /projects/ — DevSecOps Pipeline Project, Cowrie Sentinel Lab',
+    articles: '󰈚 Technical writing: /articles/ — Building a verifiable DevSecOps delivery path',
+    contact: '󰇮 Email: mail@edgseu.dev · 󰌢 GitHub: github.com/h1zardian · 󰌻 LinkedIn: linkedin.com/in/amanbsingh',
+    theme: '󰔎 Switched color theme.',
     clear: '',
   };
 
   const appendLine = (text: string, className?: string) => {
     if (!output) return;
-    const line = document.createElement('p');
+    const isMultiLine = text.includes('\n');
+    const line = document.createElement(isMultiLine ? 'pre' : 'p');
     if (className) line.className = className;
     line.textContent = text;
     output.append(line);
@@ -54,7 +75,7 @@ import { site } from '../data/site';
     const command = input.value.trim().toLowerCase();
     input.value = '';
     if (!command) return;
-    appendLine(`$ ${command}`, 'terminal-command');
+    appendLine(`edgseu@cloud:~$ ${command}`, 'terminal-command');
     if (!commands.includes(command as (typeof commands)[number])) {
       appendLine(`Unknown command: ${command}. Type help.`);
       return;

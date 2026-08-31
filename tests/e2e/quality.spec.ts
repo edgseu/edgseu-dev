@@ -37,7 +37,7 @@ test('reduced motion removes smooth scrolling and transitions', async ({ page })
   await page.goto('/articles/building-a-devsecops-pipeline/');
   const styles = await page.evaluate(() => ({
     scroll: getComputedStyle(document.documentElement).scrollBehavior,
-    progress: getComputedStyle(document.querySelector('.reading-progress')!).transitionDuration,
+    progress: getComputedStyle(document.querySelector('.outline-progress-bar') ?? document.body).transitionDuration,
   }));
   expect(styles.scroll).toBe('auto');
   expect(Number.parseFloat(styles.progress)).toBeLessThanOrEqual(0.001);

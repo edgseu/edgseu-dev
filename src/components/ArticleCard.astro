@@ -1,6 +1,6 @@
 ---
+import Icon from './Icon.astro';
 import type { Article } from '../lib/articles';
-
 interface Props {
   article: Article;
   headingLevel?: 2 | 3;
@@ -16,8 +16,17 @@ const { frontmatter } = article;
   <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
   <p>{frontmatter.summary}</p>
   <div class="metadata">
-    {frontmatter.publishedAt && <time datetime={frontmatter.publishedAt}>{frontmatter.publishedAt}</time>}
-    <span>{article.readingMinutes} min read</span>
+    <span>By edgseu</span>
+    {frontmatter.publishedAt && (
+      <time datetime={frontmatter.publishedAt}>
+        <Icon name="calendar" size={14} />
+        <span>{frontmatter.publishedAt}</span>
+      </time>
+    )}
+    <span>
+      <Icon name="clock" size={14} />
+      <span>{article.readingMinutes} min read</span>
+    </span>
   </div>
   {frontmatter.tags && frontmatter.tags.length > 0 && (
     <ul class="tag-list" aria-label={`${frontmatter.title} tags`}>

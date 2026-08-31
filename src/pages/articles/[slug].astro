@@ -1,5 +1,6 @@
 ---
 import ArticleOutline from '../../components/ArticleOutline.astro';
+import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { articleNeighbors, visibleArticles } from '../../lib/articles';
@@ -43,7 +44,6 @@ const jsonLd = {
   noindex={isDraft}
   jsonLd={jsonLd}
 >
-  <div class="reading-progress" aria-hidden="true"></div>
   <div class="article-context">
     <a href="/articles/">Articles</a><span aria-hidden="true">/</span><span>{frontmatter.title}</span>
   </div>
@@ -54,10 +54,23 @@ const jsonLd = {
       <h1>{frontmatter.title}</h1>
       <p class="summary">{frontmatter.summary}</p>
       <div class="metadata">
-        <span>By {site.person}</span>
-        {frontmatter.publishedAt && <time datetime={frontmatter.publishedAt}>Published {frontmatter.publishedAt}</time>}
-        {frontmatter.revisedAt && <time datetime={frontmatter.revisedAt}>Revised {frontmatter.revisedAt}</time>}
-        <span>{article.readingMinutes} min read</span>
+        <span>By edgseu</span>
+        {frontmatter.publishedAt && (
+          <time datetime={frontmatter.publishedAt}>
+            <Icon name="calendar" size={14} />
+            <span>Published {frontmatter.publishedAt}</span>
+          </time>
+        )}
+        {frontmatter.revisedAt && (
+          <time datetime={frontmatter.revisedAt}>
+            <Icon name="calendar" size={14} />
+            <span>Revised {frontmatter.revisedAt}</span>
+          </time>
+        )}
+        <span>
+          <Icon name="clock" size={14} />
+          <span>{article.readingMinutes} min read</span>
+        </span>
       </div>
     </header>
 
@@ -99,7 +112,7 @@ const jsonLd = {
 
 <script>
   const body = document.querySelector<HTMLElement>('[data-article-body]');
-  const progress = document.querySelector<HTMLElement>('.reading-progress');
+  const progressBars = document.querySelectorAll<HTMLElement>('.outline-progress-bar');
   const outlineButton = document.querySelector<HTMLButtonElement>('.outline-disclosure > button');
   const mobileOutline = document.querySelector<HTMLElement>('#mobile-outline');
   const outlineLinks = [...document.querySelectorAll<HTMLAnchorElement>('.article-outline a')];
@@ -133,11 +146,13 @@ const jsonLd = {
   });
 
   const updateReadingState = () => {
-    if (body && progress) {
+    if (body && progressBars.length > 0) {
       const rect = body.getBoundingClientRect();
       const distance = Math.max(1, body.offsetHeight - innerHeight);
       const percentage = Math.max(0, Math.min(100, (-rect.top / distance) * 100));
-      progress.style.width = `${percentage}%`;
+      progressBars.forEach((bar) => {
+        bar.style.height = `${percentage}%`;
+      });
     }
     let active: HTMLElement | undefined;
     for (const heading of headings) {
@@ -162,21 +177,45 @@ const jsonLd = {
     wrapper.append(table);
   });
 
+  const copyIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="13px" height="13px" fill="currentColor" aria-hidden="true" focusable="false"><path d="M384 336l-192 0c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l140.1 0L384 95.9 384 320c0 8.8-7.2 16-16 16zM192 0C165.5 0 144 21.5 144 48l0 272c0 26.5 21.5 48 48 48l192 0c26.5 0 48-21.5 48-48l0-224c0-12.7-5.1-24.9-14.1-33.9L385.9 14.1C376.9 5.1 364.7 0 352 0L192 0zM64 128c-35.3 0-64 28.7-64 64L0 448c0 35.3 28.7 64 64 64l192 0c35.3 0 64-28.7 64-64l0-32-48 0 0 32c0 8.8-7.2 16-16 16L64 464c-8.8 0-16-7.2-16-16l0-256c0-8.8 7.2-16 16-16l32 0 0-48-32 0z"/></svg>`;
+  const checkIconSvg = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" width="13px" height="13px" fill="currentColor" aria-hidden="true" focusable="false"><path d="M438.6 105.4c12.5 12.5 12.5 32.8 0 45.3l-256 256c-12.5 12.5-32.8 12.5-45.3 0l-128-128c-12.5-12.5-12.5-32.8 0-45.3s32.8-12.5 45.3 0L160 338.7 393.4 105.4c12.5-12.5 32.8-12.5 45.3 0z"/></svg>`;
+
   document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
     const wrapper = document.createElement('div');
     wrapper.className = 'code-block';
     pre.before(wrapper);
-    wrapper.append(pre);
+
+    const header = document.createElement('div');
+    header.className = 'code-block-header';
+
+    const lang =
+      pre.getAttribute('data-language') ||
+      pre.className.match(/language-([a-zA-Z0-9_-]+)/)?.[1] ||
+      pre.querySelector('code')?.className.match(/language-([a-zA-Z0-9_-]+)/)?.[1] ||
+      'code';
+
+    const titleSpan = document.createElement('span');
+    titleSpan.className = 'code-block-title';
+    titleSpan.textContent = lang;
+    header.append(titleSpan);
+
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'copy-code';
-    button.textContent = 'Copy code';
+    button.setAttribute('aria-label', 'Copy code to clipboard');
+    button.innerHTML = `${copyIconSvg} <span>Copy</span>`;
+
     button.addEventListener('click', async () => {
       await navigator.clipboard.writeText(pre.textContent ?? '');
-      button.textContent = 'Copied';
-      window.setTimeout(() => { button.textContent = 'Copy code'; }, 2000);
+      button.innerHTML = `${checkIconSvg} <span>Copied</span>`;
+      window.setTimeout(() => {
+        button.innerHTML = `${copyIconSvg} <span>Copy</span>`;
+      }, 2000);
     });
-    wrapper.prepend(button);
+
+    header.append(button);
+    wrapper.append(header);
+    wrapper.append(pre);
   });
 
   const comments = document.querySelector<HTMLElement>('[data-comments]');

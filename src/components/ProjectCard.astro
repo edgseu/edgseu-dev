@@ -1,4 +1,5 @@
 ---
+import Icon from './Icon.astro';
 import type { EnrichedProject } from '../lib/projects';
 
 interface Props {
@@ -8,24 +9,29 @@ interface Props {
 
 const { project, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as const;
+
+const languages = project.enrichment?.languages ?? (project.enrichment?.language ? [project.enrichment.language] : []);
+const pushedAt = project.enrichment?.pushedAt;
 ---
 
 <article class="project-card">
-  <div class="card-heading">
-    <div>
-      <p class="eyebrow">Project</p>
-      <Heading><a href={project.url}>{project.title} <span aria-hidden="true">↗</span></a></Heading>
-    </div>
-    <span class={`status status-${project.lifecycle.toLowerCase()}`}>{project.lifecycle}</span>
-  </div>
+  <Heading>
+    <a href={project.url}>
+      {project.title} <Icon name="arrow-up-right-from-square" size={13} />
+    </a>
+  </Heading>
   <p>{project.summary}</p>
   <ul class="tag-list" aria-label={`${project.title} technologies`}>
     {project.tags.map((tag) => <li>{tag}</li>)}
   </ul>
-  {project.enrichment && (
-    <p class="metadata">
-      {project.enrichment.language && <span>Primary language: {project.enrichment.language}</span>}
-      {project.enrichment.pushedAt && <span>Updated <time datetime={project.enrichment.pushedAt}>{project.enrichment.pushedAt}</time></span>}
-    </p>
+  {(languages.length > 0 || pushedAt) && (
+    <footer class="project-card-meta">
+      {languages.length > 0 && (
+        <span class="meta-item"><Icon name="code" size={13} /> {languages.join(', ')}</span>
+      )}
+      {pushedAt && (
+        <span class="meta-item"><Icon name="clock" size={13} /> Updated <time datetime={pushedAt}>{pushedAt}</time></span>
+      )}
+    </footer>
   )}
 </article>

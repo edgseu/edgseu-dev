@@ -6,7 +6,7 @@ for (const route of routes) {
   test(`${route} exposes the shared static shell`, async ({ page }) => {
     await page.goto(route);
     await expect(page.locator('a').first()).toHaveText('Skip to content');
-    await expect(page.getByRole('link', { name: 'edgseu' })).toBeVisible();
+    await expect(page.getByRole('link', { name: 'edgseu', exact: true })).toBeVisible();
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',

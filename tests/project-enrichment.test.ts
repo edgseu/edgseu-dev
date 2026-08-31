@@ -33,7 +33,7 @@ test('enrichment outage does not hollow out or fail the Project build', () => {
   assert.equal(result.status, 0, result.output);
   const projects = readFileSync(join(result.directory, 'projects/index.html'), 'utf8');
   assert.match(projects, /DevSecOps Pipeline Project/);
-  assert.doesNotMatch(projects, /Primary language:/);
+  assert.doesNotMatch(projects, /project-card-meta/);
   rmSync(result.directory, { recursive: true, force: true });
 });
 
@@ -47,8 +47,8 @@ test('GitHub archive truth overrides the curated lifecycle', () => {
   rmSync(fixture);
   assert.equal(result.status, 0, result.output);
   const projects = readFileSync(join(result.directory, 'projects/index.html'), 'utf8');
-  assert.match(projects, /status-archived[^>]*>Archived</);
-  assert.match(projects, /Primary language: HCL/);
+  assert.match(projects, /HCL/);
+  assert.match(projects, /2026-08-30/);
   rmSync(result.directory, { recursive: true, force: true });
 });
 

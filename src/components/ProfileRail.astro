@@ -1,20 +1,57 @@
 ---
+import Icon from './Icon.astro';
 import { site } from '../data/site';
+
+const siteConfig = site as typeof site & { resumeUrl?: string; available?: boolean };
+const githubDisplay = site.github.replace(/^https?:\/\//, '');
 ---
 
 <aside class="profile-card" aria-labelledby="profile-name">
-  <img src={site.avatar} alt="Aman Bhushan Singh" width="320" height="320" decoding="async" />
-  <div>
+  <div class="profile-avatar-wrap">
+    <img
+      class="profile-avatar"
+      src={site.avatar}
+      alt={site.person}
+      width="72"
+      height="72"
+      decoding="async"
+    />
+    {siteConfig.available && (
+      <span class="status-available">
+        <Icon name="circle-dot" size={10} /> Available
+      </span>
+    )}
+  </div>
+  <div class="profile-identity">
     <h1 id="profile-name">{site.person}</h1>
     <p class="role">{site.role}</p>
   </div>
-  <p class="location"><span aria-hidden="true">⌖</span> {site.location}</p>
+  <p class="location">
+    <Icon name="location-dot" size={14} />
+    <span>{site.location}</span>
+  </p>
   <ul class="focus-list" aria-label="Focus areas">
     {site.focusAreas.map((area) => <li>{area}</li>)}
   </ul>
   <nav class="profile-links" aria-label="Profile links">
-    <a href={site.github}>GitHub <span aria-hidden="true">↗</span></a>
-    <a href={site.linkedin}>LinkedIn <span aria-hidden="true">↗</span></a>
-    <a href={`mailto:${site.email}`}>Email</a>
+    <a href={`mailto:${site.email}`}>
+      <Icon name="envelope" size={14} />
+      <span>{site.email}</span>
+    </a>
+    <a href={site.github} aria-label="GitHub">
+      <Icon name="github" size={14} />
+      <span>{githubDisplay}</span>
+    </a>
+    <a href={site.linkedin}>
+      <Icon name="linkedin" size={14} />
+      <span>LinkedIn</span>
+      <Icon name="arrow-up-right-from-square" size={12} class="external-icon" />
+    </a>
+    {siteConfig.resumeUrl && (
+      <a href={siteConfig.resumeUrl}>
+        <Icon name="arrow-up-right-from-square" size={14} />
+        <span>Résumé</span>
+      </a>
+    )}
   </nav>
 </aside>

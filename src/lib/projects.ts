@@ -2,7 +2,6 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Project } from '../data/projects';
 import { projects } from '../data/projects';
-
 interface RepositoryMetadata {
   full_name?: string;
   html_url?: string;
@@ -10,6 +9,7 @@ interface RepositoryMetadata {
   private?: boolean;
   archived?: boolean;
   language?: string | null;
+  languages?: string[];
   pushed_at?: string | null;
 }
 
@@ -21,6 +21,7 @@ interface RepositoryResult {
 export interface EnrichedProject extends Project {
   enrichment?: {
     language?: string;
+    languages?: string[];
     pushedAt?: string;
   };
 }
@@ -62,14 +63,19 @@ export const publishedProjects: EnrichedProject[] = await Promise.all(
     if (result.body.full_name !== expectedName || result.body.html_url !== project.url) {
       throw new Error(`Published Project repository was renamed or moved: ${project.url}`);
     }
-    const language = result.body.language?.trim();
+    const rawLanguages = Array.isArray(result.body.languages) && result.body.languages.length > 0
+      ? result.body.languages.map((lang) => lang.trim()).filter(Boolean)
+      : (result.body.language?.trim() ? [result.body.language.trim()] : []);
+    const languages = rawLanguages.length > 0 ? rawLanguages : undefined;
+    const language = languages?.[0];
     const pushedAt = result.body.pushed_at?.slice(0, 10);
     return {
       ...project,
       lifecycle: result.body.archived ? 'Archived' : project.lifecycle,
-      ...((language || pushedAt) ? {
+      ...((languages || pushedAt) ? {
         enrichment: {
           ...(language ? { language } : {}),
+          ...(languages ? { languages } : {}),
           ...(pushedAt ? { pushedAt } : {}),
         },
       } : {}),
