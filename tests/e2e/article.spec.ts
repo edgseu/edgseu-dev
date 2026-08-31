@@ -66,3 +66,17 @@ test('old Article path is a static canonical meta-refresh redirect', async ({ re
   expect(html).toContain(`href="https://edgseu.dev${articlePath}"`);
   expect(html).toContain(`href="${articlePath}"`);
 });
+
+test('desktop Table of Contents sticks to viewport when scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto(articlePath);
+  const outline = page.locator('.article-grid .article-outline');
+  const initialPosition = await outline.evaluate((el) => getComputedStyle(el).position);
+  expect(initialPosition).toBe('sticky');
+
+  await page.getByRole('heading', { name: 'Review the path as a system' }).scrollIntoViewIfNeeded();
+  await expect(outline).toBeInViewport();
+  const boundingBox = await outline.boundingBox();
+  expect(boundingBox).not.toBeNull();
+  expect(boundingBox!.y).toBeGreaterThanOrEqual(0);
+});
