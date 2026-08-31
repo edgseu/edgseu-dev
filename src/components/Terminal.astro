@@ -8,21 +8,8 @@ const articleCount = publishedArticles.length;
 const projectTitles = publishedProjects.map((p) => p.title).join(', ');
 const articleTitles = publishedArticles.map((a) => a.frontmatter.title).join(', ');
 
-const whoamiOutput = `edgseu@cloud
-------------
-󰋜 host     cloud-edge-node
- user     ${site.person}
- role     ${site.role}
- loc      ${site.location}
-󰒍 focus    ${site.focusAreas.join(' · ')}
-󰈙 projects ${projectCount} contributed
-󰈚 articles ${articleCount} published
-󰅐 uptime   99.99%
-󰋽 hint     type 'help' for available commands`;
-
 const initialResponses = {
   help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
-  whoami: whoamiOutput,
   skills: `󰒍 ${site.focusAreas.join(' · ')}`,
   projects: `󰈙 Selected projects: /projects/${projectTitles ? ` — ${projectTitles}` : ''}`,
   articles: `󰈚 Technical writing: /articles/${articleTitles ? ` — ${articleTitles}` : ''}`,
@@ -32,19 +19,36 @@ const initialResponses = {
 };
 ---
 
-<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)}>
+<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-project-count={projectCount} data-article-count={articleCount}>
   <div class="terminal-bar">
-    <span class="terminal-close" aria-hidden="true">×</span>
-    <h2 id="terminal-title">cloud-shell ~</h2>
+    <div class="terminal-dots" aria-hidden="true">
+      <span class="terminal-dot terminal-dot-red"></span>
+      <span class="terminal-dot terminal-dot-yellow"></span>
+      <span class="terminal-dot terminal-dot-green"></span>
+    </div>
+    <h2 id="terminal-title">cloud-shell <span class="terminal-title-tilde">~</span></h2>
   </div>
   <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
-    <p><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span> whoami</p>
-    <pre class="terminal-pre">{whoamiOutput}</pre>
+    <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
+    <pre class="terminal-pre"><span class="t-user">edgseu</span><span class="t-pink">@</span><span class="t-cyan">cloud</span>
+<span class="t-muted">------------</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-edge-node</span>
+<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
+<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
+<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">{projectCount} contributed</span>
+<span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">{articleCount} published</span>
+<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span></pre>
   </div>
   <form class="terminal-form" autocomplete="off">
-    <label for="terminal-input"><span class="prompt" aria-hidden="true">edgseu@cloud:~$</span><span class="sr-only">Terminal command</span></label>
+    <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
     <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
   </form>
+  <div class="terminal-footer">
+    <span class="terminal-hint-icon" aria-hidden="true">󰋽</span>
+    <span class="terminal-hint-text">hint: type <code class="terminal-hint-code">help</code> for available commands</span>
+  </div>
   <noscript><p class="terminal-noscript">Interactive commands require JavaScript. All destinations are linked below.</p></noscript>
 </section>
 
@@ -57,6 +61,9 @@ const initialResponses = {
   let historyIndex = 0;
   const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
 
+  const projectCount = terminalEl?.dataset.projectCount ?? '2';
+  const articleCount = terminalEl?.dataset.articleCount ?? '1';
+
   let responses: Record<string, string> = {};
   try {
     responses = JSON.parse(terminalEl?.dataset.responses ?? '{}');
@@ -64,12 +71,39 @@ const initialResponses = {
     responses = {};
   }
 
-  const appendLine = (text: string, className?: string) => {
+  const whoamiHtml = `<span class="t-user">edgseu</span><span class="t-pink">@</span><span class="t-cyan">cloud</span>
+<span class="t-muted">------------</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-edge-node</span>
+<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
+<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
+<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} contributed</span>
+<span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">${articleCount} published</span>
+<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span>`;
+
+  const escapeHtml = (str: string) =>
+    str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+
+  const appendCommandLine = (rawCommand: string, isValid: boolean) => {
     if (!output) return;
-    const isMultiLine = text.includes('\n');
+    const line = document.createElement('p');
+    line.className = 'terminal-command-line';
+    line.innerHTML = `<span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(rawCommand)}</span>`;
+    output.append(line);
+  };
+
+  const appendResponse = (htmlOrText: string, isHtml = false) => {
+    if (!output) return;
+    if (!htmlOrText) return;
+    const isMultiLine = htmlOrText.includes('\n');
     const line = document.createElement(isMultiLine ? 'pre' : 'p');
-    if (className) line.className = className;
-    line.textContent = text;
+    line.className = isMultiLine ? 'terminal-pre' : 'terminal-response';
+    if (isHtml) {
+      line.innerHTML = htmlOrText;
+    } else {
+      line.textContent = htmlOrText;
+    }
     output.append(line);
     while (output.childElementCount > 24) output.firstElementChild?.remove();
     output.scrollTop = output.scrollHeight;
@@ -78,17 +112,23 @@ const initialResponses = {
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
     if (!input || !output) return;
-    const command = input.value.trim().toLowerCase();
+    const rawCommand = input.value.trim();
+    const command = rawCommand.toLowerCase();
     input.value = '';
     if (!command) return;
-    appendLine(`edgseu@cloud:~$ ${command}`, 'terminal-command');
-    if (!commands.includes(command as (typeof commands)[number])) {
-      appendLine(`Unknown command: ${command}. Type help.`);
+
+    const isValid = commands.includes(command as (typeof commands)[number]);
+    appendCommandLine(rawCommand, isValid);
+
+    if (!isValid) {
+      appendResponse(`Unknown command: ${rawCommand}. Type help.`);
       return;
     }
+
     history.push(command);
     if (history.length > 20) history.shift();
     historyIndex = history.length;
+
     if (command === 'clear') {
       output.replaceChildren();
       return;
@@ -96,7 +136,11 @@ const initialResponses = {
     if (command === 'theme') {
       document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
     }
-    appendLine(responses[command] ?? '');
+    if (command === 'whoami') {
+      appendResponse(whoamiHtml, true);
+      return;
+    }
+    appendResponse(responses[command] ?? '');
   });
 
   input?.addEventListener('keydown', (event) => {
