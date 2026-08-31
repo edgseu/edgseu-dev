@@ -21,12 +21,8 @@ const initialResponses = {
 
 <section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-project-count={projectCount} data-article-count={articleCount}>
   <div class="terminal-bar">
-    <div class="terminal-dots" aria-hidden="true">
-      <span class="terminal-dot terminal-dot-red"></span>
-      <span class="terminal-dot terminal-dot-yellow"></span>
-      <span class="terminal-dot terminal-dot-green"></span>
-    </div>
-    <h2 id="terminal-title">cloud-shell <span class="terminal-title-tilde">~</span></h2>
+    <span class="terminal-close" aria-hidden="true">×</span>
+    <h2 id="terminal-title">cloud-shell ~</h2>
   </div>
   <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
     <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
