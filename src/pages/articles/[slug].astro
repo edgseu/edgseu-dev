@@ -146,22 +146,70 @@ const jsonLd = {
   });
 
   const updateReadingState = () => {
-    if (body && progressBars.length > 0) {
-      const rect = body.getBoundingClientRect();
-      const distance = Math.max(1, body.offsetHeight - innerHeight);
-      const percentage = Math.max(0, Math.min(100, (-rect.top / distance) * 100));
-      progressBars.forEach((bar) => {
-        bar.style.height = `${percentage}%`;
-      });
+    const threshold = 140;
+    let activeIndex = -1;
+
+    for (let i = 0; i < headings.length; i += 1) {
+      const heading = headings[i];
+      if (heading && heading.getBoundingClientRect().top <= threshold) {
+        activeIndex = i;
+      }
     }
-    let active: HTMLElement | undefined;
-    for (const heading of headings) {
-      if (heading.getBoundingClientRect().top <= 140) active = heading;
-    }
-    outlineLinks.forEach((link) => {
-      if (active && link.hash === `#${active.id}`) link.setAttribute('aria-current', 'location');
-      else link.removeAttribute('aria-current');
+
+    outlineLinks.forEach((link, idx) => {
+      if (idx === activeIndex) {
+        link.setAttribute('aria-current', 'location');
+      } else {
+        link.removeAttribute('aria-current');
+      }
     });
+
+    if (progressBars.length > 0 && outlineLinks.length > 0) {
+      const wrap = outlineLinks[0]?.closest('.outline-list-wrap');
+      if (wrap) {
+        const wrapRect = wrap.getBoundingClientRect();
+        let targetHeight = 0;
+
+        if (activeIndex >= 0) {
+          const activeLink = outlineLinks[activeIndex];
+          if (activeLink) {
+            const linkRect = activeLink.getBoundingClientRect();
+            const linkTopInWrap = linkRect.top - wrapRect.top;
+            const linkHeight = linkRect.height;
+            const startY = linkTopInWrap + linkHeight * 0.5;
+
+            if (activeIndex < headings.length - 1) {
+              const currentH = headings[activeIndex]!;
+              const nextH = headings[activeIndex + 1]!;
+              const nextLink = outlineLinks[activeIndex + 1]!;
+              const nextLinkRect = nextLink.getBoundingClientRect();
+              const nextY = nextLinkRect.top - wrapRect.top + nextLinkRect.height * 0.5;
+
+              const hCurrentTop = currentH.getBoundingClientRect().top;
+              const hNextTop = nextH.getBoundingClientRect().top;
+              const segmentSpan = Math.max(1, hNextTop - hCurrentTop);
+              const segmentProgress = Math.max(0, Math.min(1, (threshold - hCurrentTop) / segmentSpan));
+
+              targetHeight = startY + segmentProgress * (nextY - startY);
+            } else if (body) {
+              const bodyRect = body.getBoundingClientRect();
+              const currentH = headings[activeIndex]!;
+              const hCurrentTop = currentH.getBoundingClientRect().top;
+              const remainingSpan = Math.max(1, bodyRect.bottom - threshold);
+              const segmentProgress = Math.max(0, Math.min(1, (threshold - hCurrentTop) / remainingSpan));
+              targetHeight = startY + segmentProgress * (wrapRect.height - startY);
+            } else {
+              targetHeight = startY;
+            }
+          }
+        }
+
+        const percentage = wrapRect.height > 0 ? Math.max(0, Math.min(100, (targetHeight / wrapRect.height) * 100)) : 0;
+        progressBars.forEach((bar) => {
+          bar.style.height = `${percentage}%`;
+        });
+      }
+    }
   };
 
   document.addEventListener('scroll', updateReadingState, { passive: true });

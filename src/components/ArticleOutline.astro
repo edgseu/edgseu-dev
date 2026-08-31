@@ -15,15 +15,17 @@ const outline = headings.filter((heading) => heading.depth === 2 || heading.dept
 ---
 
 <nav class="article-outline" id={id} aria-label="On this page">
-  <div class="outline-progress-track" aria-hidden="true">
-    <div class="outline-progress-bar"></div>
-  </div>
   <h2>On this page</h2>
-  <ol>
-    {outline.map((heading) => (
-      <li data-depth={heading.depth}>
-        <a href={`#${heading.slug}`}>{heading.text}</a>
-      </li>
-    ))}
-  </ol>
+  <div class="outline-list-wrap">
+    <div class="outline-progress-track" aria-hidden="true">
+      <div class="outline-progress-bar"></div>
+    </div>
+    <ol>
+      {outline.map((heading) => (
+        <li data-depth={heading.depth}>
+          <a href={`#${heading.slug}`}>{heading.text}</a>
+        </li>
+      ))}
+    </ol>
+  </div>
 </nav>
