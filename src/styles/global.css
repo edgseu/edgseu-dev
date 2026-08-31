@@ -302,9 +302,8 @@ main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 .terminal-output p { margin: 0 0 0.35rem; color: #f8f8f2; line-height: 1.45; }
 .terminal-output pre, .terminal-pre { margin: 0 0 0.35rem; font-family: inherit; font-size: inherit; line-height: 1.5; white-space: pre-wrap; color: #f8f8f2; }
 .prompt { margin-right: 0.5rem; font-weight: 600; user-select: none; }
-.prompt-user { color: #50fa7b; }
+.prompt-user, .prompt-host { color: #8be9fd; }
 .prompt-at { color: #ff79c6; }
-.prompt-host { color: #8be9fd; }
 .prompt-colon { color: #6272a4; }
 .prompt-path { color: #ffb86c; }
 .prompt-dollar { color: #bd93f9; font-weight: 700; }
