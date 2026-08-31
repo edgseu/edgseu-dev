@@ -293,7 +293,7 @@ main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 
 .home-main { min-width: 0; }
 
-.terminal { border: 1px solid var(--border); border-radius: 0.65rem; background: #282a36; color: #F3F4F6; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
+.terminal { border: 1px solid var(--border); border-radius: 0.65rem; background: #2B2B37; color: #F3F4F6; overflow: hidden; font-family: ui-monospace, SFMono-Regular, Consolas, monospace; }
 .terminal-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.5rem 0.85rem; border-bottom: 1px solid #3D3D3D; background: #272727; }
 .terminal-bar h2 { margin: 0; font-size: 0.8rem; font-weight: 500; color: #9CA3AF; font-family: inherit; }
 .terminal-close { display: inline-flex; align-items: center; justify-content: center; width: 1.15rem; height: 1.15rem; border-radius: 50%; background: #323232; color: #9CA3AF; font-size: 0.85rem; line-height: 1; user-select: none; }
