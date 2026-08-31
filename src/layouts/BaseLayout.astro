@@ -1,5 +1,6 @@
 ---
 import Header from '../components/Header.astro';
+import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
 import '../styles/global.css';
 
@@ -32,7 +33,7 @@ const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#0d1117" />
+    <meta name="theme-color" content="#1F1F1F" />
     <title>{fullTitle}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonical} />
@@ -66,11 +67,11 @@ const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
       <slot />
     </main>
     <footer class="site-footer">
-      <p>© {new Date().getUTCFullYear()} {site.person}. Built as a static, accessible Site.</p>
+      <p>© {new Date().getUTCFullYear()} edgseu. Built as a static, accessible Site.</p>
       <nav aria-label="Footer">
-        <a href={site.github}>GitHub</a>
-        <a href={site.linkedin}>LinkedIn</a>
-        <a href={`mailto:${site.email}`}>Email</a>
+        <a href={site.github}><Icon name="github" size={14} /> GitHub</a>
+        <a href={site.linkedin}><Icon name="linkedin" size={14} /> LinkedIn</a>
+        <a href={`mailto:${site.email}`}><Icon name="envelope" size={14} /> Email</a>
       </nav>
     </footer>
   </body>

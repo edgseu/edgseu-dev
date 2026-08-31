@@ -1,6 +1,6 @@
 ---
+import Icon from './Icon.astro';
 import { site } from '../data/site';
-
 interface Props {
   pathname: string;
 }
@@ -34,10 +34,13 @@ const links = [
     </nav>
     <div class="header-actions">
       <button class="theme-toggle" type="button" aria-label="Use light theme" title="Use light theme">
-        <span aria-hidden="true">☼</span><span class="action-label">Light</span>
+        <span class="icon-sun" aria-hidden="true"><Icon name="sun" size={14} /></span>
+        <span class="icon-moon" aria-hidden="true"><Icon name="moon" size={14} /></span>
+        <span class="action-label">Light</span>
       </button>
       <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="mobile-menu">
-        Menu
+        <Icon name="bars" size={14} class="menu-icon" />
+        <span>Menu</span>
       </button>
     </div>
   </div>

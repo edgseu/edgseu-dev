@@ -28,7 +28,7 @@ test('local development renders Draft at its eventual path with a banner', async
     try {
       const page = await browser.newPage();
       await page.goto('http://127.0.0.1:4322/articles/draft-preview/');
-      assert.equal(await page.locator('h1').textContent(), 'Draft preview');
+      assert.equal(await page.locator('main h1').textContent(), 'Draft preview');
       assert.match(await page.locator('.draft-banner').textContent() ?? '', /not included in production/);
       assert.equal(await page.locator('meta[name="robots"]').getAttribute('content'), 'noindex, nofollow');
     } finally {
