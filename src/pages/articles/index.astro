@@ -10,14 +10,14 @@ const articles = visibleArticles(import.meta.env.DEV);
   title="Articles"
   description="Portable technical writing about Cloud engineering, DevSecOps, GitOps, and security automation."
 >
-  <header class="page-header">
+  <header class="page-header article-page-header">
     <p class="eyebrow">Technical writing</p>
     <h1>Articles</h1>
     <p>Long-form notes built from portable Markdown and published in descending original publication order.</p>
   </header>
   <section aria-label="Published articles">
     {articles.length > 0 ? (
-      <div class="cards">{articles.map((article) => <ArticleCard article={article} headingLevel={2} />)}</div>
+      <div class="cards article-index-list">{articles.map((article) => <ArticleCard article={article} headingLevel={2} />)}</div>
     ) : (
       <p class="empty-state">No articles are published yet. Approved writing will appear here.</p>
     )}
