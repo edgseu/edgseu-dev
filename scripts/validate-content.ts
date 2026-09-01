@@ -9,6 +9,7 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
 import { projects } from '../src/data/projects';
+import { validateProfileFile } from '../src/lib/profile';
 
 interface ParsedArticle {
   slug: string;
@@ -21,6 +22,7 @@ interface ParsedArticle {
 
 const errors: string[] = [];
 const articleRoot = resolve(process.env.ARTICLE_ROOT ?? 'src/content/articles');
+const profileFile = resolve(process.env.PROFILE_FILE ?? 'src/content/profile.md');
 const allowedLanguages: Record<string, true> = {
   bash: true, css: true, diff: true, dockerfile: true, go: true, hcl: true,
   html: true, javascript: true, json: true, jsx: true, kotlin: true,
@@ -166,6 +168,9 @@ function validateLocalTarget(file: string, target: string, image: boolean): void
   }
 }
 
+const profileResult = validateProfileFile(profileFile);
+for (const error of profileResult.errors) fail(profileFile, error);
+
 validateProjects();
 if (!existsSync(articleRoot)) fail(articleRoot, 'Article root does not exist');
 const entries = existsSync(articleRoot) ? readdirSync(articleRoot, { withFileTypes: true }) : [];
@@ -200,5 +205,5 @@ if (errors.length > 0) {
   for (const error of errors) console.error(`- ${error}`);
   process.exitCode = 1;
 } else {
-  console.log(`Content validation passed: ${projects.length} Projects, ${articles.length} Articles.`);
+  console.log(`Content validation passed: 1 Profile, ${projects.length} Projects, ${articles.length} Articles.`);
 }

@@ -5,14 +5,23 @@ import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
 
-function runValidation(source: string): { status: number | null; output: string } {
+function runValidation(
+  source: string,
+  profileSource?: string,
+): { status: number | null; output: string } {
   const root = join(tmpdir(), `edgseu-content-${crypto.randomUUID()}`);
   const article = join(root, 'invalid-article');
+  const profile = join(root, 'profile.md');
   mkdirSync(article, { recursive: true });
   writeFileSync(join(article, 'index.md'), source);
+  if (profileSource) writeFileSync(profile, profileSource);
   const result = spawnSync('pnpm', ['exec', 'tsx', 'scripts/validate-content.ts'], {
     cwd: process.cwd(),
-    env: { ...process.env, ARTICLE_ROOT: root },
+    env: {
+      ...process.env,
+      ARTICLE_ROOT: root,
+      ...(profileSource ? { PROFILE_FILE: profile } : {}),
+    },
     encoding: 'utf8',
   });
   rmSync(root, { recursive: true, force: true });
@@ -69,3 +78,83 @@ no language
   assert.match(result.output, /raw HTML is not portable/);
   assert.match(result.output, /code fence requires a recognized language/);
 });
+
+test('invalid Profile reports actionable authoring boundaries', () => {
+  const result = runValidation(
+    `---
+title: Valid Article
+summary: A portable validation fixture.
+state: Draft
+tags: []
+---
+
+## Valid article
+`,
+    `---
+name: Aman Bhushan Singh
+username: edgseu
+role: Cloud Security & Operations Engineer
+location: India
+email: not-an-email
+github: relative/github
+linkedin: https://www.linkedin.com/in/amanbs
+avatar: images/avatar.png
+promptHost: cloud
+host: cloud-node
+resumeUrl: ""
+focusAreas: [Cloud, cloud]
+shortSkills: []
+skills: [AWS EKS]
+---
+`,
+  );
+
+  assert.equal(result.status, 1);
+  assert.match(result.output, /email must be a valid email address/);
+  assert.match(result.output, /github must be an absolute HTTPS URL/);
+  assert.match(result.output, /avatar must be a root-relative path/);
+  assert.match(result.output, /resumeUrl must be null or an absolute HTTPS URL/);
+  assert.match(result.output, /focusAreas must contain unique values/);
+  assert.match(result.output, /shortSkills must contain at least one value/);
+  assert.match(result.output, /Profile narrative must not be empty/);
+});
+
+const profileFixture = `---
+name: Aman Bhushan Singh
+username: edgseu
+role: Cloud Security & Operations Engineer
+location: India
+email: mail@edgseu.dev
+github: https://github.com/h1zardian
+linkedin: https://www.linkedin.com/in/amanbs
+avatar: /images/avatar.png
+promptHost: cloud
+host: cloud-node
+resumeUrl: RESUME_URL
+focusAreas: [Cloud infrastructure]
+shortSkills: [AWS]
+skills: [AWS EKS]
+---
+
+## Profile narrative
+`;
+
+for (const resumeUrl of ['null', 'https://example.com/resume.pdf']) {
+  test(`Profile accepts resumeUrl: ${resumeUrl}`, () => {
+    const result = runValidation(
+      `---
+title: Valid Article
+summary: A portable validation fixture.
+state: Draft
+tags: []
+---
+
+## Valid article
+`,
+      profileFixture.replace('RESUME_URL', resumeUrl),
+    );
+
+    assert.equal(result.status, 0, result.output);
+    assert.match(result.output, /Content validation passed/);
+  });
+}
