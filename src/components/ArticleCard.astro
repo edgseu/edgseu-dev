@@ -20,7 +20,12 @@ const { frontmatter } = article;
   <p class="eyebrow">Article{frontmatter.state === 'Draft' ? ' · Draft' : ''}</p>
   <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
   <p>{frontmatter.summary}</p>
-  <div class="metadata">
+  {frontmatter.tags && frontmatter.tags.length > 0 && (
+    <ul class="tag-list" aria-label={`${frontmatter.title} tags`}>
+      {frontmatter.tags.map((tag) => <li>{tag}</li>)}
+    </ul>
+  )}
+  <footer class="metadata">
     <span>By edgseu</span>
     {frontmatter.publishedAt && (
       <time datetime={frontmatter.publishedAt}>
@@ -28,14 +33,5 @@ const { frontmatter } = article;
         <span>{frontmatter.publishedAt}</span>
       </time>
     )}
-    <span>
-      <Icon name="clock" size={14} />
-      <span>{article.readingMinutes} min read</span>
-    </span>
-  </div>
-  {frontmatter.tags && frontmatter.tags.length > 0 && (
-    <ul class="tag-list" aria-label={`${frontmatter.title} tags`}>
-      {frontmatter.tags.map((tag) => <li>{tag}</li>)}
-    </ul>
-  )}
+  </footer>
 </article>
