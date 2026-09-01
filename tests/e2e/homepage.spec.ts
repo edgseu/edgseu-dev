@@ -8,9 +8,9 @@ test('Homepage keeps identity and destinations useful without JavaScript', async
   const page = await context.newPage();
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Aman Bhushan Singh' })).toBeVisible();
-  await expect(page.getByText('Cloud & DevSecOps Engineer', { exact: true })).toBeVisible();
+  await expect(page.getByText('Cloud Security & Operations Engineer', { exact: true })).toBeVisible();
   await expect(page.getByRole('link', { name: /GitHub/ }).first()).toHaveAttribute('href', 'https://github.com/h1zardian');
-  await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', /linkedin\.com\/in\/aman-bhushan-singh/);
+  await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', 'https://www.linkedin.com/in/amanbs');
   await expect(page.locator('#terminal-output p').first()).toContainText('whoami');
   await context.close();
 });
