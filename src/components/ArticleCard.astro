@@ -17,7 +17,6 @@ const { frontmatter } = article;
       <Icon name="thumbtack" size={10} /> pinned
     </span>
   )}
-  <p class="eyebrow">Article{frontmatter.state === 'Draft' ? ' · Draft' : ''}</p>
   <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
   <p>{frontmatter.summary}</p>
   {frontmatter.tags && frontmatter.tags.length > 0 && (
