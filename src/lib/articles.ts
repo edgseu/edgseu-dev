@@ -8,6 +8,7 @@ export interface ArticleFrontmatter {
   revisedAt?: string;
   tags?: string[];
   aliases?: string[];
+  pinned?: boolean;
 }
 
 export interface Article {
@@ -40,6 +41,7 @@ const loaded = Object.entries(modules).map(([file, article]) => {
       ...article.frontmatter,
       ...(publishedAt ? { publishedAt } : {}),
       ...(revisedAt ? { revisedAt } : {}),
+      ...(typeof article.frontmatter.pinned === 'boolean' ? { pinned: article.frontmatter.pinned } : {}),
     },
     Content: article.Content,
     headings: article.getHeadings(),
@@ -47,9 +49,12 @@ const loaded = Object.entries(modules).map(([file, article]) => {
   } satisfies Article;
 });
 
-export const allArticles = loaded.toSorted((left, right) =>
-  (right.frontmatter.publishedAt ?? '').localeCompare(left.frontmatter.publishedAt ?? ''),
-);
+export const allArticles = loaded.toSorted((left, right) => {
+  const leftPinned = Boolean(left.frontmatter.pinned);
+  const rightPinned = Boolean(right.frontmatter.pinned);
+  if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+  return (right.frontmatter.publishedAt ?? '').localeCompare(left.frontmatter.publishedAt ?? '');
+});
 
 export const publishedArticles = process.env.EMPTY_ARTICLES === '1'
   ? []

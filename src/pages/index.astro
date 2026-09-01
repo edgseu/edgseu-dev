@@ -21,6 +21,12 @@ const jsonLd = {
     address: { '@type': 'PostalAddress', addressCountry: 'IN' },
   },
 };
+
+const pinnedProjects = publishedProjects.filter((p) => p.pinned);
+const displayedProjects = pinnedProjects.length > 2
+  ? publishedProjects.slice(0, Math.min(4, Math.max(pinnedProjects.length, 2)))
+  : publishedProjects.slice(0, 2);
+const isProjectGrid2x2 = displayedProjects.length > 2;
 ---
 
 <BaseLayout
@@ -33,7 +39,6 @@ const jsonLd = {
     <div class="home-main">
       <Terminal />
       <section class="profile-prose" aria-labelledby="profile-introduction">
-        <p class="eyebrow">Profile</p>
         <h2 id="profile-introduction">Cloud systems with security in the delivery path</h2>
         <p>
           I build and document cloud infrastructure, GitOps delivery, and security automation. This Site collects selected public work and practical technical writing in one place.
@@ -45,15 +50,15 @@ const jsonLd = {
 
       <section aria-labelledby="selected-projects">
         <div class="section-heading">
-          <div><p class="eyebrow">Proof of work</p><h2 id="selected-projects">Selected projects</h2></div>
+          <div><h2 id="selected-projects">Selected projects</h2></div>
           <a href="/projects/">View all projects</a>
         </div>
-        <div class="cards">{publishedProjects.slice(0, 2).map((project) => <ProjectCard project={project} />)}</div>
+        <div class={`cards ${isProjectGrid2x2 ? 'cards-grid-2x2' : ''}`}>{displayedProjects.map((project) => <ProjectCard project={project} />)}</div>
       </section>
 
       <section aria-labelledby="latest-articles">
         <div class="section-heading">
-          <div><p class="eyebrow">Writing</p><h2 id="latest-articles">Latest articles</h2></div>
+          <div><h2 id="latest-articles">Latest articles</h2></div>
           <a href="/articles/">View all articles</a>
         </div>
         {publishedArticles.length > 0 ? (

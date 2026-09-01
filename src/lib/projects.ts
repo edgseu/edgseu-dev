@@ -48,7 +48,12 @@ async function repositoryResult(project: Project): Promise<RepositoryResult | un
 
 const curatedPublishedProjects = projects
   .filter((project) => project.state === 'Published')
-  .toSorted((left, right) => left.order - right.order);
+  .toSorted((left, right) => {
+    const leftPinned = Boolean(left.pinned);
+    const rightPinned = Boolean(right.pinned);
+    if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+    return left.order - right.order;
+  });
 
 export const publishedProjects: EnrichedProject[] = await Promise.all(
   curatedPublishedProjects.map(async (project) => {

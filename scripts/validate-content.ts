@@ -16,6 +16,7 @@ interface ParsedArticle {
   state: 'Draft' | 'Published';
   aliases: string[];
   links: string[];
+  pinned?: boolean;
 }
 
 const errors: string[] = [];
@@ -52,6 +53,13 @@ function validateProjects(): void {
     if (project.tags.length < 1 || project.tags.length > 6) fail(location, 'requires one to six tags');
     const tags = project.tags.map((tag) => tag.toLocaleLowerCase());
     if (new Set(tags).size !== tags.length) fail(location, 'tags must be unique ignoring case');
+    if (project.pinned !== undefined && typeof project.pinned !== 'boolean') {
+      fail(location, 'pinned must be a boolean');
+    }
+  }
+  const pinnedProjects = projects.filter((project) => project.state === 'Published' && project.pinned);
+  if (pinnedProjects.length > 4) {
+    fail('projects', 'no more than 4 Published projects may be pinned');
   }
   const publishedOrder = projects.filter((project) => project.state === 'Published').toSorted((a, b) => a.order - b.order);
   if (publishedOrder[0]?.id !== 'devsecops-pipeline-project' || publishedOrder[1]?.id !== 'cowrie-sentinel-lab') {
@@ -83,7 +91,9 @@ function parseArticle(directory: string): ParsedArticle | undefined {
   if (state === 'Draft' && publishedAt) fail(file, 'Draft Articles must not declare publishedAt');
   if (publishedAt && publishedAt > new Date().toISOString().slice(0, 10)) fail(file, 'publishedAt cannot be in the future');
   if (revisedAt && (!publishedAt || revisedAt < publishedAt)) fail(file, 'revisedAt must be on or after publishedAt');
-
+  if (data.pinned !== undefined && typeof data.pinned !== 'boolean') {
+    fail(file, 'pinned must be a boolean');
+  }
   const tags = Array.isArray(data.tags) ? data.tags : [];
   if (tags.length > 4 || tags.some((tag) => typeof tag !== 'string' || !tag.trim())) fail(file, 'tags must contain zero to four nonempty strings');
   const normalizedTags = tags.map((tag) => String(tag).toLocaleLowerCase());
@@ -132,6 +142,7 @@ function parseArticle(directory: string): ParsedArticle | undefined {
     state: state === 'Draft' ? 'Draft' : 'Published',
     aliases,
     links,
+    pinned: data.pinned === true,
   };
 }
 
@@ -178,6 +189,10 @@ for (const article of articles.filter((candidate) => candidate.state === 'Publis
     const target = routes.get(link.split('#')[0] ?? '');
     if (target?.state === 'Draft') fail(article.file, `Published Article links to Draft Article: ${link}`);
   }
+}
+const pinnedPublishedArticles = articles.filter((article) => article.state === 'Published' && article.pinned);
+if (pinnedPublishedArticles.length > 2) {
+  fail('articles', 'no more than 2 Published articles may be pinned');
 }
 
 if (errors.length > 0) {
