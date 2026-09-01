@@ -40,8 +40,16 @@ const initialResponses = {
 ---
 <section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-profile={JSON.stringify(profile)} data-project-count={projectCount} data-article-count={articleCount} data-build-time={buildTime}>
   <div class="terminal-bar">
-    <span class="terminal-close" aria-hidden="true">×</span>
+    <div class="terminal-dots" aria-hidden="true">
+      <span class="t-dot dot-red"></span>
+      <span class="t-dot dot-yellow"></span>
+      <span class="t-dot dot-green"></span>
+    </div>
     <h2 id="terminal-title">cloud-shell ~</h2>
+    <div class="terminal-status" aria-hidden="true">
+      <span class="status-ping"></span>
+      <span class="status-text">online</span>
+    </div>
   </div>
   <div class="terminal-body" id="terminal-body" tabindex="0">
     <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
@@ -64,7 +72,14 @@ const initialResponses = {
   </div>
   <div class="terminal-footer">
     <Icon name="circle-info" size={13} class="terminal-hint-icon" />
-    <span class="terminal-hint-text">hint: type <code class="terminal-hint-code">help</code> for available commands</span>
+    <span class="terminal-hint-text">commands:</span>
+    <div class="terminal-chips">
+      <button type="button" class="terminal-chip" data-cmd="whoami">whoami</button>
+      <button type="button" class="terminal-chip" data-cmd="skills">skills</button>
+      <button type="button" class="terminal-chip" data-cmd="contact">contact</button>
+      <button type="button" class="terminal-chip" data-cmd="theme">theme</button>
+      <button type="button" class="terminal-chip" data-cmd="clear">clear</button>
+    </div>
   </div>
   <noscript><p class="terminal-noscript">Interactive commands require JavaScript. All destinations are linked below.</p></noscript>
 </section>
@@ -216,5 +231,14 @@ ${clockSvg}<span class="t-key">uptime      </span><span class="t-val">${formatUp
         input.value = matches[0] ?? input.value;
       }
     }
+  });
+
+  document.querySelectorAll<HTMLButtonElement>('.terminal-chip').forEach((chip) => {
+    chip.addEventListener('click', () => {
+      const cmd = chip.dataset.cmd;
+      if (!cmd || !input || !form) return;
+      input.value = cmd;
+      form.dispatchEvent(new Event('submit', { cancelable: true }));
+    });
   });
 </script>

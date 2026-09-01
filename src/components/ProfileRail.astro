@@ -15,7 +15,8 @@ import { profile } from '../data/profile';
     />
     {profile.available && (
       <span class="status-available">
-        <Icon name="circle-dot" size={10} /> Available
+        <span class="status-ping" aria-hidden="true"></span>
+        <span>Available</span>
       </span>
     )}
   </div>
