@@ -1,10 +1,30 @@
 ---
+name: Aman Bhushan Singh
+username: edgseu
 role: Cloud Security & Operations Engineer
+location: India
+email: mail@edgseu.dev
+github: https://github.com/h1zardian
+linkedin: https://linkedin.com/in/amanbs
+avatar: /images/avatar.png
+promptHost: cloud
+host: cloud-node
+resumeUrl: https://drive.google.com/file/d/103-alPKW08YhgKIAioHny9Hd14mrY4oE/
 focusAreas:
   - Cloud infrastructure
   - DevSecOps
   - GitOps
   - Security automation
+shortSkills:
+  - AWS
+  - Azure
+  - Kubernetes
+skills:
+  - AWS EKS
+  - Azure AKS
+  - Azure Monitor
+  - Azure Sentinel
+  - Azure EntraID
 ---
 
 ## Cloud systems with security in the delivery path
