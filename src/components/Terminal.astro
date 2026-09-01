@@ -1,44 +1,30 @@
 ---
 import Icon from './Icon.astro';
-import { publishedProjects } from '../lib/projects';
+import { loadProjectCatalog } from '../lib/projects';
 import { publishedArticles } from '../lib/articles';
 import { profile } from '../data/profile';
+import { executeTerminalCommand, TERMINAL_COMMANDS } from '../lib/terminal';
 
+const { publishedProjects } = await loadProjectCatalog();
 const projectCount = publishedProjects.length;
 const articleCount = publishedArticles.length;
-const formatSkillsGrid = (items: string[], columns = 2, gap = 4): string => {
-  if (!items.length) return '';
-  const maxLen = Math.max(...items.map((s) => s.length));
-  const colWidth = maxLen + gap;
-  const lines: string[] = [];
-  for (let i = 0; i < items.length; i += columns) {
-    const row = items.slice(i, i + columns);
-    lines.push(row.map((item, idx) => (idx < row.length - 1 ? item.padEnd(colWidth) : item)).join(''));
-  }
-  return lines.join('\n');
-};
 const buildTime = Date.now();
-
-const svgIcon = (viewBox: string, path: string, className = '') =>
-  `<span class="t-icon ${className}" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="${viewBox}" fill="currentColor" focusable="false"><path d="${path}"/></svg></span>`;
-
-const envelopeSvg = svgIcon('0 0 512 512', 'M48 64C21.5 64 0 85.5 0 112c0 15.1 7.1 29.3 19.2 38.4L236.8 313.6c11.4 8.5 27 8.5 38.4 0L492.8 150.4c12.1-9.1 19.2-23.3 19.2-38.4c0-26.5-21.5-48-48-48L48 64zM0 176L0 384c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-208L294.4 339.2c-22.8 17.1-54 17.1-76.8 0L0 176z');
-const githubSvg = svgIcon('0 0 496 512', 'M165.9 397.4c0 2-2.3 3.6-5.2 3.6-3.3.3-5.6-1.3-5.6-3.6 0-2 2.3-3.6 5.2-3.6 3-.3 5.6 1.3 5.6 3.6zm-31.1-4.5c-.7 2 1.3 4.3 4.3 4.9 2.6 1 5.6 0 6.2-2s-1.3-4.3-4.3-5.2c-2.6-.7-5.5.3-6.2 2.3zm44.2-1.7c-2.9.7-4.9 2.6-4.6 4.9.3 2 2.9 3.3 5.9 2.6 2.9-.7 4.9-2.6 4.6-4.6-.3-1.9-3-3.2-5.9-2.9zM244.8 8C106.1 8 0 113.3 0 252c0 110.9 69.8 205.8 169.5 239.2 12.8 2.3 17.3-5.6 17.3-12.1 0-6.2-.3-40.4-.3-61.4 0 0-70 15-84.7-29.8 0 0-11.4-29.1-27.8-36.6 0 0-22.9-15.7 1.6-15.4 0 0 24.9 2 38.6 25.8 21.9 38.6 58.6 27.5 72.9 20.9 2.3-16 8.8-27.1 16-33.7-55.9-6.2-112.3-14.3-112.3-110.5 0-27.5 7.6-41.3 23.6-58.9-2.6-6.5-11.1-33.3 2.6-67.9 20.9-6.5 69 27 69 27 20-5.6 41.5-8.5 62.8-8.5s42.8 2.9 62.8 8.5c0 0 48.1-33.6 69-27 13.7 34.7 5.2 61.4 2.6 67.9 16 17.7 25.8 31.5 25.8 58.9 0 96.5-58.9 104.2-114.8 110.5 9.2 7.9 17 22.9 17 46.4 0 33.7-.3 75.4-.3 83.6 0 6.5 4.6 14.4 17.3 12.1C428.2 457.8 496 362.9 496 252 496 113.3 383.5 8 244.8 8zM97.2 352.9c-1.3 1-1 3.3.7 5.2 1.6 1.6 3.9 2.3 5.2 1 1.3-1 1-3.3-.7-5.2-1.6-1.6-3.9-2.3-5.2-1zm-10.8-8.1c-.7 1.3.3 2.9 2.3 3.9 1.6 1 3.6.7 4.3-.7.7-1.3-.3-2.9-2.3-3.9-2-.6-3.6-.3-4.3.7zm32.4 35.6c-1.6 1.3-1 4.3 1.3 6.2 2.3 2.3 5.2 2.6 6.5 1 1.3-1.3.7-4.3-1.3-6.2-2.2-2.3-5.2-2.6-6.5-1zm-11.4-14.7c-1.6 1-1.6 3.6 0 5.9 1.6 2.3 4.3 3.3 5.6 2.3 1.6-1.3 1.6-3.9 0-6.2-1.4-2.3-4-3.3-5.6-2z');
-const linkedinSvg = svgIcon('0 0 448 512', 'M416 32H31.9C14.3 32 0 46.5 0 64.3v383.4C0 465.5 14.3 480 31.9 480H416c17.6 0 32-14.5 32-32.3V64.3c0-17.8-14.4-32.3-32-32.3zM135.4 416H69V202.2h66.5V416zm-33.2-243c-21.3 0-38.5-17.3-38.5-38.5S80.9 96 102.2 96c21.2 0 38.5 17.3 38.5 38.5 0 21.3-17.2 38.5-38.5 38.5zm282.1 243h-66.4V312c0-24.8-.5-56.7-34.5-56.7-34.6 0-39.9 27-39.9 54.9V416h-66.4V202.2h63.7v29.2h.9c8.9-16.8 30.6-34.5 62.9-34.5 67.2 0 79.7 44.3 79.7 101.9V416z');
-
-const initialResponses = {
-  help: 'Available commands: help, whoami, skills, contact, theme, clear',
-  skills: formatSkillsGrid(profile.skills),
-  contact: [
-    `${envelopeSvg}Email:    ${profile.email}`,
-    `${githubSvg}GitHub:   ${profile.github.replace(/^https?:\/\//, '')}`,
-    `${linkedinSvg}LinkedIn: ${profile.linkedin.replace(/^https?:\/\//, '')}`,
-  ].join('\n'),
-  theme: 'Switched color theme.',
-  clear: '',
+const context = {
+  profile,
+  projectCount,
+  articleCount,
+  buildTime,
 };
+const initialWhoami = executeTerminalCommand('whoami', context).output ?? '';
 ---
-<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-profile={JSON.stringify(profile)} data-project-count={projectCount} data-article-count={articleCount} data-build-time={buildTime}>
+<section
+  class="terminal"
+  aria-labelledby="terminal-title"
+  data-profile={JSON.stringify(profile)}
+  data-project-count={projectCount}
+  data-article-count={articleCount}
+  data-build-time={buildTime}
+>
   <div class="terminal-bar">
     <h2 id="terminal-title">cloud-shell ~</h2>
     <div class="terminal-status" aria-hidden="true">
@@ -49,16 +35,7 @@ const initialResponses = {
   <div class="terminal-body" id="terminal-body" tabindex="0">
     <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
       <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">{profile.username}</span><span class="prompt-at">@</span><span class="prompt-host">{profile.promptHost}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
-      <pre class="terminal-pre"><span class="t-purple">cloud-shell</span>
-<span class="t-muted">-----------</span>
-<span class="t-icon"><Icon name="user" size={13} /></span><span class="t-key">user        </span><span class="t-val">{profile.name} ({profile.username})</span>
-<span class="t-icon"><Icon name="server" size={13} /></span><span class="t-key">host        </span><span class="t-val">{profile.host}</span>
-<span class="t-icon"><Icon name="briefcase" size={13} /></span><span class="t-key">role        </span><span class="t-val">{profile.role}</span>
-<span class="t-icon"><Icon name="location-dot" size={13} /></span><span class="t-key">loc         </span><span class="t-val">{profile.location}</span>
-<span class="t-icon"><Icon name="code" size={13} /></span><span class="t-key">skills      </span><span class="t-val">{profile.shortSkills.join(' · ')}</span>
-<span class="t-icon"><Icon name="folder" size={13} /></span><span class="t-key">projects    </span><span class="t-val">{projectCount} featured</span>
-<span class="t-icon"><Icon name="file-lines" size={13} /></span><span class="t-key">articles    </span><span class="t-val">{articleCount} published</span>
-<span class="t-icon"><Icon name="clock" size={13} /></span><span class="t-key">uptime      </span><span class="t-val t-uptime">&lt; 1m</span></pre>
+      <pre class="terminal-pre" set:html={initialWhoami}></pre>
     </div>
     <form class="terminal-form" autocomplete="off">
       <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">{profile.username}</span><span class="prompt-at">@</span><span class="prompt-host">{profile.promptHost}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
@@ -69,86 +46,47 @@ const initialResponses = {
     <Icon name="circle-info" size={13} class="terminal-hint-icon" />
     <span class="terminal-hint-text">commands:</span>
     <div class="terminal-chips">
-      <button type="button" class="terminal-chip" data-cmd="whoami">whoami</button>
-      <button type="button" class="terminal-chip" data-cmd="skills">skills</button>
-      <button type="button" class="terminal-chip" data-cmd="contact">contact</button>
-      <button type="button" class="terminal-chip" data-cmd="theme">theme</button>
-      <button type="button" class="terminal-chip" data-cmd="clear">clear</button>
+      {TERMINAL_COMMANDS.filter((command) => command.showAsChip).map((command) => (
+        <button
+          type="button"
+          class="terminal-chip"
+          data-cmd={command.name}
+          title={command.description}
+        >
+          {command.name}
+        </button>
+      ))}
     </div>
   </div>
   <noscript><p class="terminal-noscript">Interactive commands require JavaScript. All destinations are linked below.</p></noscript>
 </section>
 
 <script>
+  import {
+    completeTerminalCommand,
+    escapeHtml,
+    executeTerminalCommand,
+    formatUptime,
+    TerminalHistory,
+  } from '../lib/terminal';
+  import type { TerminalContext, TerminalProfile } from '../lib/terminal';
+
   const terminalEl = document.querySelector<HTMLElement>('.terminal');
   const form = document.querySelector<HTMLFormElement>('.terminal-form');
   const input = document.querySelector<HTMLInputElement>('#terminal-input');
   const output = document.querySelector<HTMLElement>('#terminal-output');
   const body = document.querySelector<HTMLElement>('#terminal-body');
-  const history: string[] = [];
-  let historyIndex = 0;
-  const commands = ['help', 'whoami', 'skills', 'contact', 'theme', 'clear'] as const;
+  const history = new TerminalHistory();
 
-  const projectCount = terminalEl?.dataset.projectCount ?? '0';
-  const articleCount = terminalEl?.dataset.articleCount ?? '0';
-  const terminalProfile = JSON.parse(terminalEl?.dataset.profile ?? 'null') as {
-    name: string;
-    username: string;
-    role: string;
-    location: string;
-    promptHost: string;
-    host: string;
-    shortSkills: string[];
-  } | null;
+  const projectCount = Number(terminalEl?.dataset.projectCount ?? '0');
+  const articleCount = Number(terminalEl?.dataset.articleCount ?? '0');
+  const terminalProfile = JSON.parse(terminalEl?.dataset.profile ?? 'null') as TerminalProfile | null;
   const buildTime = Number(terminalEl?.dataset.buildTime ?? Date.now());
-
-  const formatUptime = (diffMs: number): string => {
-    const totalMinutes = Math.floor(Math.max(0, diffMs) / 60000);
-    const days = Math.floor(totalMinutes / 1440);
-    const hours = Math.floor((totalMinutes % 1440) / 60);
-    const minutes = totalMinutes % 60;
-    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    if (minutes > 0) return `${minutes}m`;
-    return '< 1m';
-  };
 
   const initialUptime = terminalEl?.querySelector('.t-uptime');
   if (initialUptime) {
     initialUptime.textContent = formatUptime(Date.now() - buildTime);
   }
-
-  let responses: Record<string, string> = {};
-  try {
-    responses = JSON.parse(terminalEl?.dataset.responses ?? '{}');
-  } catch {
-    responses = {};
-  }
-
-  const escapeHtml = (str: string) =>
-    str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
-
-  const getWhoamiHtml = () => {
-    if (!terminalProfile) return '';
-  const userSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512" fill="currentColor" focusable="false"><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3 0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg></span>`;
-  const serverSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" focusable="false"><path d="M64 32C28.7 32 0 60.7 0 96l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 32zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm48 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0zM64 288c-35.3 0-64 28.7-64 64l0 64c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-64c0-35.3-28.7-64-64-64L64 288zm280 72a24 24 0 1 1 0 48 24 24 0 1 1 0-48zm48 24a24 24 0 1 1 48 0 24 24 0 1 1 -48 0z"/></svg></span>`;
-  const briefcaseSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" focusable="false"><path d="M184 48l144 0c4.4 0 8 3.6 8 8l0 40-160 0 0-40c0-4.4 3.6-8 8-8zm-56 8l0 40L32 96C14.3 96 0 110.3 0 128l0 96 512 0 0-96c0-17.7-14.3-32-32-32l-96 0 0-40c0-30.9-25.1-56-56-56L184 0c-30.9 0-56 25.1-56 56zM512 256L0 256l0 160c0 35.3 28.7 64 64 64l384 0c35.3 0 64-28.7 64-64l0-160zM232 328l48 0c8.8 0 16 7.2 16 16s-7.2 16-16 16l-48 0c-8.8 0-16-7.2-16-16s7.2-16 16-16z"/></svg></span>`;
-  const locSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" focusable="false"><path d="M215.7 499.2C267 435 384 279.4 384 192C384 86 298 0 192 0S0 86 0 192c0 87.4 117 243 168.3 307.2c12.3 15.3 35.1 15.3 47.4 0zM192 128a64 64 0 1 1 0 128 64 64 0 1 1 0-128z"/></svg></span>`;
-  const codeSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 512" fill="currentColor" focusable="false"><path d="M392.8 1.2c-17-4.9-34.7 5-39.6 22l-128 448c-4.9 17 5 34.7 22 39.6s34.7-5 39.6-22l128-448c4.9-17-5-34.7-22-39.6zm80.6 120.1c-12.5 12.5-12.5 32.8 0 45.3L562.7 256l-89.4 89.4c-12.5 12.5-12.5 32.8 0 45.3s32.8 12.5 45.3 0l112-112c12.5-12.5 12.5-32.8 0-45.3l-112-112c-12.5-12.5-32.8-12.5-45.3 0zm-306.7 0c-12.5-12.5-32.8-12.5-45.3 0l-112 112c-12.5 12.5-12.5 32.8 0 45.3l112 112c12.5 12.5 32.8 12.5 45.3 0s12.5-32.8 0-45.3L77.3 256l89.4-89.4c12.5-12.5 12.5-32.8 0-45.3z"/></svg></span>`;
-  const folderSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" focusable="false"><path d="M64 480H448c35.3 0 64-28.7 64-64V160c0-35.3-28.7-64-64-64H288c-10.1 0-19.6-4.7-25.6-12.8L243.2 57.6C231.1 41.5 212.1 32 192 32H64C28.7 32 0 60.7 0 96V416c0 35.3 28.7 64 64 64z"/></svg></span>`;
-  const articleSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" fill="currentColor" focusable="false"><path d="M64 0C28.7 0 0 28.7 0 64L0 448c0 35.3 28.7 64 64 64l256 0c35.3 0 64-28.7 64-64l0-288-160 0c-17.7 0-32-14.3-32-32L192 0 64 0zM224 0l0 128 160 0L256 0 224 0zM80 224c0-13.3 10.7-24 24-24l176 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-176 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l176 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-176 0c-13.3 0-24-10.7-24-24zm0 96c0-13.3 10.7-24 24-24l112 0c13.3 0 24 10.7 24 24s-10.7 24-24 24l-112 0c-13.3 0-24-10.7-24-24z"/></svg></span>`;
-  const clockSvg = `<span class="t-icon" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" fill="currentColor" focusable="false"><path d="M256 0a256 256 0 1 1 0 512A256 256 0 1 1 256 0zM232 120l0 136c0 8 4 15.5 10.7 20l96 64c11.1 7.4 25.9 4.4 33.3-6.7s4.4-25.9-6.7-33.3L280 243.2 280 120c0-13.3-10.7-24-24-24s-24 10.7-24 24z"/></svg></span>`;
-  return `<span class="t-purple">cloud-shell</span>
-<span class="t-muted">-----------</span>
-${userSvg}<span class="t-key">user        </span><span class="t-val">${escapeHtml(terminalProfile.name)} (${escapeHtml(terminalProfile.username)})</span>
-${serverSvg}<span class="t-key">host        </span><span class="t-val">${escapeHtml(terminalProfile.host)}</span>
-${briefcaseSvg}<span class="t-key">role        </span><span class="t-val">${escapeHtml(terminalProfile.role)}</span>
-${locSvg}<span class="t-key">loc         </span><span class="t-val">${escapeHtml(terminalProfile.location)}</span>
-${codeSvg}<span class="t-key">skills      </span><span class="t-val">${terminalProfile.shortSkills.map(escapeHtml).join(' · ')}</span>
-${folderSvg}<span class="t-key">projects    </span><span class="t-val">${projectCount} featured</span>
-${articleSvg}<span class="t-key">articles    </span><span class="t-val">${articleCount} published</span>
-${clockSvg}<span class="t-key">uptime      </span><span class="t-val">${formatUptime(Date.now() - buildTime)}</span>`;
-  };
 
   const appendCommandLine = (rawCommand: string, isValid: boolean) => {
     if (!output || !terminalProfile) return;
@@ -177,53 +115,51 @@ ${clockSvg}<span class="t-key">uptime      </span><span class="t-val">${formatUp
 
   form?.addEventListener('submit', (event) => {
     event.preventDefault();
-    if (!input || !output) return;
+    if (!input || !output || !terminalProfile) return;
     const rawCommand = input.value.trim();
-    const command = rawCommand.toLowerCase();
     input.value = '';
-    if (!command) return;
+    if (!rawCommand) return;
 
-    const isValid = commands.includes(command as (typeof commands)[number]);
-    appendCommandLine(rawCommand, isValid);
+    const context: TerminalContext = {
+      profile: terminalProfile,
+      projectCount,
+      articleCount,
+      buildTime,
+      currentTime: Date.now(),
+    };
 
-    if (!isValid) {
-      appendResponse(`Unknown command: ${rawCommand}. Type help.`);
+    const result = executeTerminalCommand(rawCommand, context);
+    appendCommandLine(rawCommand, result.isValid);
+
+    if (!result.isValid) {
+      appendResponse(result.output ?? `Unknown command: ${rawCommand}. Type help.`);
       return;
     }
 
-    history.push(command);
-    if (history.length > 20) history.shift();
-    historyIndex = history.length;
+    history.record(rawCommand);
 
-    if (command === 'clear') {
+    if (result.type === 'clear') {
       output.replaceChildren();
       return;
     }
-    if (command === 'theme') {
+    if (result.action === 'theme') {
       document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
     }
-    if (command === 'whoami') {
-      appendResponse(getWhoamiHtml(), true);
-      return;
+    if (result.output) {
+      appendResponse(result.output, result.type === 'html');
     }
-    if (command === 'contact') {
-      appendResponse(responses.contact ?? '', true);
-      return;
-    }
-    appendResponse(responses[command] ?? '');
   });
 
   input?.addEventListener('keydown', (event) => {
     if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
       event.preventDefault();
-      historyIndex = Math.max(0, Math.min(history.length, historyIndex + (event.key === 'ArrowUp' ? -1 : 1)));
-      input.value = history[historyIndex] ?? '';
+      input.value = history.navigate(event.key === 'ArrowUp' ? 'previous' : 'next');
     }
     if (event.key === 'Tab' && input.value) {
-      const matches = commands.filter((command) => command.startsWith(input.value.toLowerCase()));
-      if (matches.length === 1) {
+      const completion = completeTerminalCommand(input.value);
+      if (completion) {
         event.preventDefault();
-        input.value = matches[0] ?? input.value;
+        input.value = completion;
       }
     }
   });

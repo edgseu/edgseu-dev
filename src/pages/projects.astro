@@ -1,8 +1,10 @@
 ---
 import ProjectCard from '../components/ProjectCard.astro';
-import { publishedProjects } from '../lib/projects';
+import { loadProjectCatalog } from '../lib/projects';
 import { profile } from '../data/profile';
 import BaseLayout from '../layouts/BaseLayout.astro';
+
+const { publishedProjects } = await loadProjectCatalog();
 ---
 
 <BaseLayout

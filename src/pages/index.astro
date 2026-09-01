@@ -3,12 +3,13 @@ import ArticleCard from '../components/ArticleCard.astro';
 import ProfileRail from '../components/ProfileRail.astro';
 import ProjectCard from '../components/ProjectCard.astro';
 import Terminal from '../components/Terminal.astro';
-import { publishedProjects } from '../lib/projects';
+import { loadProjectCatalog } from '../lib/projects';
 import { site } from '../data/site';
 import { profile } from '../data/profile';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { publishedArticles } from '../lib/articles';
 import { Content as ProfileBio } from '../content/profile.md';
+const { homepageProjects, isHomepageProjectGrid2x2 } = await loadProjectCatalog();
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -24,11 +25,6 @@ const jsonLd = {
   },
 };
 
-const pinnedProjects = publishedProjects.filter((p) => p.pinned);
-const displayedProjects = pinnedProjects.length > 2
-  ? publishedProjects.slice(0, Math.min(4, Math.max(pinnedProjects.length, 2)))
-  : publishedProjects.slice(0, 2);
-const isProjectGrid2x2 = displayedProjects.length > 2;
 ---
 
 <BaseLayout
@@ -49,7 +45,7 @@ const isProjectGrid2x2 = displayedProjects.length > 2;
           <div><h2 id="selected-projects">Selected projects</h2></div>
           <a href="/projects/">View all projects</a>
         </div>
-        <div class={`cards ${isProjectGrid2x2 ? 'cards-grid-2x2' : ''}`}>{displayedProjects.map((project) => <ProjectCard project={project} />)}</div>
+        <div class={`cards ${isHomepageProjectGrid2x2 ? 'cards-grid-2x2' : ''}`}>{homepageProjects.map((project) => <ProjectCard project={project} />)}</div>
       </section>
 
       <section class="article-section" aria-labelledby="latest-articles">
