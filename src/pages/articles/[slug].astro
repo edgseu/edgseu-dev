@@ -68,10 +68,6 @@ const jsonLd = {
             <span>Revised {frontmatter.revisedAt}</span>
           </time>
         )}
-        <span>
-          <Icon name="clock" size={14} />
-          <span>{article.readingMinutes} min read</span>
-        </span>
       </div>
     </header>
 
@@ -102,8 +98,18 @@ const jsonLd = {
         </section>
         {(newer || older) && (
           <nav class="article-sequence" aria-label="Article sequence">
-            {newer && <a href={newer.path}>← Newer<span class="sr-only"> Article:</span><br />{newer.frontmatter.title}</a>}
-            {older && <a class="older" href={older.path}>Older →<span class="sr-only"> Article:</span><br />{older.frontmatter.title}</a>}
+            {newer && (
+              <a href={newer.path} class="sequence-card newer">
+                <span class="sequence-dir">← Newer</span>
+                <span class="sequence-title">{newer.frontmatter.title}</span>
+              </a>
+            )}
+            {older && (
+              <a href={older.path} class="sequence-card older">
+                <span class="sequence-dir">Older →</span>
+                <span class="sequence-title">{older.frontmatter.title}</span>
+              </a>
+            )}
           </nav>
         )}
       </div>
