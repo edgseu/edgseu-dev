@@ -43,9 +43,10 @@ test('terminal opts in to focus and supports only curated commands', async ({ pa
   await page.locator('#terminal-input').fill('contact');
   await page.locator('#terminal-input').press('Enter');
   const contactOutput = page.locator('#terminal-output pre').last();
-  await expect(contactOutput).toContainText('󰇮 Email: mail@edgseu.dev');
-  await expect(contactOutput).toContainText('󰊤 GitHub: github.com/h1zardian');
-  await expect(contactOutput).toContainText('󰌻 LinkedIn: linkedin.com/in/amanbs');
+  await expect(contactOutput).toContainText('Email:    mail@edgseu.dev');
+  await expect(contactOutput).toContainText('GitHub:   github.com/h1zardian');
+  await expect(contactOutput).toContainText('LinkedIn: linkedin.com/in/amanbs');
+  await expect(contactOutput.locator('svg')).toHaveCount(3);
   await page.locator('#terminal-input').fill('projects');
   await page.locator('#terminal-input').press('Enter');
   await expect(page.getByText('Unknown command: projects. Type help.')).toBeVisible();

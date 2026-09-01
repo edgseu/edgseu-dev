@@ -386,7 +386,19 @@ main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 .t-orange { color: var(--warning); }
 .t-yellow { color: var(--warning); }
 .t-muted { color: var(--muted); }
-.t-icon { display: inline-block; width: 1.25em; }
+.t-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.25em;
+  height: 1.25em;
+  vertical-align: -0.15em;
+  margin-right: 0.25rem;
+}
+.t-icon svg {
+  width: 0.85em;
+  height: 0.85em;
+}
 .t-key { color: var(--secondary); }
 .t-val { color: var(--text); }
 .terminal-form {
@@ -416,9 +428,10 @@ main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
   color: var(--muted);
 }
 .terminal-hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   color: var(--warning);
-  font-size: 0.9rem;
-  line-height: 1;
 }
 .terminal-hint-text {
   color: var(--muted);
