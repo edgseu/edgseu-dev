@@ -1,7 +1,12 @@
 import { projects } from '../src/data/projects';
-import { site } from '../src/data/site';
+import { profile } from '../src/data/profile';
 
-const urls = [site.github, site.linkedin, ...projects.filter((project) => project.state === 'Published').map((project) => project.url)];
+const urls = [
+  profile.github,
+  profile.linkedin,
+  ...(profile.resumeUrl ? [profile.resumeUrl] : []),
+  ...projects.filter((project) => project.state === 'Published').map((project) => project.url),
+];
 const failures: string[] = [];
 for (const url of urls) {
   try {

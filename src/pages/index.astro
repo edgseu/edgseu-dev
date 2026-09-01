@@ -5,11 +5,10 @@ import ProjectCard from '../components/ProjectCard.astro';
 import Terminal from '../components/Terminal.astro';
 import { publishedProjects } from '../lib/projects';
 import { site } from '../data/site';
+import { profile } from '../data/profile';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { publishedArticles } from '../lib/articles';
-import { Content as ProfileBio, frontmatter as profileFrontmatter } from '../content/profile.md';
-
-const role = (profileFrontmatter?.role as string | undefined) ?? site.role;
+import { Content as ProfileBio } from '../content/profile.md';
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -17,11 +16,11 @@ const jsonLd = {
   url: site.canonicalUrl,
   mainEntity: {
     '@type': 'Person',
-    name: site.person,
-    jobTitle: role,
-    image: new URL(site.avatar, site.canonicalUrl).href,
-    sameAs: [site.github, site.linkedin],
-    address: { '@type': 'PostalAddress', addressCountry: 'IN' },
+    name: profile.name,
+    jobTitle: profile.role,
+    image: new URL(profile.avatar, site.canonicalUrl).href,
+    sameAs: [profile.github, profile.linkedin],
+    address: { '@type': 'PostalAddress', addressCountry: profile.location },
   },
 };
 
@@ -33,8 +32,8 @@ const isProjectGrid2x2 = displayedProjects.length > 2;
 ---
 
 <BaseLayout
-  title={site.name}
-  description="Aman Bhushan Singh's Cloud and DevSecOps engineering profile, selected projects, and technical writing."
+  title={profile.username}
+  description={`${profile.name}'s ${profile.role} profile, selected projects, and technical writing.`}
   jsonLd={jsonLd}
 >
   <div class="home-grid">

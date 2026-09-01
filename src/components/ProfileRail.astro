@@ -1,59 +1,55 @@
 ---
 import Icon from './Icon.astro';
-import { site } from '../data/site';
-import { frontmatter } from '../content/profile.md';
-
-const siteConfig = site as typeof site & { resumeUrl?: string; available?: boolean };
-const role = (frontmatter?.role as string | undefined) ?? site.role;
-const focusAreas = (frontmatter?.focusAreas as string[] | undefined) ?? site.focusAreas;
+import { profile } from '../data/profile';
 ---
 
 <aside class="profile-card" aria-labelledby="profile-name">
   <div class="profile-avatar-wrap">
     <img
       class="profile-avatar"
-      src={site.avatar}
-      alt={site.person}
+      src={profile.avatar}
+      alt={profile.name}
       width="72"
       height="72"
       decoding="async"
     />
-    {siteConfig.available && (
+    {profile.available && (
       <span class="status-available">
         <Icon name="circle-dot" size={10} /> Available
       </span>
     )}
   </div>
   <div class="profile-identity">
-    <h1 id="profile-name">{site.person}</h1>
-    <p class="role">{role}</p>
+    <h1 id="profile-name">{profile.name}</h1>
+    <p class="role">{profile.role}</p>
   </div>
   <p class="location">
     <Icon name="location-dot" size={14} />
-    <span>{site.location}</span>
+    <span>{profile.location}</span>
   </p>
   <ul class="focus-list" aria-label="Focus areas">
-    {focusAreas.map((area) => <li>{area}</li>)}
+    {profile.focusAreas.map((area) => <li>{area}</li>)}
   </ul>
   <nav class="profile-links" aria-label="Profile links">
-    <a href={`mailto:${site.email}`}>
+    <a href={`mailto:${profile.email}`}>
       <Icon name="envelope" size={14} />
-      <span>{site.email}</span>
+      <span>{profile.email}</span>
     </a>
-    <a href={site.github}>
+    <a href={profile.github}>
       <Icon name="github" size={14} />
       <span>GitHub</span>
       <Icon name="arrow-up-right-from-square" size={12} class="external-icon" />
     </a>
-    <a href={site.linkedin}>
+    <a href={profile.linkedin}>
       <Icon name="linkedin" size={14} />
       <span>LinkedIn</span>
       <Icon name="arrow-up-right-from-square" size={12} class="external-icon" />
     </a>
-    {siteConfig.resumeUrl && (
-      <a href={siteConfig.resumeUrl}>
-        <Icon name="arrow-up-right-from-square" size={14} />
+    {profile.resumeUrl && (
+      <a href={profile.resumeUrl}>
+        <Icon name="file-lines" size={14} />
         <span>Résumé</span>
+        <Icon name="arrow-up-right-from-square" size={12} class="external-icon" />
       </a>
     )}
   </nav>

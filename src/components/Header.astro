@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { site } from '../data/site';
+import { profile } from '../data/profile';
 interface Props {
   pathname: string;
 }
@@ -25,12 +25,12 @@ const links = [
 
 <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label="edgseu">edgseu</a>
+    <a class="wordmark" href="/" aria-label={profile.username}>{profile.username}</a>
     <nav class="desktop-nav" aria-label="Primary">
       {links.map((link) => (
         <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
       ))}
-      <a href={`mailto:${site.email}`}>Contact</a>
+      <a href={`mailto:${profile.email}`}>Contact</a>
     </nav>
     <div class="header-actions">
       <button class="theme-toggle" type="button" aria-label="Use light theme" title="Use light theme">
@@ -48,7 +48,7 @@ const links = [
     {links.map((link) => (
       <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
     ))}
-    <a href={`mailto:${site.email}`}>Contact</a>
+    <a href={`mailto:${profile.email}`}>Contact</a>
   </nav>
 </header>
 

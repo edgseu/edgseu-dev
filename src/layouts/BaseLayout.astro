@@ -2,6 +2,7 @@
 import Header from '../components/Header.astro';
 import Icon from '../components/Icon.astro';
 import { site } from '../data/site';
+import { profile } from '../data/profile';
 import '../styles/global.css';
 
 interface Props {
@@ -25,7 +26,7 @@ const {
 } = Astro.props;
 const canonical = new URL(canonicalPath, site.canonicalUrl).href;
 const imageUrl = new URL(image, site.canonicalUrl).href;
-const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
+const fullTitle = title === profile.username ? title : `${title} · ${profile.username}`;
 ---
 
 <!doctype html>
@@ -39,7 +40,7 @@ const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
     <link rel="canonical" href={canonical} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta property="og:type" content={type} />
-    <meta property="og:site_name" content={site.name} />
+    <meta property="og:site_name" content={profile.username} />
     <meta property="og:title" content={fullTitle} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonical} />
@@ -67,11 +68,11 @@ const fullTitle = title === site.name ? title : `${title} · ${site.name}`;
       <slot />
     </main>
     <footer class="site-footer">
-      <p>© {new Date().getUTCFullYear()} edgseu. Built as a static, accessible Site.</p>
+      <p>© {new Date().getUTCFullYear()} {profile.username}. Built as a static, accessible Site.</p>
       <nav aria-label="Footer">
-        <a href={site.github}><Icon name="github" size={14} /> GitHub</a>
-        <a href={site.linkedin}><Icon name="linkedin" size={14} /> LinkedIn</a>
-        <a href={`mailto:${site.email}`}><Icon name="envelope" size={14} /> Email</a>
+        <a href={profile.github}><Icon name="github" size={14} /> GitHub</a>
+        <a href={profile.linkedin}><Icon name="linkedin" size={14} /> LinkedIn</a>
+        <a href={`mailto:${profile.email}`}><Icon name="envelope" size={14} /> Email</a>
       </nav>
     </footer>
   </body>

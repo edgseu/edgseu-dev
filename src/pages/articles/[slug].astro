@@ -2,6 +2,7 @@
 import ArticleOutline from '../../components/ArticleOutline.astro';
 import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
+import { profile } from '../../data/profile';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { articleNeighbors, visibleArticles } from '../../lib/articles';
 import type { Article } from '../../lib/articles';
@@ -31,7 +32,7 @@ const jsonLd = {
   description: frontmatter.summary,
   datePublished: frontmatter.publishedAt,
   ...(frontmatter.revisedAt ? { dateModified: frontmatter.revisedAt } : {}),
-  author: { '@type': 'Person', name: site.person, url: site.canonicalUrl },
+  author: { '@type': 'Person', name: profile.name, url: site.canonicalUrl },
   mainEntityOfPage: new URL(article.path, site.canonicalUrl).href,
 };
 ---
