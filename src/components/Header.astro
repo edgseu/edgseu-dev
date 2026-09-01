@@ -7,16 +7,18 @@ interface Props {
 
 const { pathname } = Astro.props;
 const links = [
-  { href: '/', label: 'Overview', active: pathname === '/', current: 'page' as const },
+  { href: '/', label: 'Overview', section: 'overview', active: pathname === '/', current: 'page' as const },
   {
     href: '/projects/',
     label: 'Projects',
+    section: 'projects',
     active: pathname.startsWith('/projects/'),
     current: 'page' as const,
   },
   {
     href: '/articles/',
     label: 'Articles',
+    section: 'articles',
     active: pathname.startsWith('/articles/'),
     current: pathname === '/articles/' ? ('page' as const) : ('location' as const),
   },
@@ -28,7 +30,7 @@ const links = [
     <a class="wordmark" href="/" aria-label={profile.username}>{profile.username}</a>
     <nav class="desktop-nav" aria-label="Primary">
       {links.map((link) => (
-        <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
+        <a href={link.href} data-section={link.section} aria-current={link.active ? link.current : undefined}>{link.label}</a>
       ))}
       <a href={`mailto:${profile.email}`}>Contact</a>
     </nav>
@@ -46,7 +48,7 @@ const links = [
   </div>
   <nav id="mobile-menu" class="mobile-menu" aria-label="Primary" hidden>
     {links.map((link) => (
-      <a href={link.href} aria-current={link.active ? link.current : undefined}>{link.label}</a>
+      <a href={link.href} data-section={link.section} aria-current={link.active ? link.current : undefined}>{link.label}</a>
     ))}
     <a href={`mailto:${profile.email}`}>Contact</a>
   </nav>

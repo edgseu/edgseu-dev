@@ -44,7 +44,7 @@ const isProjectGrid2x2 = displayedProjects.length > 2;
         <ProfileBio />
       </section>
 
-      <section aria-labelledby="selected-projects">
+      <section class="project-section" aria-labelledby="selected-projects">
         <div class="section-heading">
           <div><h2 id="selected-projects">Selected projects</h2></div>
           <a href="/projects/">View all projects</a>
@@ -52,7 +52,7 @@ const isProjectGrid2x2 = displayedProjects.length > 2;
         <div class={`cards ${isProjectGrid2x2 ? 'cards-grid-2x2' : ''}`}>{displayedProjects.map((project) => <ProjectCard project={project} />)}</div>
       </section>
 
-      <section aria-labelledby="latest-articles">
+      <section class="article-section" aria-labelledby="latest-articles">
         <div class="section-heading">
           <div><h2 id="latest-articles">Latest articles</h2></div>
           <a href="/articles/">View all articles</a>

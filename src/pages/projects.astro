@@ -9,12 +9,12 @@ import BaseLayout from '../layouts/BaseLayout.astro';
   title="Projects"
   description={`Selected Cloud and DevSecOps projects by ${profile.name}, linked directly to their public repositories.`}
 >
-  <header class="page-header">
+  <header class="page-header project-page-header">
     <p class="eyebrow">Proof of work</p>
     <h1>Projects</h1>
     <p>Curated public repositories covering cloud infrastructure, GitOps, security automation, and observability.</p>
   </header>
   <section aria-label="Published projects">
-    <div class="cards">{publishedProjects.map((project) => <ProjectCard project={project} headingLevel={2} />)}</div>
+    <div class="project-index-grid">{publishedProjects.map((project) => <ProjectCard project={project} headingLevel={2} />)}</div>
   </section>
 </BaseLayout>
