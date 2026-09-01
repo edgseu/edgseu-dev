@@ -1,49 +1,55 @@
 ---
 import { publishedProjects } from '../lib/projects';
 import { publishedArticles } from '../lib/articles';
-import { site } from '../data/site';
-import { frontmatter } from '../content/profile.md';
-
-const role = (frontmatter?.role as string | undefined) ?? site.role;
-const focusAreas = (frontmatter?.focusAreas as string[] | undefined) ?? site.focusAreas;
+import { profile } from '../data/profile';
 const projectCount = publishedProjects.length;
 const articleCount = publishedArticles.length;
-const projectTitles = publishedProjects.map((p) => p.title).join(', ');
-const articleTitles = publishedArticles.map((a) => a.frontmatter.title).join(', ');
+const formatSkillsGrid = (items: string[], columns = 2, gap = 4): string => {
+  if (!items.length) return '';
+  const maxLen = Math.max(...items.map((s) => s.length));
+  const colWidth = maxLen + gap;
+  const lines: string[] = [];
+  for (let i = 0; i < items.length; i += columns) {
+    const row = items.slice(i, i + columns);
+    lines.push(row.map((item, idx) => (idx < row.length - 1 ? item.padEnd(colWidth) : item)).join(''));
+  }
+  return lines.join('\n');
+};
 const buildTime = Date.now();
 
 const initialResponses = {
-  help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
-  skills: `󰒍 ${focusAreas.join(' · ')}`,
-  projects: `󰈙 Selected projects: /projects/${projectTitles ? ` — ${projectTitles}` : ''}`,
-  articles: `󰈚 Technical writing: /articles/${articleTitles ? ` — ${articleTitles}` : ''}`,
-  contact: `󰇮 Email: ${site.email} · 󰌢 GitHub: ${site.github.replace(/^https?:\/\//, '')} · 󰌻 LinkedIn: ${site.linkedin.replace(/^https?:\/\//, '')}`,
+  help: 'Available commands: help, whoami, skills, contact, theme, clear',
+  skills: formatSkillsGrid(profile.skills),
+  contact: [
+    `󰇮 Email: ${profile.email}`,
+    `󰊤 GitHub: ${profile.github.replace(/^https?:\/\//, '')}`,
+    `󰌻 LinkedIn: ${profile.linkedin.replace(/^https?:\/\//, '')}`,
+  ].join('\n'),
   theme: '󰔎 Switched color theme.',
   clear: '',
 };
 ---
-
-<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-project-count={projectCount} data-article-count={articleCount} data-build-time={buildTime} data-role={role} data-focus-areas={JSON.stringify(focusAreas)}>
+<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-profile={JSON.stringify(profile)} data-project-count={projectCount} data-article-count={articleCount} data-build-time={buildTime}>
   <div class="terminal-bar">
     <span class="terminal-close" aria-hidden="true">×</span>
     <h2 id="terminal-title">cloud-shell ~</h2>
   </div>
   <div class="terminal-body" id="terminal-body" tabindex="0">
     <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
-      <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
+      <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">{profile.username}</span><span class="prompt-at">@</span><span class="prompt-host">{profile.promptHost}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
       <pre class="terminal-pre"><span class="t-purple">cloud-shell</span>
 <span class="t-muted">-----------</span>
-<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">{site.person} (edgseu)</span>
-<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-node</span>
-<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">{role}</span>
-<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
-<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">{focusAreas.join(' · ')}</span>
+<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">{profile.name} ({profile.username})</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">{profile.host}</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">{profile.role}</span>
+<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">{profile.location}</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">skills      </span> <span class="t-val">{profile.shortSkills.join(' · ')}</span>
 <span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">{projectCount} featured</span>
 <span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">{articleCount} published</span>
 <span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val t-uptime">&lt; 1m</span></pre>
     </div>
     <form class="terminal-form" autocomplete="off">
-      <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
+      <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">{profile.username}</span><span class="prompt-at">@</span><span class="prompt-host">{profile.promptHost}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
       <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
     </form>
   </div>
@@ -62,12 +68,19 @@ const initialResponses = {
   const body = document.querySelector<HTMLElement>('#terminal-body');
   const history: string[] = [];
   let historyIndex = 0;
-  const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
+  const commands = ['help', 'whoami', 'skills', 'contact', 'theme', 'clear'] as const;
 
-  const projectCount = terminalEl?.dataset.projectCount ?? '2';
-  const articleCount = terminalEl?.dataset.articleCount ?? '1';
-  const role = terminalEl?.dataset.role ?? 'Cloud Security & Operations Engineer';
-  const focusAreas: string[] = JSON.parse(terminalEl?.dataset.focusAreas ?? '[]');
+  const projectCount = terminalEl?.dataset.projectCount ?? '0';
+  const articleCount = terminalEl?.dataset.articleCount ?? '0';
+  const terminalProfile = JSON.parse(terminalEl?.dataset.profile ?? 'null') as {
+    name: string;
+    username: string;
+    role: string;
+    location: string;
+    promptHost: string;
+    host: string;
+    shortSkills: string[];
+  } | null;
   const buildTime = Number(terminalEl?.dataset.buildTime ?? Date.now());
 
   const formatUptime = (diffMs: number): string => {
@@ -93,24 +106,28 @@ const initialResponses = {
     responses = {};
   }
 
-  const getWhoamiHtml = () => `<span class="t-purple">cloud-shell</span>
-<span class="t-muted">-----------</span>
-<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
-<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-node</span>
-<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">${role}</span>
-<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
-<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">${focusAreas.join(' · ')}</span>
-<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} featured</span>
-<span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">${articleCount} published</span>
-<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">${formatUptime(Date.now() - buildTime)}</span>`;
   const escapeHtml = (str: string) =>
     str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
+  const getWhoamiHtml = () => {
+    if (!terminalProfile) return '';
+    return `<span class="t-purple">cloud-shell</span>
+<span class="t-muted">-----------</span>
+<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">${escapeHtml(terminalProfile.name)} (${escapeHtml(terminalProfile.username)})</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">${escapeHtml(terminalProfile.host)}</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">${escapeHtml(terminalProfile.role)}</span>
+<span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">${escapeHtml(terminalProfile.location)}</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">skills      </span> <span class="t-val">${terminalProfile.shortSkills.map(escapeHtml).join(' · ')}</span>
+<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} featured</span>
+<span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">${articleCount} published</span>
+<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">${formatUptime(Date.now() - buildTime)}</span>`;
+  };
+
   const appendCommandLine = (rawCommand: string, isValid: boolean) => {
-    if (!output) return;
+    if (!output || !terminalProfile) return;
     const line = document.createElement('p');
     line.className = 'terminal-command-line';
-    line.innerHTML = `<span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(rawCommand)}</span>`;
+    line.innerHTML = `<span class="prompt" aria-hidden="true"><span class="prompt-user">${escapeHtml(terminalProfile.username)}</span><span class="prompt-at">@</span><span class="prompt-host">${escapeHtml(terminalProfile.promptHost)}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(rawCommand)}</span>`;
     output.append(line);
   };
 

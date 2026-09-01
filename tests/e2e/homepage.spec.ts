@@ -10,17 +10,48 @@ test('Homepage keeps identity and destinations useful without JavaScript', async
   await expect(page.getByRole('heading', { name: 'Aman Bhushan Singh' })).toBeVisible();
   await expect(page.locator('.profile-card .role')).toHaveText('Cloud Security & Operations Engineer');
   await expect(page.getByRole('link', { name: /GitHub/ }).first()).toHaveAttribute('href', 'https://github.com/h1zardian');
-  await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', 'https://www.linkedin.com/in/amanbs');
+  await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', 'https://linkedin.com/in/amanbs');
   await expect(page.locator('#terminal-output p').first()).toContainText('whoami');
+  await expect(page.getByRole('link', { name: 'Résumé' })).toHaveAttribute(
+    'href',
+    'https://drive.google.com/file/d/103-alPKW08YhgKIAioHny9Hd14mrY4oE/',
+  );
+  await expect(page.locator('#terminal-output')).toContainText('edgseu@cloud:~$');
+  await expect(page.locator('#terminal-output')).toContainText('cloud-node');
+  await expect(page.locator('#terminal-output')).toContainText('skills');
+  await expect(page.locator('#terminal-output')).toContainText('AWS · Azure · Kubernetes');
   await context.close();
 });
 
 test('terminal opts in to focus and supports only curated commands', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('#terminal-input')).not.toBeFocused();
+  await page.locator('#terminal-input').fill('help');
+  await page.locator('#terminal-input').press('Enter');
+  await expect(page.getByText('Available commands: help, whoami, skills, contact, theme, clear')).toBeVisible();
   await page.locator('#terminal-input').fill('skills');
   await page.locator('#terminal-input').press('Enter');
-  await expect(page.locator('#terminal-output p').filter({ hasText: 'Cloud infrastructure' })).toBeVisible();
+  const skillsOutput = page.locator('#terminal-output pre').last();
+  await expect(skillsOutput).toContainText('AWS EKS');
+  await expect(skillsOutput).toContainText('Azure AKS');
+  await expect(skillsOutput).not.toContainText('󰒍');
+  await expect(skillsOutput).not.toContainText(' · ');
+  await page.locator('#terminal-input').fill('whoami');
+  await page.locator('#terminal-input').press('Enter');
+  await expect(page.locator('#terminal-output pre').last()).toContainText('skills');
+  await expect(page.locator('#terminal-output pre').last()).toContainText('AWS · Azure · Kubernetes');
+  await page.locator('#terminal-input').fill('contact');
+  await page.locator('#terminal-input').press('Enter');
+  const contactOutput = page.locator('#terminal-output pre').last();
+  await expect(contactOutput).toContainText('󰇮 Email: mail@edgseu.dev');
+  await expect(contactOutput).toContainText('󰊤 GitHub: github.com/h1zardian');
+  await expect(contactOutput).toContainText('󰌻 LinkedIn: linkedin.com/in/amanbs');
+  await page.locator('#terminal-input').fill('projects');
+  await page.locator('#terminal-input').press('Enter');
+  await expect(page.getByText('Unknown command: projects. Type help.')).toBeVisible();
+  await page.locator('#terminal-input').fill('articles');
+  await page.locator('#terminal-input').press('Enter');
+  await expect(page.getByText('Unknown command: articles. Type help.')).toBeVisible();
   await page.locator('#terminal-input').fill('sudo');
   await page.locator('#terminal-input').press('Enter');
   await expect(page.getByText('Unknown command: sudo. Type help.')).toBeVisible();
