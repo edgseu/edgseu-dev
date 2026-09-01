@@ -24,23 +24,25 @@ const initialResponses = {
     <span class="terminal-close" aria-hidden="true">×</span>
     <h2 id="terminal-title">cloud-shell ~</h2>
   </div>
-  <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions" tabindex="0">
-    <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
-    <pre class="terminal-pre"><span class="t-purple">cloud-shell</span>
+  <div class="terminal-body" id="terminal-body" tabindex="0">
+    <div class="terminal-output" id="terminal-output" role="log" aria-live="polite" aria-relevant="additions">
+      <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
+      <pre class="terminal-pre"><span class="t-purple">cloud-shell</span>
 <span class="t-muted">-----------</span>
 <span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-edge-node</span>
 <span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
 <span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
 <span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
 <span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
-<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">{projectCount} contributed</span>
+<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">{projectCount} featured</span>
 <span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">{articleCount} published</span>
 <span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span></pre>
+    </div>
+    <form class="terminal-form" autocomplete="off">
+      <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
+      <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
+    </form>
   </div>
-  <form class="terminal-form" autocomplete="off">
-    <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
-    <input id="terminal-input" name="command" inputmode="text" spellcheck="false" maxlength="32" />
-  </form>
   <div class="terminal-footer">
     <span class="terminal-hint-icon" aria-hidden="true">󰋽</span>
     <span class="terminal-hint-text">hint: type <code class="terminal-hint-code">help</code> for available commands</span>
@@ -53,6 +55,7 @@ const initialResponses = {
   const form = document.querySelector<HTMLFormElement>('.terminal-form');
   const input = document.querySelector<HTMLInputElement>('#terminal-input');
   const output = document.querySelector<HTMLElement>('#terminal-output');
+  const body = document.querySelector<HTMLElement>('#terminal-body');
   const history: string[] = [];
   let historyIndex = 0;
   const commands = ['help', 'whoami', 'skills', 'projects', 'articles', 'contact', 'theme', 'clear'] as const;
@@ -74,7 +77,7 @@ const initialResponses = {
 <span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
 <span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
 <span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
-<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} contributed</span>
+<span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} featured</span>
 <span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">${articleCount} published</span>
 <span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span>`;
 
@@ -102,7 +105,8 @@ const initialResponses = {
     }
     output.append(line);
     while (output.childElementCount > 24) output.firstElementChild?.remove();
-    output.scrollTop = output.scrollHeight;
+    if (body) body.scrollTop = body.scrollHeight;
+    else output.scrollTop = output.scrollHeight;
   };
 
   form?.addEventListener('submit', (event) => {
