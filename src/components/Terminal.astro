@@ -2,15 +2,19 @@
 import { publishedProjects } from '../lib/projects';
 import { publishedArticles } from '../lib/articles';
 import { site } from '../data/site';
+import { frontmatter } from '../content/profile.md';
 
+const role = (frontmatter?.role as string | undefined) ?? site.role;
+const focusAreas = (frontmatter?.focusAreas as string[] | undefined) ?? site.focusAreas;
 const projectCount = publishedProjects.length;
 const articleCount = publishedArticles.length;
 const projectTitles = publishedProjects.map((p) => p.title).join(', ');
 const articleTitles = publishedArticles.map((a) => a.frontmatter.title).join(', ');
+const buildTime = Date.now();
 
 const initialResponses = {
   help: '󰋽 Available commands: help, whoami, skills, projects, articles, contact, theme, clear',
-  skills: `󰒍 ${site.focusAreas.join(' · ')}`,
+  skills: `󰒍 ${focusAreas.join(' · ')}`,
   projects: `󰈙 Selected projects: /projects/${projectTitles ? ` — ${projectTitles}` : ''}`,
   articles: `󰈚 Technical writing: /articles/${articleTitles ? ` — ${articleTitles}` : ''}`,
   contact: `󰇮 Email: ${site.email} · 󰌢 GitHub: ${site.github.replace(/^https?:\/\//, '')} · 󰌻 LinkedIn: ${site.linkedin.replace(/^https?:\/\//, '')}`,
@@ -19,7 +23,7 @@ const initialResponses = {
 };
 ---
 
-<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-project-count={projectCount} data-article-count={articleCount}>
+<section class="terminal" aria-labelledby="terminal-title" data-responses={JSON.stringify(initialResponses)} data-project-count={projectCount} data-article-count={articleCount} data-build-time={buildTime} data-role={role} data-focus-areas={JSON.stringify(focusAreas)}>
   <div class="terminal-bar">
     <span class="terminal-close" aria-hidden="true">×</span>
     <h2 id="terminal-title">cloud-shell ~</h2>
@@ -29,14 +33,14 @@ const initialResponses = {
       <p class="terminal-command-line"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="cmd-valid">whoami</span></p>
       <pre class="terminal-pre"><span class="t-purple">cloud-shell</span>
 <span class="t-muted">-----------</span>
-<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-edge-node</span>
-<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
-<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
+<span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">{site.person} (edgseu)</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-node</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">{role}</span>
 <span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
-<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">{focusAreas.join(' · ')}</span>
 <span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">{projectCount} featured</span>
 <span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">{articleCount} published</span>
-<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span></pre>
+<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val t-uptime">&lt; 1m</span></pre>
     </div>
     <form class="terminal-form" autocomplete="off">
       <label for="terminal-input"><span class="prompt" aria-hidden="true"><span class="prompt-user">edgseu</span><span class="prompt-at">@</span><span class="prompt-host">cloud</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span><span class="sr-only">Terminal command</span></label>
@@ -62,6 +66,25 @@ const initialResponses = {
 
   const projectCount = terminalEl?.dataset.projectCount ?? '2';
   const articleCount = terminalEl?.dataset.articleCount ?? '1';
+  const role = terminalEl?.dataset.role ?? 'Cloud Security & Operations Engineer';
+  const focusAreas: string[] = JSON.parse(terminalEl?.dataset.focusAreas ?? '[]');
+  const buildTime = Number(terminalEl?.dataset.buildTime ?? Date.now());
+
+  const formatUptime = (diffMs: number): string => {
+    const totalMinutes = Math.floor(Math.max(0, diffMs) / 60000);
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+    if (days > 0) return `${days}d ${hours}h ${minutes}m`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    if (minutes > 0) return `${minutes}m`;
+    return '< 1m';
+  };
+
+  const initialUptime = terminalEl?.querySelector('.t-uptime');
+  if (initialUptime) {
+    initialUptime.textContent = formatUptime(Date.now() - buildTime);
+  }
 
   let responses: Record<string, string> = {};
   try {
@@ -70,17 +93,16 @@ const initialResponses = {
     responses = {};
   }
 
-  const whoamiHtml = `<span class="t-purple">cloud-shell</span>
+  const getWhoamiHtml = () => `<span class="t-purple">cloud-shell</span>
 <span class="t-muted">-----------</span>
-<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-edge-node</span>
 <span class="t-icon t-pink"></span> <span class="t-key">user        </span> <span class="t-val">Aman Bhushan Singh (edgseu)</span>
-<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">Cloud Security &amp; Operations Engineering</span>
+<span class="t-icon t-cyan">󰋜</span> <span class="t-key">host        </span> <span class="t-val">cloud-node</span>
+<span class="t-icon t-purple"></span> <span class="t-key">role        </span> <span class="t-val">${role}</span>
 <span class="t-icon t-green"></span> <span class="t-key">loc         </span> <span class="t-val">India</span>
-<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">Cloud infrastructure · DevOps · GitOps · Security automation</span>
+<span class="t-icon t-orange">󰒍</span> <span class="t-key">focus       </span> <span class="t-val">${focusAreas.join(' · ')}</span>
 <span class="t-icon t-yellow">󰈙</span> <span class="t-key">projects    </span> <span class="t-val">${projectCount} featured</span>
 <span class="t-icon t-cyan">󰈚</span> <span class="t-key">articles    </span> <span class="t-val">${articleCount} published</span>
-<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">99.99%</span>`;
-
+<span class="t-icon t-green">󰅐</span> <span class="t-key">uptime      </span> <span class="t-val">${formatUptime(Date.now() - buildTime)}</span>`;
   const escapeHtml = (str: string) =>
     str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 
@@ -137,7 +159,7 @@ const initialResponses = {
       document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
     }
     if (command === 'whoami') {
-      appendResponse(whoamiHtml, true);
+      appendResponse(getWhoamiHtml(), true);
       return;
     }
     appendResponse(responses[command] ?? '');

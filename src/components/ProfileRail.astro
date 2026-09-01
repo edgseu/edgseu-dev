@@ -1,8 +1,11 @@
 ---
 import Icon from './Icon.astro';
 import { site } from '../data/site';
+import { frontmatter } from '../content/profile.md';
 
 const siteConfig = site as typeof site & { resumeUrl?: string; available?: boolean };
+const role = (frontmatter?.role as string | undefined) ?? site.role;
+const focusAreas = (frontmatter?.focusAreas as string[] | undefined) ?? site.focusAreas;
 ---
 
 <aside class="profile-card" aria-labelledby="profile-name">
@@ -23,14 +26,14 @@ const siteConfig = site as typeof site & { resumeUrl?: string; available?: boole
   </div>
   <div class="profile-identity">
     <h1 id="profile-name">{site.person}</h1>
-    <p class="role">{site.role}</p>
+    <p class="role">{role}</p>
   </div>
   <p class="location">
     <Icon name="location-dot" size={14} />
     <span>{site.location}</span>
   </p>
   <ul class="focus-list" aria-label="Focus areas">
-    {site.focusAreas.map((area) => <li>{area}</li>)}
+    {focusAreas.map((area) => <li>{area}</li>)}
   </ul>
   <nav class="profile-links" aria-label="Profile links">
     <a href={`mailto:${site.email}`}>

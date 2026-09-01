@@ -32,7 +32,7 @@ test('terminal opts in to focus and supports only curated commands', async ({ pa
 test('Projects preserve curated order and link directly to GitHub', async ({ page }) => {
   await page.goto('/projects/');
   const projectLinks = page.locator('.project-card a[href^="https://github.com/h1zardian/"]');
-  await expect(projectLinks).toHaveCount(2);
+  await expect(projectLinks).toHaveCount(8);
   await expect(projectLinks.nth(0)).toHaveAttribute('href', firstProject);
   await expect(projectLinks.nth(1)).toHaveAttribute('href', secondProject);
   await expect(page.locator('.project-card a[href^="/projects/"]')).toHaveCount(0);

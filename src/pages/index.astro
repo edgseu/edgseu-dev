@@ -7,6 +7,9 @@ import { publishedProjects } from '../lib/projects';
 import { site } from '../data/site';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { publishedArticles } from '../lib/articles';
+import { Content as ProfileBio, frontmatter as profileFrontmatter } from '../content/profile.md';
+
+const role = (profileFrontmatter?.role as string | undefined) ?? site.role;
 
 const jsonLd = {
   '@context': 'https://schema.org',
@@ -15,7 +18,7 @@ const jsonLd = {
   mainEntity: {
     '@type': 'Person',
     name: site.person,
-    jobTitle: site.role,
+    jobTitle: role,
     image: new URL(site.avatar, site.canonicalUrl).href,
     sameAs: [site.github, site.linkedin],
     address: { '@type': 'PostalAddress', addressCountry: 'IN' },
@@ -38,14 +41,8 @@ const isProjectGrid2x2 = displayedProjects.length > 2;
     <ProfileRail />
     <div class="home-main">
       <Terminal />
-      <section class="profile-prose" aria-labelledby="profile-introduction">
-        <h2 id="profile-introduction">Cloud systems with security in the delivery path</h2>
-        <p>
-          I build and document cloud infrastructure, GitOps delivery, and security automation. This Site collects selected public work and practical technical writing in one place.
-        </p>
-        <p>
-          The projects below show the current focus across AWS, Azure, Kubernetes, infrastructure as code, observability, and software supply-chain controls.
-        </p>
+      <section class="profile-prose" aria-label="Profile introduction">
+        <ProfileBio />
       </section>
 
       <section aria-labelledby="selected-projects">
