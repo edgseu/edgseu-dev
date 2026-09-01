@@ -375,35 +375,26 @@ h1, h2, h3 { text-wrap: balance; }
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  justify-content: center;
   min-height: 2.35rem;
   padding: 0.5rem 0.95rem;
   border-bottom: 1px solid var(--border);
   background: var(--subtle);
 }
-.terminal-dots {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-.t-dot {
-  width: 0.6rem;
-  height: 0.6rem;
-  border-radius: 50%;
-  opacity: 0.8;
-}
-.dot-red { background: oklch(0.68 0.18 25); }
-.dot-yellow { background: oklch(0.78 0.14 75); }
-.dot-green { background: oklch(0.72 0.16 150); }
 .terminal-bar h2 {
-  margin: 0;
+  margin: 0 auto;
   font-size: 0.8rem;
   font-weight: 500;
   color: var(--muted);
   font-family: inherit;
   letter-spacing: -0.01em;
+  text-align: center;
 }
 .terminal-status {
+  position: absolute;
+  right: 0.95rem;
+  top: 50%;
+  transform: translateY(-50%);
   display: flex;
   align-items: center;
   gap: 0.35rem;
