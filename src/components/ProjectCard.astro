@@ -14,7 +14,12 @@ const languages = project.enrichment?.languages ?? (project.enrichment?.language
 const pushedAt = project.enrichment?.pushedAt;
 ---
 
-<article class="project-card">
+<article class={`project-card ${project.pinned ? 'is-pinned' : ''}`}>
+  {project.pinned && (
+    <span class="card-pinned-pill" aria-label="Pinned project">
+      <Icon name="thumbtack" size={10} /> pinned
+    </span>
+  )}
   <Heading>
     <a href={project.url}>
       {project.title} <Icon name="arrow-up-right-from-square" size={13} />

@@ -11,7 +11,12 @@ const Heading = `h${headingLevel}` as const;
 const { frontmatter } = article;
 ---
 
-<article class="article-card">
+<article class={`article-card ${frontmatter.pinned ? 'is-pinned' : ''}`}>
+  {frontmatter.pinned && (
+    <span class="card-pinned-pill" aria-label="Pinned article">
+      <Icon name="thumbtack" size={10} /> pinned
+    </span>
+  )}
   <p class="eyebrow">Article{frontmatter.state === 'Draft' ? ' · Draft' : ''}</p>
   <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
   <p>{frontmatter.summary}</p>
