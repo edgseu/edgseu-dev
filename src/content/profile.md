@@ -4,7 +4,7 @@ username: edgseu
 role: Cloud Security & Operations Engineer
 location: India
 email: amanb.singh21@gmail.com
-github: https://github.com/h1zardian
+github: https://github.com/edgseu
 linkedin: https://linkedin.com/in/amanbs
 avatar: /images/avatar.png
 promptHost: cloud
