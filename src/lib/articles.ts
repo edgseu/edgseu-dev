@@ -1,4 +1,4 @@
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, extname, resolve } from 'node:path';
 import type { MarkdownInstance } from 'astro';
 import matter from 'gray-matter';
@@ -151,17 +151,47 @@ export function parseAndValidateArticle(
   let data: Record<string, unknown>;
   let content: string;
   if (typeof source === 'string') {
-    try {
-      const parsed = matter(source);
-      data = parsed.data as Record<string, unknown>;
-      content = parsed.content;
-    } catch (error) {
-      const message = error instanceof Error ? error.message : String(error);
-      const formatted = `frontmatter could not be parsed: ${message}`;
-      return {
-        valid: false,
-        errors: [options.file ? `${fileLabel}: ${formatted}` : formatted],
-      };
+    const yamlPath = options.baseDirectory ? resolve(options.baseDirectory, 'metadata.yaml') : undefined;
+    const ymlPath = options.baseDirectory ? resolve(options.baseDirectory, 'metadata.yml') : undefined;
+    if (yamlPath && existsSync(yamlPath)) {
+      try {
+        const raw = readFileSync(yamlPath, 'utf8');
+        const wrapped = raw.startsWith('---') ? raw : `---\n${raw}\n---`;
+        data = (matter(wrapped).data as Record<string, unknown>) ?? {};
+        content = source;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          valid: false,
+          errors: [`${yamlPath}: metadata YAML could not be parsed: ${message}`],
+        };
+      }
+    } else if (ymlPath && existsSync(ymlPath)) {
+      try {
+        const raw = readFileSync(ymlPath, 'utf8');
+        const wrapped = raw.startsWith('---') ? raw : `---\n${raw}\n---`;
+        data = (matter(wrapped).data as Record<string, unknown>) ?? {};
+        content = source;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        return {
+          valid: false,
+          errors: [`${ymlPath}: metadata YAML could not be parsed: ${message}`],
+        };
+      }
+    } else {
+      try {
+        const parsed = matter(source);
+        data = parsed.data as Record<string, unknown>;
+        content = parsed.content;
+      } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        const formatted = `frontmatter could not be parsed: ${message}`;
+        return {
+          valid: false,
+          errors: [options.file ? `${fileLabel}: ${formatted}` : formatted],
+        };
+      }
     }
   } else {
     data = source.frontmatter;
@@ -389,22 +419,32 @@ function getAstroModules(): Record<string, MarkdownInstance<ArticleFrontmatter>>
 }
 
 const loadedEntries = Object.entries(getAstroModules()).map(([file, markdown]) => {
+  const dir = resolve(dirname(file.startsWith('/') ? file.slice(1) : file));
   const slug = file.split('/').at(-2) ?? '';
+  let metadata: Record<string, unknown> = { ...markdown.frontmatter };
+  const yamlPath = resolve(dir, 'metadata.yaml');
+  const ymlPath = resolve(dir, 'metadata.yml');
+  if (existsSync(yamlPath) || existsSync(ymlPath)) {
+    const target = existsSync(yamlPath) ? yamlPath : ymlPath;
+    const raw = readFileSync(target, 'utf8');
+    const wrapped = raw.startsWith('---') ? raw : `---\n${raw}\n---`;
+    metadata = (matter(wrapped).data as Record<string, unknown>) ?? {};
+  }
+
   const result = parseAndValidateArticle(
     {
-      frontmatter: { ...markdown.frontmatter },
+      frontmatter: metadata,
       content: markdown.rawContent(),
     },
     {
       slug,
       file,
-      baseDirectory: resolve(dirname(file.startsWith('/') ? file.slice(1) : file)),
+      baseDirectory: dir,
     },
   );
   if (!result.article) {
     throw new Error(result.errors.join('\n'));
   }
-
   const parsed = result.article;
   const article = {
     slug,

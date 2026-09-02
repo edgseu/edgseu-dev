@@ -8,9 +8,10 @@ This is the owner’s operating guide for updating, validating, publishing, host
 
 | What you want to change | Authoritative file |
 | --- | --- |
-| Name, role, location, contact links, résumé, skills, availability, homepage biography | `src/content/profile.md` |
-| Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/content/projects.md` |
-| Articles, drafts, publication dates, tags, redirects, and article body | `src/content/articles/<slug>/index.md` |
+| Name, role, location, contact links, résumé, skills, availability | `src/content/metadata.yaml` |
+| Homepage biography heading and narrative paragraphs | `src/content/bio.yaml` |
+| Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/content/projects.yaml` |
+| Articles, drafts, publication dates, tags, redirects, and article body | `src/content/articles/<slug>/` (`metadata.yaml` + `index.md`) |
 
 Do not edit `src/data/profile.ts` or `src/data/projects.ts`; they only load and export the validated content. Do not edit `.astro/` or `dist/`; both are generated.
 
@@ -158,12 +159,14 @@ Delete generated output only when troubleshooting a stale local build; the next 
 
 ## 4. Updating the profile and homepage biography
 
-The complete profile source is `src/content/profile.md`. It contains YAML frontmatter followed by Markdown biography text.
+The profile is split into two dedicated files:
 
-### Profile template
+1. `src/content/metadata.yaml` — structured identity, links, skills, and configuration.
+2. `src/content/bio.yaml` — homepage biography heading and narrative paragraphs.
 
-```markdown
----
+### Profile metadata template (`src/content/metadata.yaml`)
+
+```yaml
 name: Your full name
 username: your-handle
 role: Your professional role
@@ -185,13 +188,16 @@ shortSkills:
 skills:
   - AWS EKS
   - Azure AKS
----
-
-## A short professional heading
-
-Write the homepage biography here.
 ```
 
+### Homepage biography template (`src/content/bio.yaml`)
+
+```yaml
+heading: A short professional heading
+paragraphs:
+  - Write the first paragraph of your homepage biography here.
+  - Continue with your background, engineering focus, and current technical interests.
+```
 ### Field behavior and validation
 
 | Field | Required | Meaning and constraints |
@@ -212,15 +218,15 @@ Write the homepage biography here.
 | `shortSkills` | Yes | At least one unique nonempty value. Used in the initial terminal summary. |
 | `skills` | Yes | At least one unique nonempty value. Used by the terminal `skills` command. |
 
-The schema is strict. Unknown frontmatter keys fail validation instead of being silently ignored. All three lists must contain at least one item and cannot contain case-insensitive duplicates.
+The schema is strict. Unknown keys fail validation instead of being silently ignored. All three lists must contain at least one item and cannot contain case-insensitive duplicates.
 
-The Markdown after the closing `---` is the homepage biography. It must not be empty. It is rendered below the terminal. Keep the biography concise enough that selected projects and writing remain discoverable on the homepage.
+The biography in `src/content/bio.yaml` must contain a non-empty heading and at least one paragraph. It is rendered below the terminal. Keep the biography concise enough that selected projects and writing remain discoverable on the homepage.
 
 ### Updating the avatar
 
 1. Put the replacement image in `public/images/`.
 2. Prefer keeping the stable name `avatar.png`; replacing that file avoids changing profile data and cached references eventually expire.
-3. If the filename changes, update `avatar` in `src/content/profile.md`.
+3. If the filename changes, update `avatar` in `src/content/metadata.yaml`.
 4. Keep the image optimized. The artifact gate rejects an initially loaded image larger than 200 KiB.
 5. Run `pnpm quality` to confirm the file exists in the built artifact and remains within the page budget.
 
@@ -358,10 +364,13 @@ Removing a published project does not create a broken internal route because car
 
 ## 6. Writing and publishing articles
 
-Each article lives in its own lowercase kebab-case directory:
+Each article lives in its own lowercase kebab-case directory containing its metadata and pure Markdown body:
 
 ```text
-src/content/articles/my-article/index.md
+src/content/articles/my-article/
+├── metadata.yaml
+├── index.md
+└── architecture.png
 ```
 
 The folder name is the article slug and creates this route:
@@ -370,20 +379,22 @@ The folder name is the article slug and creates this route:
 /articles/my-article/
 ```
 
-Only `index.md` is loaded. Top-level `.mdx` files are rejected, and MDX is not part of the content model.
+Only `index.md` and `metadata.yaml` are loaded. Top-level `.mdx` files are rejected, and MDX is not part of the content model.
 
-### Draft article template
+### Draft article metadata template (`metadata.yaml`)
 
-```markdown
----
+```yaml
 title: A plain-text article title
 summary: A unique plain-text description used on cards and in metadata.
 state: Draft
 tags:
   - Kubernetes
   - Security
----
+```
 
+### Article body template (`index.md`)
+
+```markdown
 ## The first section
 
 Write the article in portable Markdown.
@@ -874,7 +885,8 @@ Do not hand-edit `pnpm-lock.yaml`. Change dependency versions in `package.json` 
 | `GITHUB_ENRICHMENT=off` | Offline local build | Skips GitHub API enrichment but keeps curated projects. |
 | `GITHUB_TOKEN=<token>` or `GH_TOKEN=<token>` | Authenticated GitHub enrichment | Raises API limits for reliable repository dates and language totals. GitHub Actions supplies `GITHUB_TOKEN`; never commit a token. |
 | `GITHUB_ENRICHMENT_FILE=<file>` | Fixture or integration build | Supplies deterministic GitHub responses without network requests. |
-| `PROFILE_FILE=<file>` | Automated tests | Validates and builds from an alternate profile file. |
+| `METADATA_FILE=<file>` | Automated tests | Validates and builds from an alternate metadata file. |
+| `BIO_FILE=<file>` | Automated tests | Validates and builds from an alternate bio file. |
 | `PROJECTS_FILE=<file>` | Automated tests | Validates and builds from an alternate projects catalog file. |
 | `ARTICLE_ROOT=<directory>` | Automated tests | Runs content validation against alternate article fixtures. |
 | `EMPTY_ARTICLES=1` | Automated tests | Forces the published article collection empty. |
@@ -902,7 +914,7 @@ The production loader filters drafts. Confirm the deployed workflow built the cu
 ### A project is missing
 
 - Confirm `state: 'Published'`.
-- Confirm the entry exists inside `src/content/projects.md`.
+- Confirm the entry exists inside `src/content/projects.yaml`.
 - Run `pnpm check` for validation and schema errors.
 - Check whether another pinned project changed the homepage selection.
 - Inspect `/projects/`; the homepage intentionally shows only two to four projects.
@@ -916,9 +928,7 @@ id == GitHub repository name
 url == https://github.com/<owner>/<id>
 repository visibility == public
 ```
-
-If the repository was intentionally renamed or moved, update `id` and `url` in `src/content/projects.md`.
-
+If the repository was intentionally renamed or moved, update `id` and `url` in `src/content/projects.yaml`.
 ### Project language or last-pushed metadata is absent
 
 The GitHub API request may have timed out or returned 403, 429, or 5xx. This is an intentional graceful fallback. The curated project still renders. Retry later if you need to inspect enrichment, but do not add fake local metadata.
@@ -977,8 +987,7 @@ hello
 ## 14. Routine maintenance checklists
 
 ### Small profile or copy edit
-
-- [ ] Edit `src/content/profile.md`.
+- [ ] Edit `src/content/metadata.yaml` or `src/content/bio.yaml`.
 - [ ] Run `pnpm validate`.
 - [ ] Inspect the affected section through `pnpm dev`.
 - [ ] Run `pnpm quality` before merge.

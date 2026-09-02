@@ -311,12 +311,11 @@ test('invalid Profile schema reports actionable authoring boundaries', () => {
   }
 });
 
-const profileFixture = `---
-name: Aman Bhushan Singh
+const profileFixture = `name: Aman Bhushan Singh
 username: edgseu
 role: Cloud Security & Operations Engineer
 location: India
-email: mail@edgseu.dev
+email: amanb.singh21@gmail.com
 github: https://github.com/edgseu
 linkedin: https://www.linkedin.com/in/amanbs
 avatar: /images/avatar.png
@@ -326,15 +325,13 @@ resumeUrl: RESUME_URL
 focusAreas: [Cloud infrastructure]
 shortSkills: [AWS]
 skills: [AWS EKS]
----
-
-## Profile narrative
 `;
 
 for (const resumeUrl of ['null', 'https://example.com/resume.pdf']) {
   test(`Profile accepts resumeUrl: ${resumeUrl}`, () => {
-    const parsed = matter(profileFixture.replace('RESUME_URL', resumeUrl));
-    const result = profileSchema.safeParse(parsed.data);
+    const raw = profileFixture.replace('RESUME_URL', resumeUrl);
+    const data = matter(`---\n${raw}\n---`).data;
+    const result = profileSchema.safeParse(data);
     assert.equal(result.success, true);
   });
 }

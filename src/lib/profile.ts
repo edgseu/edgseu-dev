@@ -47,36 +47,52 @@ export const profileSchema = z.object({
 
 export type Profile = z.infer<typeof profileSchema>;
 
-interface ProfileValidation {
-  profile?: Profile;
-  narrative: string;
+export const bioSchema = z.object({
+  heading: requiredText,
+  paragraphs: z.array(requiredText).min(1, 'must contain at least one paragraph'),
+}).strict();
+
+export type Bio = z.infer<typeof bioSchema>;
+
+export interface ProfileValidation {
+  profile?: Profile | undefined;
   errors: string[];
 }
 
-export function validateProfileFile(file = process.env.PROFILE_FILE ?? 'src/content/profile.md'): ProfileValidation {
+export interface BioValidation {
+  bio?: Bio | undefined;
+  errors: string[];
+}
+
+export function validateProfileFile(
+  file = process.env.METADATA_FILE ?? process.env.PROFILE_FILE ?? 'src/content/metadata.yaml',
+): ProfileValidation {
   const profileFile = resolve(file);
   let source: string;
   try {
     source = readFileSync(profileFile, 'utf8');
   } catch (error) {
     return {
-      narrative: '',
       errors: [`could not read Profile source: ${error instanceof Error ? error.message : 'unknown error'}`],
     };
   }
 
-  const parsed = matter(source);
-  const result = profileSchema.safeParse(parsed.data);
-  const errors = result.success
-    ? []
-    : result.error.issues.map((issue) => `${issue.path.join('.') || 'frontmatter'} ${issue.message}`);
-  const narrative = parsed.content.trim();
-  if (!narrative) errors.push('Profile narrative must not be empty');
+  let data: unknown;
+  try {
+    const wrapped = source.startsWith('---') ? source : `---\n${source}\n---`;
+    data = matter(wrapped).data;
+  } catch (error) {
+    return {
+      errors: [`invalid Profile YAML: ${error instanceof Error ? error.message : 'parse error'}`],
+    };
+  }
 
+  const result = profileSchema.safeParse(data);
   return {
-    ...(result.success ? { profile: result.data } : {}),
-    narrative,
-    errors,
+    profile: result.success ? result.data : undefined,
+    errors: result.success
+      ? []
+      : result.error.issues.map((issue) => `${issue.path.join('.') || 'metadata'}: ${issue.message}`),
   };
 }
 
@@ -86,4 +102,42 @@ export function loadProfile(file?: string): Profile {
     throw new Error(`Invalid Profile content:\n${result.errors.map((error) => `- ${error}`).join('\n')}`);
   }
   return result.profile;
+}
+
+export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.yaml'): BioValidation {
+  const bioFile = resolve(file);
+  let source: string;
+  try {
+    source = readFileSync(bioFile, 'utf8');
+  } catch (error) {
+    return {
+      errors: [`could not read Bio source: ${error instanceof Error ? error.message : 'unknown error'}`],
+    };
+  }
+
+  let data: unknown;
+  try {
+    const wrapped = source.startsWith('---') ? source : `---\n${source}\n---`;
+    data = matter(wrapped).data;
+  } catch (error) {
+    return {
+      errors: [`invalid Bio YAML: ${error instanceof Error ? error.message : 'parse error'}`],
+    };
+  }
+
+  const result = bioSchema.safeParse(data);
+  return {
+    bio: result.success ? result.data : undefined,
+    errors: result.success
+      ? []
+      : result.error.issues.map((issue) => `${issue.path.join('.') || 'bio'}: ${issue.message}`),
+  };
+}
+
+export function loadBio(file?: string): Bio {
+  const result = validateBioFile(file);
+  if (!result.bio || result.errors.length > 0) {
+    throw new Error(`Invalid Bio content:\n${result.errors.map((error) => `- ${error}`).join('\n')}`);
+  }
+  return result.bio;
 }

@@ -1,15 +1,3 @@
----
-title: Declarative GitOps workflows with Argo CD
-summary: Automating continuous deployment, drift detection, and automated rollback for Kubernetes manifests.
-state: Published
-publishedAt: 2026-08-18
-tags:
-  - GitOps
-  - Argo CD
-  - Kubernetes
-  - DevOps
----
-
 GitOps defines the desired state of a Kubernetes cluster entirely within Git repositories. Argo CD continuously compares the running cluster state against the declared manifests in Git, reconciling any detected configuration drift.
 
 ## Reconciliation architecture
@@ -35,7 +23,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/h1zardian/cloud-service
+    repoURL: https://github.com/edgseu/cloud-service
     targetRevision: main
     path: manifests/production
   destination:

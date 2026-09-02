@@ -6,20 +6,24 @@ import {
   validateArticleCollection,
   type ParsedArticle,
 } from '../src/lib/articles';
-import { validateProfileFile } from '../src/lib/profile';
+import { validateBioFile, validateProfileFile } from '../src/lib/profile';
 import { validateProjectsFile } from '../src/lib/projects';
 
 const errors: string[] = [];
 const articleRoot = resolve(process.env.ARTICLE_ROOT ?? 'src/content/articles');
-const profileFile = resolve(process.env.PROFILE_FILE ?? 'src/content/profile.md');
-const projectsFile = resolve(process.env.PROJECTS_FILE ?? 'src/content/projects.md');
+const metadataFile = resolve(process.env.METADATA_FILE ?? process.env.PROFILE_FILE ?? 'src/content/metadata.yaml');
+const bioFile = resolve(process.env.BIO_FILE ?? 'src/content/bio.yaml');
+const projectsFile = resolve(process.env.PROJECTS_FILE ?? 'src/content/projects.yaml');
 function fail(location: string, message: string): void {
   errors.push(`${location}: ${message}`);
 }
 
-// 1. Validate Profile
-const profileResult = validateProfileFile(profileFile);
-for (const error of profileResult.errors) fail(profileFile, error);
+// 1. Validate Profile Metadata & Bio
+const profileResult = validateProfileFile(metadataFile);
+for (const error of profileResult.errors) fail(metadataFile, error);
+
+const bioResult = validateBioFile(bioFile);
+for (const error of bioResult.errors) fail(bioFile, error);
 
 // 2. Validate Projects
 const projectResult = validateProjectsFile(projectsFile);
@@ -48,6 +52,11 @@ for (const entry of entries.filter((e) => e.isDirectory())) {
   if (!existsSync(file)) {
     fail(dir, 'Article folder must contain index.md');
     continue;
+  }
+  const metadataYaml = join(dir, 'metadata.yaml');
+  const metadataYml = join(dir, 'metadata.yml');
+  if (!existsSync(metadataYaml) && !existsSync(metadataYml)) {
+    fail(dir, 'Article folder must contain metadata.yaml');
   }
   const source = readFileSync(file, 'utf8');
   const result = parseAndValidateArticle(source, {

@@ -10,9 +10,8 @@ const output = 'dist-profile';
 
 test('Profile rail publishes a configured résumé destination', () => {
   const fixtureRoot = mkdtempSync(join(tmpdir(), 'edgseu-profile-'));
-  const profileFile = join(fixtureRoot, 'profile.md');
-  writeFileSync(profileFile, `---
-name: Profile Fixture
+  const profileFile = join(fixtureRoot, 'metadata.yaml');
+  writeFileSync(profileFile, `name: Profile Fixture
 username: fixture
 role: Cloud Engineer
 location: India
@@ -26,16 +25,12 @@ resumeUrl: https://example.com/resume.pdf
 focusAreas: [Cloud]
 shortSkills: [AWS]
 skills: [AWS EKS]
----
-
-## Fixture narrative
 `);
-
   rmSync(output, { recursive: true, force: true });
   try {
     const result = spawnSync('pnpm', ['astro', 'build', '--outDir', output], {
       cwd: process.cwd(),
-      env: { ...process.env, PROFILE_FILE: profileFile },
+      env: { ...process.env, METADATA_FILE: profileFile },
       encoding: 'utf8',
     });
     assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);

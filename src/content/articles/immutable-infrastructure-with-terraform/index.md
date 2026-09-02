@@ -1,14 +1,3 @@
----
-title: Immutable infrastructure patterns with Terraform
-summary: Designing reproducible cloud environments with modular Terraform patterns and state isolation.
-state: Published
-publishedAt: 2026-08-25
-tags:
-  - Terraform
-  - Cloud
-  - Infrastructure as code
----
-
 Managing cloud infrastructure at scale requires treating resources as immutable building blocks. When an environment requires an update, we replace instances and network definitions cleanly rather than applying manual configuration drift.
 
 ## State management and workspace boundaries

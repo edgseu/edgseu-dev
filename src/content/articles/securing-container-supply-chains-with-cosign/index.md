@@ -1,15 +1,3 @@
----
-title: Securing container supply chains with Sigstore Cosign
-summary: Cryptographic container image signing and admission policy verification in Kubernetes clusters.
-state: Published
-publishedAt: 2026-08-22
-tags:
-  - Security
-  - Containers
-  - Cosign
-  - Supply chain
----
-
 Software supply-chain integrity ensures that workloads running inside production clusters match the exact commits and builds reviewed by the team. Cosign provides keyless cryptographic signing directly alongside OCI container registries.
 
 ## The keyless signing lifecycle
@@ -27,7 +15,7 @@ Using OpenID Connect (OIDC) identity tokens from GitHub Actions, Cosign generate
 The signing step runs after container scanning passes:
 
 ```bash "sign-image.sh"
-cosign sign --yes "ghcr.io/h1zardian/api-service@sha256:abcd1234"
+cosign sign --yes "ghcr.io/edgseu/api-service@sha256:abcd1234"
 ```
 
 ## Admission controller verification

@@ -47,7 +47,7 @@ export interface ProjectsValidation {
   errors: string[];
 }
 
-export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/content/projects.md'): ProjectsValidation {
+export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/content/projects.yaml'): ProjectsValidation {
   const projectsFile = resolve(file);
   let source: string;
   try {
@@ -58,15 +58,27 @@ export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/co
     };
   }
 
-  const parsed = matter(source);
-  const result = projectsFileSchema.safeParse(parsed.data);
-  if (!result.success) {
+  let data: unknown;
+  try {
+    const wrapped = source.startsWith('---') ? source : `---\n${source}\n---`;
+    data = matter(wrapped).data;
+  } catch (error) {
     return {
-      errors: result.error.issues.map((issue) => `${issue.path.join('.') || 'frontmatter'}: ${issue.message}`),
+      errors: [`invalid Projects YAML: ${error instanceof Error ? error.message : 'parse error'}`],
     };
   }
 
-  const catalog = result.data.projects;
+  const result = Array.isArray(data)
+    ? z.array(projectSchema).safeParse(data)
+    : projectsFileSchema.safeParse(data);
+
+  if (!result.success) {
+    return {
+      errors: result.error.issues.map((issue) => `${issue.path.join('.') || 'projects'}: ${issue.message}`),
+    };
+  }
+
+  const catalog = Array.isArray(result.data) ? result.data : result.data.projects;
   const errors = validateProjectCatalog(catalog);
   return {
     projects: errors.length === 0 ? catalog : undefined,

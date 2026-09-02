@@ -1,16 +1,3 @@
----
-title: Building a verifiable DevSecOps delivery path
-summary: A practical approach to making security controls visible, repeatable, and useful from commit to deployment.
-state: Published
-publishedAt: 2026-08-31
-tags:
-  - DevSecOps
-  - GitOps
-  - Supply chain security
-aliases:
-  - /articles/verifiable-devsecops-delivery/
----
-
 A delivery pipeline is trustworthy when every important claim can be checked. “The image was scanned,” “the manifest was reviewed,” and “the deployed workload matches the approved source” should be evidence, not convention.
 
 This article describes a portable path for turning those claims into repeatable controls. The goal is not to collect tools. It is to keep the relationship between source, artifact, policy, and runtime easy to inspect.

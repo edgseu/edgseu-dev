@@ -40,9 +40,10 @@ The repository is also an implementation sample. It shows:
 
 The main content sources are intentionally small and direct:
 
-- `src/content/profile.md` — profile details and homepage biography
-- `src/content/projects.md` — curated project catalog
-- `src/content/articles/*/index.md` — draft and published articles
+- `src/content/metadata.yaml` — profile details, links, skills, and configuration
+- `src/content/bio.yaml` — homepage biography heading and narrative
+- `src/content/projects.yaml` — curated project catalog
+- `src/content/articles/*/{metadata.yaml,index.md}` — draft and published articles with split metadata and body
 - `public/images/` — public profile and social assets
 
 ## Make this your own (Portability)
@@ -50,10 +51,11 @@ The main content sources are intentionally small and direct:
 This repository is designed so anyone can fork/clone it and immediately make it their own by editing only content files:
 
 1. **Site Domain**: Update `canonicalUrl` in `src/data/site.ts`.
-2. **Profile & Identity**: Update `src/content/profile.md` with your name, role, bio, email, GitHub, LinkedIn, skills, and focus areas.
-3. **Projects Catalog**: Update `src/content/projects.md` with your own repositories, summaries, and tags.
-4. **Technical Articles**: Add your Markdown articles in `src/content/articles/<slug>/index.md`.
-5. **Avatar**: Replace `public/images/avatar.png`.
+2. **Profile & Identity**: Update `src/content/metadata.yaml` with your name, role, email, GitHub, LinkedIn, skills, and focus areas.
+3. **Bio Narrative**: Update `src/content/bio.yaml` with your homepage introduction.
+4. **Projects Catalog**: Update `src/content/projects.yaml` with your own repositories, summaries, and tags.
+5. **Technical Articles**: Add your articles in `src/content/articles/<slug>/` with `metadata.yaml` and `index.md`.
+6. **Avatar**: Replace `public/images/avatar.png`.
 
 Everything else—including the header, navigation, profile sidebar, terminal introduction commands, meta tags, sitemap, GitHub Discussions comments, GitHub repository live metadata enrichment, and automated quality gates—adapts dynamically at runtime.
 

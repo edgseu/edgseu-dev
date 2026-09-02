@@ -1,16 +1,3 @@
----
-title: Kubernetes observability with Prometheus and Grafana
-summary: Establishing actionable metrics, service monitors, and cluster alerts for production Kubernetes workloads.
-state: Published
-publishedAt: 2026-08-28
-pinned: true
-tags:
-  - Kubernetes
-  - Prometheus
-  - Observability
-  - Grafana
----
-
 Effective cluster observability focuses on actionable signals rather than noisy dashboards. When an incident occurs, metrics should immediately isolate whether the failure originates in the infrastructure, ingress controller, or application runtime.
 
 ## Core telemetry boundaries
