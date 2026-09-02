@@ -423,20 +423,21 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
     }
   }
 
-  for (const article of articles.filter((candidate) => candidate.state === 'Published')) {
+  let pinnedCount = 0;
+  for (const article of articles) {
     const fileLabel = article.file ?? article.slug;
-    for (const link of article.links) {
-      const target = routes.get(link.split('#')[0] ?? '');
-      if (target?.state === 'Draft') {
-        errors.push(`${fileLabel}: Published Article links to Draft Article: ${link}`);
+    if (article.state === 'Published') {
+      if (article.pinned) pinnedCount++;
+      for (const link of article.links) {
+        const target = routes.get(link.split('#')[0] ?? '');
+        if (target?.state === 'Draft') {
+          errors.push(`${fileLabel}: Published Article links to Draft Article: ${link}`);
+        }
       }
     }
   }
 
-  const pinnedPublished = articles.filter(
-    (article) => article.state === 'Published' && article.pinned,
-  );
-  if (pinnedPublished.length > 2) {
+  if (pinnedCount > 2) {
     errors.push('articles: no more than 2 Published articles may be pinned');
   }
 
@@ -445,13 +446,12 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
 
 export function sortArticles(articles: readonly Article[]): Article[] {
   return articles.toSorted((left, right) => {
-    const leftPinned = Boolean(left.frontmatter.pinned);
-    const rightPinned = Boolean(right.frontmatter.pinned);
-    if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+    const leftPinned = left.frontmatter.pinned ? 1 : 0;
+    const rightPinned = right.frontmatter.pinned ? 1 : 0;
+    if (leftPinned !== rightPinned) return rightPinned - leftPinned;
     return (right.frontmatter.publishedAt ?? '').localeCompare(left.frontmatter.publishedAt ?? '');
   });
 }
-
 function getAstroModules(): Record<string, MarkdownInstance<ArticleFrontmatter>> {
   try {
     return import.meta.glob<MarkdownInstance<ArticleFrontmatter>>(
