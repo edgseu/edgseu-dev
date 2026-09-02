@@ -29,15 +29,19 @@ export const projectSchema = z.object({
   state: z.enum(['Draft', 'Published']),
   lifecycle: z.enum(['Active', 'Maintained', 'Complete', 'Archived']),
   tags: z.array(z.string().trim().min(1)).min(1, 'requires one to six tags').max(6, 'requires one to six tags').superRefine((tags, ctx) => {
-    const normalized = tags.map((t) => t.toLocaleLowerCase());
-    if (new Set(normalized).size !== normalized.length) {
-      ctx.addIssue({ code: 'custom', message: 'tags must be unique ignoring case' });
+    const seen = new Set<string>();
+    for (const tag of tags) {
+      const lower = tag.toLocaleLowerCase();
+      if (seen.has(lower)) {
+        ctx.addIssue({ code: 'custom', message: 'tags must be unique ignoring case' });
+        return;
+      }
+      seen.add(lower);
     }
   }),
   order: z.number().int('display order must be a unique integer'),
   pinned: z.boolean().optional(),
 });
-
 const projectsFileSchema = z.object({
   projects: z.array(projectSchema),
 });
@@ -373,9 +377,9 @@ export function sortPublishedProjects(catalog: readonly Project[]): Project[] {
   return catalog
     .filter((project) => project.state === 'Published')
     .toSorted((left, right) => {
-      const leftPinned = Boolean(left.pinned);
-      const rightPinned = Boolean(right.pinned);
-      if (leftPinned !== rightPinned) return leftPinned ? -1 : 1;
+      const leftPinned = left.pinned ? 1 : 0;
+      const rightPinned = right.pinned ? 1 : 0;
+      if (leftPinned !== rightPinned) return rightPinned - leftPinned;
       return left.order - right.order;
     });
 }

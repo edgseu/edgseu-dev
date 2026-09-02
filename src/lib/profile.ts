@@ -15,9 +15,14 @@ function isAbsoluteHttpsUrl(value: unknown): value is string {
 const requiredText = z.string().trim().min(1, 'must not be empty');
 const httpsUrl = requiredText.refine(isAbsoluteHttpsUrl, 'must be an absolute HTTPS URL');
 const uniqueList = z.array(requiredText).min(1, 'must contain at least one value').superRefine((values, context) => {
-  const normalized = values.map((value) => value.toLocaleLowerCase());
-  if (new Set(normalized).size !== normalized.length) {
-    context.addIssue({ code: 'custom', message: 'must contain unique values' });
+  const seen = new Set<string>();
+  for (const value of values) {
+    const lower = value.toLocaleLowerCase();
+    if (seen.has(lower)) {
+      context.addIssue({ code: 'custom', message: 'must contain unique values' });
+      return;
+    }
+    seen.add(lower);
   }
 });
 
