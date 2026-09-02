@@ -41,7 +41,7 @@ The repository is also an implementation sample. It shows:
 The main content sources are intentionally small and direct:
 
 - `src/content/profile.md` — profile details and homepage biography
-- `src/data/projects.ts` — curated project catalog
+- `src/content/projects.md` — curated project catalog
 - `src/content/articles/*/index.md` — draft and published articles
 - `public/images/` — public profile and social assets
 

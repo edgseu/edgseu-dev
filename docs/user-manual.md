@@ -9,10 +9,10 @@ This is the owner’s operating guide for updating, validating, publishing, host
 | What you want to change | Authoritative file |
 | --- | --- |
 | Name, role, location, contact links, résumé, skills, availability, homepage biography | `src/content/profile.md` |
-| Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/data/projects.ts` |
+| Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/content/projects.md` |
 | Articles, drafts, publication dates, tags, redirects, and article body | `src/content/articles/<slug>/index.md` |
 
-Do not edit `src/data/profile.ts`; it only loads and exports the validated profile. Do not edit `.astro/` or `dist/`; both are generated.
+Do not edit `src/data/profile.ts` or `src/data/projects.ts`; they only load and export the validated content. Do not edit `.astro/` or `dist/`; both are generated.
 
 ### Normal update workflow
 
@@ -34,9 +34,9 @@ Commit and push the branch, open a pull request, and merge it after the `Site` w
 ### Important URLs
 
 - Production site: <https://edgseu.dev/>
-- Repository: <https://github.com/h1zardian/edgseu-dev>
-- GitHub Actions: <https://github.com/h1zardian/edgseu-dev/actions>
-- Article discussions: <https://github.com/h1zardian/edgseu-dev/discussions/categories/article-comments>
+- Repository: <https://github.com/edgseu/edgseu-dev>
+- GitHub Actions: <https://github.com/edgseu/edgseu-dev/actions>
+- Article discussions: <https://github.com/edgseu/edgseu-dev/discussions/categories/article-comments>
 - Production sitemap: <https://edgseu.dev/sitemap.xml>
 
 ## 2. How the site is assembled
@@ -247,48 +247,48 @@ Inspect the profile rail, terminal `whoami`, terminal `skills`, contact output, 
 
 ## 5. Managing projects
 
-The authoritative project catalog is the `projects` array in `src/data/projects.ts`. Each entry is curated locally and can be enriched with public repository data during the build.
+The authoritative project catalog is `src/content/projects.md`. Each entry is curated under the `projects:` frontmatter list and enriched with public repository data during the build.
 
 ### Project template
 
-```typescript
-{
-  id: 'repository-name',
-  title: 'Human-readable project title',
-  summary: 'A plain-text explanation of the problem, system, and important technologies.',
-  url: 'https://github.com/h1zardian/repository-name',
-  state: 'Draft',
-  lifecycle: 'Active',
-  tags: ['AWS', 'Terraform', 'Security'],
-  order: 9,
-  pinned: false,
-},
+```yaml
+- id: repository-name
+  title: Human-readable project title
+  summary: A plain-text explanation of the problem, system, and important technologies.
+  url: https://github.com/edgseu/repository-name
+  state: Draft
+  lifecycle: Active
+  tags:
+    - AWS
+    - Terraform
+    - Security
+  order: 9
+  pinned: false
 ```
 
 ### Project fields
 
 | Field | Allowed values and rules |
 | --- | --- |
-| `id` | Lowercase kebab-case, unique, and currently expected to exactly match the repository name under `h1zardian`. |
+| `id` | Lowercase kebab-case, unique project identifier matching the repository name. |
 | `title` | Required nonempty display title. |
 | `summary` | Plain text, 1–240 characters, with no line breaks, `<`, or `>`. |
-| `url` | Canonical HTTPS GitHub repository URL, such as `https://github.com/h1zardian/repository-name`. |
+| `url` | Canonical HTTPS GitHub repository URL, such as `https://github.com/edgseu/repository-name`. |
 | `state` | `Draft` or `Published`. Only published projects render. |
 | `lifecycle` | `Active`, `Maintained`, `Complete`, or `Archived`. |
 | `tags` | One to six nonempty labels, unique ignoring case. |
 | `order` | Unique integer. Lower numbers come first within the same pin group. |
 | `pinned` | Optional boolean. Omit it or use `false` for normal ordering. At most four published projects may be pinned. |
 
-Although the TypeScript URL type permits another GitHub owner, the enrichment implementation currently requests `h1zardian/<id>` and verifies that both the returned full name and URL match the local entry. For a published project, keep all three values aligned:
+The repository owner is dynamically resolved at runtime from `project.url` or `profile.github`. The enrichment implementation verifies that both the returned full name and URL match the local entry:
 
 ```text
 id:  repository-name
-API: h1zardian/repository-name
-url: https://github.com/h1zardian/repository-name
+API: <owner>/repository-name
+url: https://github.com/<owner>/repository-name
 ```
 
 A published repository must be public. A 404, private repository, renamed repository, moved repository, or mismatched URL fails the build with an actionable error.
-
 ### Sorting and homepage selection
 
 Published projects are sorted in two stages:
@@ -305,7 +305,7 @@ The homepage behaves differently to keep the selected-project area compact:
 - if four projects are pinned, it shows the first four;
 - validation prevents more than four published pins.
 
-There is also a deliberate fixed-order invariant: among published projects sorted by numeric `order`, `devsecops-pipeline-project` must remain first and `cowrie-sentinel-lab` second. Changing their relative leadership fails `pnpm validate` unless the validation policy is intentionally changed too.
+
 
 ### GitHub enrichment
 
@@ -569,7 +569,7 @@ Article comments use [Giscus](https://giscus.app/) and the repository’s GitHub
 
 The article route is currently configured with:
 
-- repository: `h1zardian/edgseu-dev`;
+- repository: derived dynamically from `profile.github` (e.g. `edgseu/edgseu-dev`);
 - category: `Article comments`;
 - mapping: exact pathname;
 - strict mapping enabled;
@@ -875,6 +875,7 @@ Do not hand-edit `pnpm-lock.yaml`. Change dependency versions in `package.json` 
 | `GITHUB_TOKEN=<token>` or `GH_TOKEN=<token>` | Authenticated GitHub enrichment | Raises API limits for reliable repository dates and language totals. GitHub Actions supplies `GITHUB_TOKEN`; never commit a token. |
 | `GITHUB_ENRICHMENT_FILE=<file>` | Fixture or integration build | Supplies deterministic GitHub responses without network requests. |
 | `PROFILE_FILE=<file>` | Automated tests | Validates and builds from an alternate profile file. |
+| `PROJECTS_FILE=<file>` | Automated tests | Validates and builds from an alternate projects catalog file. |
 | `ARTICLE_ROOT=<directory>` | Automated tests | Runs content validation against alternate article fixtures. |
 | `EMPTY_ARTICLES=1` | Automated tests | Forces the published article collection empty. |
 | `DIST_DIR=<directory>` | Artifact checking | Points `check-artifact.ts` at a non-default build directory. |
@@ -901,8 +902,8 @@ The production loader filters drafts. Confirm the deployed workflow built the cu
 ### A project is missing
 
 - Confirm `state: 'Published'`.
-- Confirm the object is inside the exported `projects` array.
-- Run `pnpm check` for TypeScript and content errors.
+- Confirm the entry exists inside `src/content/projects.md`.
+- Run `pnpm check` for validation and schema errors.
 - Check whether another pinned project changed the homepage selection.
 - Inspect `/projects/`; the homepage intentionally shows only two to four projects.
 
@@ -912,12 +913,11 @@ Check all of these:
 
 ```text
 id == GitHub repository name
-url == https://github.com/h1zardian/<id>
-repository owner == h1zardian
+url == https://github.com/<owner>/<id>
 repository visibility == public
 ```
 
-If the repository was intentionally renamed, update both `id` and `url`. If it moved to another owner, the enrichment implementation also needs a code change because the API owner is currently fixed to `h1zardian`.
+If the repository was intentionally renamed or moved, update `id` and `url` in `src/content/projects.md`.
 
 ### Project language or last-pushed metadata is absent
 
