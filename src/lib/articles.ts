@@ -530,12 +530,21 @@ export function visibleArticles(isDev: boolean): Article[] {
   return isDev ? allArticles : publishedArticles;
 }
 
+const neighborMap = new Map<string, { newer?: Article; older?: Article }>();
+for (let i = 0; i < publishedArticles.length; i++) {
+  const current = publishedArticles[i];
+  if (!current) continue;
+  const newer = i > 0 ? publishedArticles[i - 1] : undefined;
+  const older = i + 1 < publishedArticles.length ? publishedArticles[i + 1] : undefined;
+  neighborMap.set(current.slug, {
+    ...(newer ? { newer } : {}),
+    ...(older ? { older } : {}),
+  });
+}
+
 export function articleNeighbors(article: Article): {
   newer?: Article;
   older?: Article;
 } {
-  const index = publishedArticles.findIndex((candidate) => candidate.slug === article.slug);
-  const newer = index > 0 ? publishedArticles[index - 1] : undefined;
-  const older = index >= 0 ? publishedArticles[index + 1] : undefined;
-  return { ...(newer ? { newer } : {}), ...(older ? { older } : {}) };
+  return neighborMap.get(article.slug) ?? {};
 }
