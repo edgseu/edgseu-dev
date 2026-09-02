@@ -246,7 +246,15 @@ export const TERMINAL_ICONS = {
 
 export type TerminalIconName = keyof typeof TERMINAL_ICONS;
 
+const ICON_HTML_CACHE = Object.fromEntries(
+  Object.entries(TERMINAL_ICONS).map(([name, icon]) => [
+    name,
+    `<span class="t-icon " aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" fill="currentColor" focusable="false"><path d="${icon.path}"/></svg></span>`,
+  ]),
+) as Record<TerminalIconName, string>;
+
 export function renderTerminalIcon(name: TerminalIconName, className = ''): string {
+  if (!className) return ICON_HTML_CACHE[name] ?? '';
   const icon = TERMINAL_ICONS[name];
   if (!icon) return '';
   return `<span class="t-icon ${className}" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" fill="currentColor" focusable="false"><path d="${icon.path}"/></svg></span>`;
