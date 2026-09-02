@@ -99,19 +99,22 @@ export const allowedCodeLanguages: Record<string, true> = {
 };
 
 export function normalizeDate(value: unknown): string | undefined {
-  let normalized: string | undefined;
   if (value instanceof Date && !Number.isNaN(value.valueOf())) {
-    normalized = value.toISOString().slice(0, 10);
-  } else if (typeof value === 'string') {
-    const trimmed = value.trim();
-    if (/^\d{4}-\d{2}-\d{2}$/u.test(trimmed)) normalized = trimmed;
+    return value.toISOString().slice(0, 10);
   }
-
-  if (!normalized) return undefined;
-  const parsed = new Date(`${normalized}T00:00:00.000Z`);
-  return !Number.isNaN(parsed.valueOf()) && parsed.toISOString().slice(0, 10) === normalized
-    ? normalized
-    : undefined;
+  if (typeof value !== 'string') return undefined;
+  const trimmed = value.trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/u.exec(trimmed);
+  if (!match || !match[1] || !match[2] || !match[3]) return undefined;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12 || day < 1 || day > 31) return undefined;
+  const isLeap = (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0;
+  const daysInMonth = [31, isLeap ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const maxDays = daysInMonth[month - 1];
+  if (maxDays === undefined || day > maxDays) return undefined;
+  return trimmed;
 }
 
 export function calculateReadingMinutes(content: string): number {
