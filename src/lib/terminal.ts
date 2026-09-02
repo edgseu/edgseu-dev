@@ -260,12 +260,16 @@ export function renderTerminalIcon(name: TerminalIconName, className = ''): stri
   return `<span class="t-icon ${className}" aria-hidden="true"><svg xmlns="http://www.w3.org/2000/svg" viewBox="${icon.viewBox}" fill="currentColor" focusable="false"><path d="${icon.path}"/></svg></span>`;
 }
 
+const HTML_ESCAPE_MAP: Record<string, string> = {
+  '&': '&amp;',
+  '<': '&lt;',
+  '>': '&gt;',
+  '"': '&quot;',
+};
+const HTML_ESCAPE_RE = /[&<>"]/g;
+
 export function escapeHtml(str: string): string {
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;');
+  return HTML_ESCAPE_RE.test(str) ? str.replace(HTML_ESCAPE_RE, (c) => HTML_ESCAPE_MAP[c] ?? c) : str;
 }
 
 export function formatUptime(diffMs: number): string {

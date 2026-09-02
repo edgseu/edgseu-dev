@@ -118,7 +118,11 @@ export function normalizeDate(value: unknown): string | undefined {
 }
 
 export function calculateReadingMinutes(content: string): number {
-  const words = content.trim().split(/\s+/u).filter(Boolean).length;
+  let words = 0;
+  const re = /\S+/gu;
+  while (re.exec(content) !== null) {
+    words++;
+  }
   return Math.max(1, Math.ceil(words / 220));
 }
 
