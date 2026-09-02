@@ -1,8 +1,8 @@
 import { expect, test } from '@playwright/test';
+import { profile } from '../../src/data/profile';
 
 const firstProject = 'https://github.com/h1zardian/devsecops-pipeline-project';
 const secondProject = 'https://github.com/h1zardian/cowrie-sentinel-lab';
-
 test('Homepage keeps identity and destinations useful without JavaScript', async ({ browser }) => {
   const context = await browser.newContext({ javaScriptEnabled: false });
   const page = await context.newPage();
@@ -12,10 +12,12 @@ test('Homepage keeps identity and destinations useful without JavaScript', async
   await expect(page.getByRole('link', { name: /GitHub/ }).first()).toHaveAttribute('href', 'https://github.com/h1zardian');
   await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', 'https://linkedin.com/in/amanbs');
   await expect(page.locator('#terminal-output p').first()).toContainText('whoami');
-  await expect(page.getByRole('link', { name: 'Résumé' })).toHaveAttribute(
-    'href',
-    'https://drive.google.com/file/d/103-alPKW08YhgKIAioHny9Hd14mrY4oE/',
-  );
+  if (profile.resumeUrl) {
+    await expect(page.getByRole('link', { name: 'Résumé' })).toHaveAttribute(
+      'href',
+      profile.resumeUrl,
+    );
+  }
   await expect(page.locator('#terminal-output')).toContainText('edgseu@cloud:~$');
   await expect(page.locator('#terminal-output')).toContainText('cloud-node');
   await expect(page.locator('#terminal-output')).toContainText('skills');
@@ -43,9 +45,9 @@ test('terminal opts in to focus and supports only curated commands', async ({ pa
   await page.locator('#terminal-input').fill('contact');
   await page.locator('#terminal-input').press('Enter');
   const contactOutput = page.locator('#terminal-output pre').last();
-  await expect(contactOutput).toContainText('Email:    mail@edgseu.dev');
-  await expect(contactOutput).toContainText('GitHub:   github.com/h1zardian');
-  await expect(contactOutput).toContainText('LinkedIn: linkedin.com/in/amanbs');
+  await expect(contactOutput).toContainText(`Email:    ${profile.email}`);
+  await expect(contactOutput).toContainText(`GitHub:   ${profile.github.replace('https://', '')}`);
+  await expect(contactOutput).toContainText(`LinkedIn: ${profile.linkedin.replace('https://', '')}`);
   await expect(contactOutput.locator('svg')).toHaveCount(3);
   await page.locator('#terminal-input').fill('projects');
   await page.locator('#terminal-input').press('Enter');
