@@ -194,6 +194,7 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
 .theme-toggle, .menu-toggle {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.45rem;
   cursor: pointer;
   border-color: var(--border);
@@ -867,8 +868,9 @@ h1, h2, h3 { text-wrap: balance; }
 
 @media (max-width: 47.999rem) {
   .desktop-nav { display: none; }
-  .menu-toggle { display: inline-flex; }
+  .menu-toggle { display: inline-flex; height: 2.35rem; }
   .action-label { display: none; }
+  .theme-toggle { width: 2.35rem; height: 2.35rem; padding: 0; }
   main, .header-inner, .mobile-menu, .site-footer { width: min(100% - 1rem, 75rem); }
   .home-grid, .page-header { padding-top: 1.5rem; }
   .section-heading, .site-footer { align-items: flex-start; flex-direction: column; }
