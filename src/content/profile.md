@@ -3,13 +3,13 @@ name: Aman Bhushan Singh
 username: edgseu
 role: Cloud Security & Operations Engineer
 location: India
-email: mail@edgseu.dev
+email: amanb.singh21@gmail.com
 github: https://github.com/h1zardian
 linkedin: https://linkedin.com/in/amanbs
 avatar: /images/avatar.png
 promptHost: cloud
 host: cloud-node
-resumeUrl: https://drive.google.com/file/d/103-alPKW08YhgKIAioHny9Hd14mrY4oE/
+resumeUrl: https://docs.google.com/document/d/e/2PACX-1vSdAwxs14dZlLX1vKwKvBsHMXsgiU_9hdrUzS4VL4mVln7zI-1LfBJnk8vuadpV6rShqo1VoWVaxw5J/pub
 focusAreas:
   - Cloud infrastructure
   - DevSecOps
