@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import matter from 'gray-matter';
 import { z } from 'zod';
@@ -57,10 +57,24 @@ export interface BioValidation {
   errors: string[];
 }
 
+const profileCache = new Map<string, { mtime: number; result: ProfileValidation }>();
+const bioCache = new Map<string, { mtime: number; result: BioValidation }>();
+
 export function validateProfileFile(
   file = process.env.METADATA_FILE ?? process.env.PROFILE_FILE ?? 'src/content/metadata.yaml',
 ): ProfileValidation {
   const profileFile = resolve(file);
+  let mtime = 0;
+  try {
+    mtime = statSync(profileFile).mtimeMs;
+    const cached = profileCache.get(profileFile);
+    if (cached && cached.mtime === mtime) {
+      return cached.result;
+    }
+  } catch {
+    // let readFileSync report the error
+  }
+
   let source: string;
   try {
     source = readFileSync(profileFile, 'utf8');
@@ -81,12 +95,16 @@ export function validateProfileFile(
   }
 
   const result = profileSchema.safeParse(data);
-  return {
+  const validation: ProfileValidation = {
     profile: result.success ? result.data : undefined,
     errors: result.success
       ? []
       : result.error.issues.map((issue) => `${issue.path.join('.') || 'metadata'}: ${issue.message}`),
   };
+  if (mtime > 0) {
+    profileCache.set(profileFile, { mtime, result: validation });
+  }
+  return validation;
 }
 
 export function loadProfile(file?: string): Profile {
@@ -99,6 +117,17 @@ export function loadProfile(file?: string): Profile {
 
 export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.md'): BioValidation {
   const bioFile = resolve(file);
+  let mtime = 0;
+  try {
+    mtime = statSync(bioFile).mtimeMs;
+    const cached = bioCache.get(bioFile);
+    if (cached && cached.mtime === mtime) {
+      return cached.result;
+    }
+  } catch {
+    // let readFileSync report the error
+  }
+
   let source: string;
   try {
     source = readFileSync(bioFile, 'utf8');
@@ -115,8 +144,12 @@ export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.
     };
   }
 
-  return {
+  const validation: BioValidation = {
     narrative,
     errors: [],
   };
+  if (mtime > 0) {
+    bioCache.set(bioFile, { mtime, result: validation });
+  }
+  return validation;
 }

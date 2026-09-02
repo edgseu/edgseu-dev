@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { readFileSync, statSync } from 'node:fs';
 import { resolve } from 'node:path';
 import matter from 'gray-matter';
 import { z } from 'zod';
@@ -47,8 +47,21 @@ export interface ProjectsValidation {
   errors: string[];
 }
 
+const projectsCache = new Map<string, { mtime: number; result: ProjectsValidation }>();
+
 export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/content/projects.yaml'): ProjectsValidation {
   const projectsFile = resolve(file);
+  let mtime = 0;
+  try {
+    mtime = statSync(projectsFile).mtimeMs;
+    const cached = projectsCache.get(projectsFile);
+    if (cached && cached.mtime === mtime) {
+      return cached.result;
+    }
+  } catch {
+    // let readFileSync report error
+  }
+
   let source: string;
   try {
     source = readFileSync(projectsFile, 'utf8');
@@ -80,10 +93,14 @@ export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/co
 
   const catalog = Array.isArray(result.data) ? result.data : result.data.projects;
   const errors = validateProjectCatalog(catalog);
-  return {
+  const validation: ProjectsValidation = {
     projects: errors.length === 0 ? catalog : undefined,
     errors,
   };
+  if (mtime > 0) {
+    projectsCache.set(projectsFile, { mtime, result: validation });
+  }
+  return validation;
 }
 
 export function loadProjects(file?: string): Project[] {
