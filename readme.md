@@ -41,7 +41,7 @@ The repository is also an implementation sample. It shows:
 The main content sources are intentionally small and direct:
 
 - `src/content/metadata.yaml` — profile details, links, skills, and configuration
-- `src/content/bio.yaml` — homepage biography heading and narrative
+- `src/content/bio.md` — pure Markdown homepage biography
 - `src/content/projects.yaml` — curated project catalog
 - `src/content/articles/*/{metadata.yaml,index.md}` — draft and published articles with split metadata and body
 - `public/images/` — public profile and social assets
@@ -52,7 +52,7 @@ This repository is designed so anyone can fork/clone it and immediately make it 
 
 1. **Site Domain**: Update `canonicalUrl` in `src/data/site.ts`.
 2. **Profile & Identity**: Update `src/content/metadata.yaml` with your name, role, email, GitHub, LinkedIn, skills, and focus areas.
-3. **Bio Narrative**: Update `src/content/bio.yaml` with your homepage introduction.
+3. **Bio Narrative**: Update `src/content/bio.md` with your Markdown homepage introduction.
 4. **Projects Catalog**: Update `src/content/projects.yaml` with your own repositories, summaries, and tags.
 5. **Technical Articles**: Add your articles in `src/content/articles/<slug>/` with `metadata.yaml` and `index.md`.
 6. **Avatar**: Replace `public/images/avatar.png`.

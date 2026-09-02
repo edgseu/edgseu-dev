@@ -9,7 +9,7 @@ This is the owner’s operating guide for updating, validating, publishing, host
 | What you want to change | Authoritative file |
 | --- | --- |
 | Name, role, location, contact links, résumé, skills, availability | `src/content/metadata.yaml` |
-| Homepage biography heading and narrative paragraphs | `src/content/bio.yaml` |
+| Homepage biography Markdown narrative | `src/content/bio.md` |
 | Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/content/projects.yaml` |
 | Articles, drafts, publication dates, tags, redirects, and article body | `src/content/articles/<slug>/` (`metadata.yaml` + `index.md`) |
 
@@ -162,7 +162,7 @@ Delete generated output only when troubleshooting a stale local build; the next 
 The profile is split into two dedicated files:
 
 1. `src/content/metadata.yaml` — structured identity, links, skills, and configuration.
-2. `src/content/bio.yaml` — homepage biography heading and narrative paragraphs.
+2. `src/content/bio.md` — pure GitHub Flavored Markdown homepage biography narrative.
 
 ### Profile metadata template (`src/content/metadata.yaml`)
 
@@ -190,13 +190,14 @@ skills:
   - Azure AKS
 ```
 
-### Homepage biography template (`src/content/bio.yaml`)
+### Homepage biography template (`src/content/bio.md`)
 
-```yaml
-heading: A short professional heading
-paragraphs:
-  - Write the first paragraph of your homepage biography here.
-  - Continue with your background, engineering focus, and current technical interests.
+```markdown
+## A short professional heading
+
+Write the first paragraph of your homepage biography here.
+
+Continue with your background, engineering focus, and current technical interests.
 ```
 ### Field behavior and validation
 
@@ -220,7 +221,7 @@ paragraphs:
 
 The schema is strict. Unknown keys fail validation instead of being silently ignored. All three lists must contain at least one item and cannot contain case-insensitive duplicates.
 
-The biography in `src/content/bio.yaml` must contain a non-empty heading and at least one paragraph. It is rendered below the terminal. Keep the biography concise enough that selected projects and writing remain discoverable on the homepage.
+The biography in `src/content/bio.md` must not be empty. It is rendered below the terminal. Keep the biography concise enough that selected projects and writing remain discoverable on the homepage.
 
 ### Updating the avatar
 
@@ -987,7 +988,7 @@ hello
 ## 14. Routine maintenance checklists
 
 ### Small profile or copy edit
-- [ ] Edit `src/content/metadata.yaml` or `src/content/bio.yaml`.
+- [ ] Edit `src/content/metadata.yaml` or `src/content/bio.md`.
 - [ ] Run `pnpm validate`.
 - [ ] Inspect the affected section through `pnpm dev`.
 - [ ] Run `pnpm quality` before merge.

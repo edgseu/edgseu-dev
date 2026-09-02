@@ -47,20 +47,13 @@ export const profileSchema = z.object({
 
 export type Profile = z.infer<typeof profileSchema>;
 
-export const bioSchema = z.object({
-  heading: requiredText,
-  paragraphs: z.array(requiredText).min(1, 'must contain at least one paragraph'),
-}).strict();
-
-export type Bio = z.infer<typeof bioSchema>;
-
 export interface ProfileValidation {
   profile?: Profile | undefined;
   errors: string[];
 }
 
 export interface BioValidation {
-  bio?: Bio | undefined;
+  narrative?: string | undefined;
   errors: string[];
 }
 
@@ -104,7 +97,7 @@ export function loadProfile(file?: string): Profile {
   return result.profile;
 }
 
-export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.yaml'): BioValidation {
+export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.md'): BioValidation {
   const bioFile = resolve(file);
   let source: string;
   try {
@@ -115,29 +108,15 @@ export function validateBioFile(file = process.env.BIO_FILE ?? 'src/content/bio.
     };
   }
 
-  let data: unknown;
-  try {
-    const wrapped = source.startsWith('---') ? source : `---\n${source}\n---`;
-    data = matter(wrapped).data;
-  } catch (error) {
+  const narrative = source.trim();
+  if (!narrative) {
     return {
-      errors: [`invalid Bio YAML: ${error instanceof Error ? error.message : 'parse error'}`],
+      errors: ['Bio narrative must not be empty'],
     };
   }
 
-  const result = bioSchema.safeParse(data);
   return {
-    bio: result.success ? result.data : undefined,
-    errors: result.success
-      ? []
-      : result.error.issues.map((issue) => `${issue.path.join('.') || 'bio'}: ${issue.message}`),
+    narrative,
+    errors: [],
   };
-}
-
-export function loadBio(file?: string): Bio {
-  const result = validateBioFile(file);
-  if (!result.bio || result.errors.length > 0) {
-    throw new Error(`Invalid Bio content:\n${result.errors.map((error) => `- ${error}`).join('\n')}`);
-  }
-  return result.bio;
 }

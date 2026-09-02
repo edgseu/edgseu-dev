@@ -5,9 +5,10 @@ import ProjectCard from '../components/ProjectCard.astro';
 import Terminal from '../components/Terminal.astro';
 import { loadProjectCatalog } from '../lib/projects';
 import { site } from '../data/site';
-import { bio, profile } from '../data/profile';
+import { profile } from '../data/profile';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { publishedArticles } from '../lib/articles';
+import { Content as BioContent } from '../content/bio.md';
 const { homepageProjects, isHomepageProjectGrid2x2 } = await loadProjectCatalog();
 
 const jsonLd = {
@@ -36,8 +37,7 @@ const jsonLd = {
     <div class="home-main">
       <Terminal />
       <section class="profile-prose" aria-label="Profile introduction">
-        <h2>{bio.heading}</h2>
-        {bio.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+        <BioContent />
       </section>
 
       <section class="project-section" aria-labelledby="selected-projects">

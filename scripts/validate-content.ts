@@ -12,7 +12,7 @@ import { validateProjectsFile } from '../src/lib/projects';
 const errors: string[] = [];
 const articleRoot = resolve(process.env.ARTICLE_ROOT ?? 'src/content/articles');
 const metadataFile = resolve(process.env.METADATA_FILE ?? process.env.PROFILE_FILE ?? 'src/content/metadata.yaml');
-const bioFile = resolve(process.env.BIO_FILE ?? 'src/content/bio.yaml');
+const bioFile = resolve(process.env.BIO_FILE ?? 'src/content/bio.md');
 const projectsFile = resolve(process.env.PROJECTS_FILE ?? 'src/content/projects.yaml');
 function fail(location: string, message: string): void {
   errors.push(`${location}: ${message}`);
