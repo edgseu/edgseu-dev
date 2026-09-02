@@ -414,11 +414,12 @@ export function selectHomepageProjects(published: readonly EnrichedProject[]): {
   projects: EnrichedProject[];
   is2x2: boolean;
 } {
-  const pinned = published.filter((project) => project.pinned);
-  const selected =
-    pinned.length > 2
-      ? published.slice(0, Math.min(4, Math.max(pinned.length, 2)))
-      : published.slice(0, 2);
+  let pinnedCount = 0;
+  for (const project of published) {
+    if (project.pinned) pinnedCount++;
+  }
+  const count = pinnedCount > 2 ? Math.min(4, Math.max(pinnedCount, 2)) : 2;
+  const selected = published.slice(0, count);
   return {
     projects: selected,
     is2x2: selected.length > 2,
