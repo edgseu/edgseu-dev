@@ -715,12 +715,13 @@ h1, h2, h3 { text-wrap: balance; }
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 0.85rem;
   margin-top: auto;
   color: var(--muted);
   font-family: var(--font-mono);
   font-size: 0.78rem;
+  text-align: right;
 }
 
 .project-card-meta .meta-item {

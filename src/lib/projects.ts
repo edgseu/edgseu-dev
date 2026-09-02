@@ -35,12 +35,50 @@ export class LiveGitHubProvider implements RepositoryMetadataProvider {
   constructor(private readonly owner = 'h1zardian', private readonly timeoutMs = 5_000) {}
 
   async getMetadata(projectId: string): Promise<RepositoryResult | undefined> {
-    try {
-      const response = await fetch(`https://api.github.com/repos/${this.owner}/${projectId}`, {
-        headers: { Accept: 'application/vnd.github+json', 'User-Agent': 'edgseu-static-build' },
+    const repositoryUrl = `https://api.github.com/repos/${this.owner}/${projectId}`;
+    const headers: Record<string, string> = {
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'edgseu-static-build',
+    };
+    const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
+    if (token) headers.Authorization = `Bearer ${token}`;
+
+    const [repositoryRequest, languagesRequest] = await Promise.allSettled([
+      fetch(repositoryUrl, {
+        headers,
         signal: AbortSignal.timeout(this.timeoutMs),
-      });
+      }),
+      fetch(`${repositoryUrl}/languages`, {
+        headers,
+        signal: AbortSignal.timeout(this.timeoutMs),
+      }),
+    ]);
+    if (repositoryRequest.status === 'rejected') return undefined;
+
+    try {
+      const response = repositoryRequest.value;
       const body = (await response.json()) as RepositoryMetadata;
+
+      if (
+        response.status === 200 &&
+        languagesRequest.status === 'fulfilled' &&
+        languagesRequest.value.ok
+      ) {
+        try {
+          const languageBytes = (await languagesRequest.value.json()) as Record<string, unknown>;
+          body.languages = Object.entries(languageBytes)
+            .filter((entry): entry is [string, number] => {
+              const bytes = entry[1];
+              return typeof bytes === 'number' && Number.isFinite(bytes) && bytes > 0;
+            })
+            .toSorted((left, right) => right[1] - left[1])
+            .slice(0, 3)
+            .map(([language]) => language);
+        } catch {
+          // Keep repository identity and update metadata when language totals are malformed.
+        }
+      }
+
       return { status: response.status, body };
     } catch {
       return undefined;
@@ -176,11 +214,12 @@ export async function enrichProject(
 
   const rawLanguages =
     Array.isArray(result.body.languages) && result.body.languages.length > 0
-      ? result.body.languages.map((lang) => lang.trim()).filter(Boolean)
+      ? result.body.languages.map((language) => language.trim()).filter(Boolean)
       : result.body.language?.trim()
         ? [result.body.language.trim()]
         : [];
-  const languages = rawLanguages.length > 0 ? rawLanguages : undefined;
+  const languages =
+    rawLanguages.length > 0 ? [...new Set(rawLanguages)].slice(0, 3) : undefined;
   const language = languages?.[0];
   const pushedAt = result.body.pushed_at?.slice(0, 10);
 

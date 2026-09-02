@@ -32,7 +32,7 @@ The repository is also an implementation sample. It shows:
 | Language | TypeScript 6 |
 | Styling | Tailwind CSS 4 through Vite, plus the site stylesheet |
 | Content | Markdown with GitHub Flavored Markdown |
-| Validation | Zod and repository-specific validation scripts |
+| Validation | Zod and shared in-process content validators |
 | Browser testing | Playwright with Chromium and axe-core |
 | Performance review | Lighthouse runner with repeat measurements |
 | Hosting | GitHub Pages with a custom domain |

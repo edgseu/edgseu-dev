@@ -5,6 +5,7 @@ import {
   enrichProject,
   enrichProjects,
   FixtureMetadataProvider,
+  LiveGitHubProvider,
   loadProjectCatalog,
   OfflineMetadataProvider,
   selectHomepageProjects,
@@ -33,7 +34,7 @@ const publicRepository = (id: string, archived = false) => ({
     private: false,
     archived,
     language: 'HCL',
-    languages: ['HCL', 'Dockerfile'],
+    languages: ['HCL', 'Dockerfile', 'Shell', 'HTML'],
     pushed_at: '2026-08-30T12:00:00Z',
   },
 });
@@ -58,6 +59,88 @@ test('importing the Project catalog does not access repository metadata', async 
     const modulePath = `../src/lib/projects.ts?audit=${Date.now()}`;
     await import(modulePath);
     assert.equal(fetchCalls, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('live GitHub metadata ranks the three largest repository languages', async () => {
+  const originalFetch = globalThis.fetch;
+  const originalToken = process.env.GITHUB_TOKEN;
+  process.env.GITHUB_TOKEN = 'test-token';
+  const requests: string[] = [];
+  globalThis.fetch = (async (input, init) => {
+    assert.equal(new Headers(init?.headers).get('Authorization'), 'Bearer test-token');
+    const url = String(input);
+    requests.push(url);
+    if (url.endsWith('/languages')) {
+      return new Response(
+        JSON.stringify({ TypeScript: 2_000, HTML: 750, CSS: 1_000, Shell: 250 }),
+        { status: 200 },
+      );
+    }
+    return new Response(
+      JSON.stringify({
+        full_name: 'h1zardian/devsecops-pipeline-project',
+        html_url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+        visibility: 'public',
+        private: false,
+        archived: false,
+        language: 'TypeScript',
+        pushed_at: '2026-09-01T12:00:00Z',
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const result = await new LiveGitHubProvider().getMetadata(
+      'devsecops-pipeline-project',
+    );
+    assert.deepEqual(result?.body?.languages, ['TypeScript', 'CSS', 'HTML']);
+    assert.deepEqual(requests, [
+      'https://api.github.com/repos/h1zardian/devsecops-pipeline-project',
+      'https://api.github.com/repos/h1zardian/devsecops-pipeline-project/languages',
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+    if (originalToken === undefined) delete process.env.GITHUB_TOKEN;
+    else process.env.GITHUB_TOKEN = originalToken;
+  }
+});
+
+test('language API failure preserves the repository update date and primary language', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async (input) => {
+    const url = String(input);
+    if (url.endsWith('/languages')) {
+      return new Response(JSON.stringify({ message: 'rate limited' }), { status: 429 });
+    }
+    return new Response(
+      JSON.stringify({
+        full_name: 'h1zardian/devsecops-pipeline-project',
+        html_url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+        visibility: 'public',
+        private: false,
+        archived: false,
+        language: 'TypeScript',
+        pushed_at: '2026-09-01T12:00:00Z',
+      }),
+      { status: 200 },
+    );
+  }) as typeof fetch;
+
+  try {
+    const metadata = await new LiveGitHubProvider().getMetadata(
+      'devsecops-pipeline-project',
+    );
+    assert.ok(metadata);
+    const enriched = await enrichProject(
+      baseProject,
+      new FixtureMetadataProvider({ 'devsecops-pipeline-project': metadata }),
+    );
+    assert.deepEqual(enriched.enrichment?.languages, ['TypeScript']);
+    assert.equal(enriched.enrichment?.pushedAt, '2026-09-01');
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -100,7 +183,7 @@ test('GitHub archive truth overrides the curated lifecycle and attaches metadata
   const enriched = await enrichProject(baseProject, provider);
   assert.equal(enriched.lifecycle, 'Archived');
   assert.equal(enriched.enrichment?.language, 'HCL');
-  assert.deepEqual(enriched.enrichment?.languages, ['HCL', 'Dockerfile']);
+  assert.deepEqual(enriched.enrichment?.languages, ['HCL', 'Dockerfile', 'Shell']);
   assert.equal(enriched.enrichment?.pushedAt, '2026-08-30');
 });
 

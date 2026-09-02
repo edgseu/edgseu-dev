@@ -10,7 +10,10 @@ interface Props {
 const { project, headingLevel = 3 } = Astro.props;
 const Heading = `h${headingLevel}` as const;
 
-const languages = project.enrichment?.languages ?? (project.enrichment?.language ? [project.enrichment.language] : []);
+const languages = (
+  project.enrichment?.languages ??
+  (project.enrichment?.language ? [project.enrichment.language] : [])
+).slice(0, 3);
 const pushedAt = project.enrichment?.pushedAt;
 ---
 

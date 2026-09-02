@@ -71,7 +71,7 @@ The Astro configuration uses static output and trailing slashes. Internal URLs a
 | --- | --- |
 | `src/content/` | Owner-authored profile and articles |
 | `src/data/` | Canonical site URL, profile export, and project catalog |
-| `src/lib/` | Content loading, sorting, filtering, schema validation, and GitHub enrichment |
+| `src/lib/` | Shared profile, Project catalog, Article authoring, and Terminal command modules |
 | `src/pages/` | Public routes and page-specific behavior |
 | `src/components/` | Cards, header, profile rail, terminal, icons, and article outline |
 | `src/layouts/BaseLayout.astro` | Shared metadata, header, footer, theme initialization, and page shell |
@@ -309,10 +309,9 @@ There is also a deliberate fixed-order invariant: among published projects sorte
 
 ### GitHub enrichment
 
-During a normal build, `src/lib/projects.ts` calls the unauthenticated GitHub repository API with a five-second timeout. When successful, the project card can receive:
+During a normal build, `src/lib/projects.ts` calls GitHub’s repository and language endpoints with independent five-second timeouts. It uses `GITHUB_TOKEN` or `GH_TOKEN` when available; GitHub Actions supplies its job token automatically. When successful, the project card can receive:
 
-- primary language;
-- language list if supplied by the response or test fixture;
+- up to three major languages, ranked by GitHub’s reported byte counts and falling back to the primary language when totals are unavailable;
 - last push date;
 - archived status.
 
@@ -320,10 +319,11 @@ GitHub’s archived status overrides the curated `lifecycle` value and displays 
 
 The build degrades safely when enrichment is unavailable:
 
-- network errors, timeouts, HTTP 403, HTTP 429, and 5xx responses leave the curated card intact without enrichment metadata;
+- repository network errors, timeouts, HTTP 403, HTTP 429, and 5xx responses leave the curated card intact without enrichment metadata;
+- language-endpoint failures retain the update date and fall back to GitHub’s primary language;
 - HTTP 404 fails because the published repository is unavailable;
 - a private repository or owner/name/URL mismatch fails;
-- other unexpected non-200 responses leave the curated entry intact.
+- other unexpected repository responses leave the curated entry intact.
 
 For an offline layout-only build, disable enrichment:
 
@@ -333,7 +333,7 @@ GITHUB_ENRICHMENT=off pnpm build
 
 Do not use the disabled build as your only release verification. The GitHub Actions release build performs normal enrichment and can catch moved, renamed, private, or deleted repositories.
 
-`GITHUB_ENRICHMENT_FILE` is a fixture hook used by tests. It is not a normal content-management feature.
+Focused tests inject `FixtureMetadataProvider` directly for deterministic, network-free enrichment checks. `GITHUB_ENRICHMENT_FILE` remains available for a manual or integration build that needs fixture responses; it is not a normal content-management feature.
 
 ### Add a project safely
 
@@ -695,12 +695,12 @@ Running `pnpm test:e2e` by itself assumes `dist/` already exists because Playwri
 The release gate covers observable behavior including:
 
 - profile schema failures and optional résumé/availability rendering;
-- project enrichment outage, archive status, inaccessible repository failure, and repository mismatch failure;
+- Project catalog validation, network-free module imports, enrichment fallback, archive status, and repository identity failures;
+- Article metadata, heading, code-fence, link, alias-collision, and publication validation;
 - article and project draft exclusion from production;
 - empty article states;
-- article heading and content validation;
+- Terminal command registry, shared output formatting, completion, and history behavior;
 - shared route shell and canonical URLs;
-- theme persistence;
 - accessibility checks with axe-core;
 - keyboard focus, skip link, and disclosure behavior;
 - 320 CSS-pixel reflow without page-level overflow;
@@ -872,13 +872,14 @@ Do not hand-edit `pnpm-lock.yaml`. Change dependency versions in `package.json` 
 | `PUBLIC_GISCUS_REPO_ID` | Local/CI comments | Enables Giscus when paired with the category ID. Exposed to browser code by design. |
 | `PUBLIC_GISCUS_CATEGORY_ID` | Local/CI comments | Enables Giscus when paired with the repository ID. |
 | `GITHUB_ENRICHMENT=off` | Offline local build | Skips GitHub API enrichment but keeps curated projects. |
-| `GITHUB_ENRICHMENT_FILE=<file>` | Automated tests | Supplies deterministic fake GitHub responses. |
+| `GITHUB_TOKEN=<token>` or `GH_TOKEN=<token>` | Authenticated GitHub enrichment | Raises API limits for reliable repository dates and language totals. GitHub Actions supplies `GITHUB_TOKEN`; never commit a token. |
+| `GITHUB_ENRICHMENT_FILE=<file>` | Fixture or integration build | Supplies deterministic GitHub responses without network requests. |
 | `PROFILE_FILE=<file>` | Automated tests | Validates and builds from an alternate profile file. |
 | `ARTICLE_ROOT=<directory>` | Automated tests | Runs content validation against alternate article fixtures. |
 | `EMPTY_ARTICLES=1` | Automated tests | Forces the published article collection empty. |
 | `DIST_DIR=<directory>` | Artifact checking | Points `check-artifact.ts` at a non-default build directory. |
 
-Except for Giscus IDs and the explicit offline enrichment switch, treat these as test and troubleshooting hooks rather than everyday site configuration.
+Except for Giscus IDs, the optional GitHub token, and the explicit offline enrichment switch, treat these as test and troubleshooting hooks rather than everyday site configuration.
 
 `.env` and `.env.*` are ignored by Git, except a future `.env.example`. Never commit credentials. Variables beginning with `PUBLIC_` are exposed to client-side code and must never contain secrets.
 
