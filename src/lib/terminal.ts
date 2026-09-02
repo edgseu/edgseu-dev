@@ -50,6 +50,9 @@ export const TERMINAL_COMMANDS = [
 
 export type TerminalCommand = (typeof TERMINAL_COMMANDS)[number]['name'];
 export const TERMINAL_COMMAND_NAMES = TERMINAL_COMMANDS.map((command) => command.name);
+const COMMAND_MAP = new Map<string, TerminalCommandDefinition>(
+  TERMINAL_COMMANDS.map((cmd) => [cmd.name, cmd]),
+);
 const TERMINAL_HELP = `Available commands: ${TERMINAL_COMMAND_NAMES.join(', ')}`;
 
 export interface TerminalProfile {
@@ -99,7 +102,6 @@ export class TerminalSession {
     this.context = context;
     this.history = new TerminalHistory(historyLimit);
   }
-
   renderPrompt(commandText: string, isValid = true): string {
     const { username, promptHost } = this.context.profile;
     return `<span class="prompt" aria-hidden="true"><span class="prompt-user">${escapeHtml(username)}</span><span class="prompt-at">@</span><span class="prompt-host">${escapeHtml(promptHost)}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(commandText)}</span>`;
@@ -317,7 +319,7 @@ export function executeTerminalCommand(
     return { isValid: false, type: 'text' };
   }
 
-  const command = TERMINAL_COMMANDS.find((candidate) => candidate.name === commandName);
+  const command = COMMAND_MAP.get(commandName);
   if (!command) {
     return {
       isValid: false,
@@ -362,6 +364,12 @@ export function executeTerminalCommand(
       return {
         isValid: true,
         type: command.resultType,
+      };
+    default:
+      return {
+        isValid: false,
+        type: 'text',
+        output: `Unknown command: ${rawCommand.trim()}. Type help.`,
       };
   }
 }

@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, extname, resolve } from 'node:path';
 import type { MarkdownInstance } from 'astro';
 import matter from 'gray-matter';
@@ -143,7 +143,6 @@ function validateLocalTarget(
   }
   return undefined;
 }
-
 export interface ParseArticleOptions {
   slug?: string;
   file?: string;
@@ -156,10 +155,24 @@ export interface ArticleSource {
   content: string;
 }
 
+const articleValidationCache = new Map<string, { mtime: number; result: ArticleValidationResult }>();
+
 export function parseAndValidateArticle(
   source: string | ArticleSource,
   options: ParseArticleOptions = {},
 ): ArticleValidationResult {
+  const fileKey = options.file ?? (typeof source === 'string' && options.slug ? options.slug : undefined);
+  let mtime = 0;
+  if (fileKey && typeof source === 'string') {
+    try {
+      mtime = statSync(fileKey).mtimeMs;
+      const cached = articleValidationCache.get(fileKey);
+      if (cached && cached.mtime === mtime) {
+        return cached.result;
+      }
+    } catch {}
+  }
+
   const errors: string[] = [];
   const fileLabel = options.file ?? 'Article';
   const fail = (message: string) => {
@@ -373,11 +386,15 @@ export function parseAndValidateArticle(
     readingMinutes: calculateReadingMinutes(content),
   };
 
-  return {
+  const validationResult: ArticleValidationResult = {
     valid: errors.length === 0,
     ...(errors.length === 0 ? { article: parsedArticle } : {}),
     errors: errors.map((error) => (options.file ? `${fileLabel}: ${error}` : error)),
   };
+  if (fileKey && mtime > 0) {
+    articleValidationCache.set(fileKey, { mtime, result: validationResult });
+  }
+  return validationResult;
 }
 
 export function validateArticleCollection(articles: readonly ParsedArticle[]): string[] {
