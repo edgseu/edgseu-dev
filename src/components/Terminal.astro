@@ -3,19 +3,19 @@ import Icon from './Icon.astro';
 import { loadProjectCatalog } from '../lib/projects';
 import { publishedArticles } from '../lib/articles';
 import { profile } from '../data/profile';
-import { executeTerminalCommand, TERMINAL_COMMANDS } from '../lib/terminal';
+import { TerminalSession, TERMINAL_COMMANDS } from '../lib/terminal';
 
 const { publishedProjects } = await loadProjectCatalog();
 const projectCount = publishedProjects.length;
 const articleCount = publishedArticles.length;
 const buildTime = Date.now();
-const context = {
+const session = new TerminalSession({
   profile,
   projectCount,
   articleCount,
   buildTime,
-};
-const initialWhoami = executeTerminalCommand('whoami', context).output ?? '';
+});
+const initialWhoami = session.getInitialWhoami();
 ---
 <section
   class="terminal"
@@ -62,114 +62,100 @@ const initialWhoami = executeTerminalCommand('whoami', context).output ?? '';
 </section>
 
 <script>
-  import {
-    completeTerminalCommand,
-    escapeHtml,
-    executeTerminalCommand,
-    formatUptime,
-    TerminalHistory,
-  } from '../lib/terminal';
-  import type { TerminalContext, TerminalProfile } from '../lib/terminal';
+  import { TerminalSession } from '../lib/terminal';
+  import type { TerminalProfile } from '../lib/terminal';
 
   const terminalEl = document.querySelector<HTMLElement>('.terminal');
   const form = document.querySelector<HTMLFormElement>('.terminal-form');
   const input = document.querySelector<HTMLInputElement>('#terminal-input');
   const output = document.querySelector<HTMLElement>('#terminal-output');
   const body = document.querySelector<HTMLElement>('#terminal-body');
-  const history = new TerminalHistory();
 
   const projectCount = Number(terminalEl?.dataset.projectCount ?? '0');
   const articleCount = Number(terminalEl?.dataset.articleCount ?? '0');
   const terminalProfile = JSON.parse(terminalEl?.dataset.profile ?? 'null') as TerminalProfile | null;
   const buildTime = Number(terminalEl?.dataset.buildTime ?? Date.now());
 
-  const initialUptime = terminalEl?.querySelector('.t-uptime');
-  if (initialUptime) {
-    initialUptime.textContent = formatUptime(Date.now() - buildTime);
-  }
-
-  const appendCommandLine = (rawCommand: string, isValid: boolean) => {
-    if (!output || !terminalProfile) return;
-    const line = document.createElement('p');
-    line.className = 'terminal-command-line';
-    line.innerHTML = `<span class="prompt" aria-hidden="true"><span class="prompt-user">${escapeHtml(terminalProfile.username)}</span><span class="prompt-at">@</span><span class="prompt-host">${escapeHtml(terminalProfile.promptHost)}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(rawCommand)}</span>`;
-    output.append(line);
-  };
-
-  const appendResponse = (htmlOrText: string, isHtml = false) => {
-    if (!output) return;
-    if (!htmlOrText) return;
-    const isMultiLine = htmlOrText.includes('\n');
-    const line = document.createElement(isMultiLine ? 'pre' : 'p');
-    line.className = isMultiLine ? 'terminal-pre' : 'terminal-response';
-    if (isHtml) {
-      line.innerHTML = htmlOrText;
-    } else {
-      line.textContent = htmlOrText;
-    }
-    output.append(line);
-    while (output.childElementCount > 24) output.firstElementChild?.remove();
-    if (body) body.scrollTop = body.scrollHeight;
-    else output.scrollTop = output.scrollHeight;
-  };
-
-  form?.addEventListener('submit', (event) => {
-    event.preventDefault();
-    if (!input || !output || !terminalProfile) return;
-    const rawCommand = input.value.trim();
-    input.value = '';
-    if (!rawCommand) return;
-
-    const context: TerminalContext = {
+  if (terminalProfile) {
+    const session = new TerminalSession({
       profile: terminalProfile,
       projectCount,
       articleCount,
       buildTime,
-      currentTime: Date.now(),
+    });
+
+    const initialUptime = terminalEl?.querySelector('.t-uptime');
+    if (initialUptime) {
+      initialUptime.textContent = session.getFormattedUptime();
+    }
+
+    const appendCommandLine = (html: string) => {
+      if (!output) return;
+      const line = document.createElement('p');
+      line.className = 'terminal-command-line';
+      line.innerHTML = html;
+      output.append(line);
     };
 
-    const result = executeTerminalCommand(rawCommand, context);
-    appendCommandLine(rawCommand, result.isValid);
+    const appendResponse = (htmlOrText: string, isHtml = false, isMultiLine = false) => {
+      if (!output || !htmlOrText) return;
+      const line = document.createElement(isMultiLine ? 'pre' : 'p');
+      line.className = isMultiLine ? 'terminal-pre' : 'terminal-response';
+      if (isHtml) line.innerHTML = htmlOrText;
+      else line.textContent = htmlOrText;
+      output.append(line);
+      while (output.childElementCount > 24) output.firstElementChild?.remove();
+      if (body) body.scrollTop = body.scrollHeight;
+      else output.scrollTop = output.scrollHeight;
+    };
 
-    if (!result.isValid) {
-      appendResponse(result.output ?? `Unknown command: ${rawCommand}. Type help.`);
-      return;
-    }
-
-    history.record(rawCommand);
-
-    if (result.type === 'clear') {
-      output.replaceChildren();
-      return;
-    }
-    if (result.action === 'theme') {
-      document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
-    }
-    if (result.output) {
-      appendResponse(result.output, result.type === 'html');
-    }
-  });
-
-  input?.addEventListener('keydown', (event) => {
-    if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+    form?.addEventListener('submit', (event) => {
       event.preventDefault();
-      input.value = history.navigate(event.key === 'ArrowUp' ? 'previous' : 'next');
-    }
-    if (event.key === 'Tab' && input.value) {
-      const completion = completeTerminalCommand(input.value);
-      if (completion) {
-        event.preventDefault();
-        input.value = completion;
-      }
-    }
-  });
+      if (!input || !output) return;
+      const rawCommand = input.value;
+      input.value = '';
+      const execution = session.submit(rawCommand);
+      if (!execution) return;
 
-  document.querySelectorAll<HTMLButtonElement>('.terminal-chip').forEach((chip) => {
-    chip.addEventListener('click', () => {
-      const cmd = chip.dataset.cmd;
-      if (!cmd || !input || !form) return;
-      input.value = cmd;
-      form.dispatchEvent(new Event('submit', { cancelable: true }));
+      appendCommandLine(execution.commandLine.html);
+
+      if (execution.clear) {
+        output.replaceChildren();
+        return;
+      }
+      if (execution.response) {
+        if (execution.response.action === 'theme') {
+          document.querySelector<HTMLButtonElement>('.theme-toggle')?.click();
+        }
+        appendResponse(
+          execution.response.html,
+          execution.response.isHtml,
+          execution.response.isMultiLine,
+        );
+      }
     });
-  });
+
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+        event.preventDefault();
+        input.value = session.navigateHistory(event.key === 'ArrowUp' ? 'previous' : 'next');
+      }
+      if (event.key === 'Tab' && input.value) {
+        const completion = session.complete(input.value);
+        if (completion) {
+          event.preventDefault();
+          input.value = completion;
+        }
+      }
+    });
+
+    document.querySelectorAll<HTMLButtonElement>('.terminal-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const cmd = chip.dataset.cmd;
+        if (!cmd || !input || !form) return;
+        input.value = cmd;
+        form.dispatchEvent(new Event('submit', { cancelable: true }));
+      });
+    });
+  }
 </script>

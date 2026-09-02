@@ -21,6 +21,12 @@ export interface ArticleFrontmatter {
   pinned?: boolean;
 }
 
+export interface ArticleOutlineNode {
+  depth: number;
+  slug: string;
+  text: string;
+}
+
 export interface ParsedArticle {
   slug: string;
   file?: string;
@@ -32,6 +38,7 @@ export interface ParsedArticle {
   tags?: string[];
   aliases?: string[];
   links: string[];
+  outline?: ArticleOutlineNode[];
   pinned?: boolean;
   readingMinutes: number;
 }
@@ -48,9 +55,21 @@ export interface Article {
   frontmatter: ArticleFrontmatter;
   Content: MarkdownInstance<ArticleFrontmatter>['Content'];
   headings: MarkdownInstance<ArticleFrontmatter>['getHeadings'] extends () => infer T ? T : never;
+  outline: ArticleOutlineNode[];
   readingMinutes: number;
 }
 
+export function extractArticleOutline(
+  headings: readonly { depth: number; slug: string; text: string }[],
+): ArticleOutlineNode[] {
+  return headings
+    .filter((heading) => heading.depth === 2 || heading.depth === 3)
+    .map((heading) => ({
+      depth: heading.depth,
+      slug: heading.slug,
+      text: heading.text,
+    }));
+}
 export const allowedCodeLanguages: Record<string, true> = {
   bash: true,
   css: true,
@@ -290,6 +309,7 @@ export function parseAndValidateArticle(
   let priorDepth = 1;
   const anchors = new Set<string>();
   const links: string[] = [];
+  const outline: ArticleOutlineNode[] = [];
 
   visit(tree, 'html', () => fail('raw HTML is not portable and is not allowed'));
   visit(tree, 'heading', (node: Heading) => {
@@ -300,9 +320,15 @@ export function parseAndValidateArticle(
     }
     priorDepth = node.depth;
     if (node.depth === 2 || node.depth === 3) {
-      const anchor = slug(toString(node));
+      const headingText = toString(node);
+      const anchor = slug(headingText);
       if (anchors.has(anchor)) fail(`duplicate normalized H2/H3 anchor: ${anchor}`);
       anchors.add(anchor);
+      outline.push({
+        depth: node.depth,
+        slug: anchor,
+        text: headingText,
+      });
     }
   });
 
@@ -342,6 +368,7 @@ export function parseAndValidateArticle(
     ...(tags.length > 0 ? { tags } : {}),
     ...(aliases.length > 0 ? { aliases } : {}),
     links,
+    outline,
     ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
     readingMinutes: calculateReadingMinutes(content),
   };
@@ -461,6 +488,7 @@ const loadedEntries = Object.entries(getAstroModules()).map(([file, markdown]) =
     },
     Content: markdown.Content,
     headings: markdown.getHeadings(),
+    outline: parsed.outline ?? extractArticleOutline(markdown.getHeadings()),
     readingMinutes: parsed.readingMinutes,
   } satisfies Article;
   return { article, parsed };

@@ -1,17 +1,14 @@
 ---
-interface Heading {
-  depth: number;
-  slug: string;
-  text: string;
-}
+import type { ArticleOutlineNode } from '../lib/articles';
 
 interface Props {
-  headings: Heading[];
+  outline?: ArticleOutlineNode[];
+  headings?: ArticleOutlineNode[];
   id?: string;
 }
 
-const { headings, id } = Astro.props;
-const outline = headings.filter((heading) => heading.depth === 2 || heading.depth === 3);
+const { headings, outline, id } = Astro.props;
+const items = outline ?? headings ?? [];
 ---
 
 <nav class="article-outline" id={id} aria-label="On this page">
@@ -21,7 +18,7 @@ const outline = headings.filter((heading) => heading.depth === 2 || heading.dept
       <div class="outline-progress-bar"></div>
     </div>
     <ol>
-      {outline.map((heading) => (
+      {items.map((heading) => (
         <li data-depth={heading.depth}>
           <a href={`#${heading.slug}`}>{heading.text}</a>
         </li>

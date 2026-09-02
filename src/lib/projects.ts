@@ -117,18 +117,81 @@ export interface EnrichedProject extends Project {
   };
 }
 
-export interface RepositoryMetadataProvider {
-  getMetadata(projectId: string, owner?: string): Promise<RepositoryResult | undefined>;
+export interface ProjectEnricher {
+  enrich(project: Project): Promise<EnrichedProject>;
 }
 
-export class LiveGitHubProvider implements RepositoryMetadataProvider {
+function parseProjectRepository(project: Project): { owner: string; repo: string } {
+  const match = project.url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
+  const defaultOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '') || profile.username;
+  const owner = match?.[1] ?? defaultOwner;
+  const repo = match?.[2] ?? project.id;
+  return { owner, repo };
+}
+
+function applyRepositoryResult(
+  project: Project,
+  owner: string,
+  repo: string,
+  result: RepositoryResult | undefined,
+): EnrichedProject {
+  if (!result || result.status === 403 || result.status === 429 || result.status >= 500) {
+    return project;
+  }
+  if (result.status === 404) {
+    throw new Error(`Published Project repository is private, deleted, or inaccessible: ${project.url}`);
+  }
+  if (result.status !== 200 || !result.body) {
+    return project;
+  }
+
+  const expectedName = `${owner}/${repo}`;
+  if (result.body.private || result.body.visibility !== 'public') {
+    throw new Error(`Published Project repository is not public: ${project.url}`);
+  }
+  if (
+    !result.body.full_name ||
+    !result.body.html_url ||
+    result.body.full_name.toLowerCase() !== expectedName.toLowerCase() ||
+    result.body.html_url.toLowerCase() !== project.url.toLowerCase()
+  ) {
+    throw new Error(`Published Project repository was renamed or moved: ${project.url}`);
+  }
+  const rawLanguages =
+    Array.isArray(result.body.languages) && result.body.languages.length > 0
+      ? result.body.languages.map((language) => language.trim()).filter(Boolean)
+      : result.body.language?.trim()
+        ? [result.body.language.trim()]
+        : [];
+  const languages =
+    rawLanguages.length > 0 ? [...new Set(rawLanguages)].slice(0, 3) : undefined;
+  const language = languages?.[0];
+  const pushedAt = result.body.pushed_at?.slice(0, 10);
+
+  return {
+    ...project,
+    lifecycle: result.body.archived ? 'Archived' : project.lifecycle,
+    ...(languages || pushedAt
+      ? {
+          enrichment: {
+            ...(language ? { language } : {}),
+            ...(languages ? { languages } : {}),
+            ...(pushedAt ? { pushedAt } : {}),
+          },
+        }
+      : {}),
+  } satisfies EnrichedProject;
+}
+
+export class LiveGitHubAdapter implements ProjectEnricher {
   constructor(
     private readonly defaultOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '') || profile.username,
     private readonly timeoutMs = 5_000,
   ) {}
 
-  async getMetadata(projectId: string, owner: string = this.defaultOwner): Promise<RepositoryResult | undefined> {
-    const repositoryUrl = `https://api.github.com/repos/${owner}/${projectId}`;
+  async enrich(project: Project): Promise<EnrichedProject> {
+    const { owner = this.defaultOwner, repo } = parseProjectRepository(project);
+    const repositoryUrl = `https://api.github.com/repos/${owner}/${repo}`;
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'edgseu-static-build',
@@ -136,24 +199,36 @@ export class LiveGitHubProvider implements RepositoryMetadataProvider {
     const token = process.env.GITHUB_TOKEN ?? process.env.GH_TOKEN;
     if (token) headers.Authorization = `Bearer ${token}`;
 
-    const [repositoryRequest, languagesRequest] = await Promise.allSettled([
-      fetch(repositoryUrl, {
-        headers,
-        signal: AbortSignal.timeout(this.timeoutMs),
-      }),
-      fetch(`${repositoryUrl}/languages`, {
-        headers,
-        signal: AbortSignal.timeout(this.timeoutMs),
-      }),
-    ]);
-    if (repositoryRequest.status === 'rejected') return undefined;
-
     try {
+      const [repositoryRequest, languagesRequest] = await Promise.allSettled([
+        fetch(repositoryUrl, {
+          headers,
+          signal: AbortSignal.timeout(this.timeoutMs),
+        }),
+        fetch(`${repositoryUrl}/languages`, {
+          headers,
+          signal: AbortSignal.timeout(this.timeoutMs),
+        }),
+      ]);
+
+      if (repositoryRequest.status === 'rejected') {
+        return project;
+      }
+
       const response = repositoryRequest.value;
+      if (response.status === 403 || response.status === 429 || response.status >= 500) {
+        return project;
+      }
+      if (response.status === 404) {
+        throw new Error(`Published Project repository is private, deleted, or inaccessible: ${project.url}`);
+      }
+      if (response.status !== 200) {
+        return project;
+      }
+
       const body = (await response.json()) as RepositoryMetadata;
 
       if (
-        response.status === 200 &&
         languagesRequest.status === 'fulfilled' &&
         languagesRequest.value.ok
       ) {
@@ -172,14 +247,17 @@ export class LiveGitHubProvider implements RepositoryMetadataProvider {
         }
       }
 
-      return { status: response.status, body };
-    } catch {
-      return undefined;
+      return applyRepositoryResult(project, owner, repo, { status: response.status, body });
+    } catch (error) {
+      if (error instanceof Error && error.message.startsWith('Published Project repository')) {
+        throw error;
+      }
+      return project;
     }
   }
 }
 
-export class FixtureMetadataProvider implements RepositoryMetadataProvider {
+export class FixtureGitHubAdapter implements ProjectEnricher {
   private readonly fixtures: Record<string, RepositoryResult>;
 
   constructor(source: string | Record<string, RepositoryResult>) {
@@ -190,27 +268,38 @@ export class FixtureMetadataProvider implements RepositoryMetadataProvider {
     }
   }
 
-  async getMetadata(projectId: string): Promise<RepositoryResult | undefined> {
-    return this.fixtures[projectId];
+  async enrich(project: Project): Promise<EnrichedProject> {
+    const { owner, repo } = parseProjectRepository(project);
+    const result = this.fixtures[repo] ?? this.fixtures[project.id];
+    return applyRepositoryResult(project, owner, repo, result);
   }
 }
 
-export class OfflineMetadataProvider implements RepositoryMetadataProvider {
-  async getMetadata(): Promise<RepositoryResult | undefined> {
-    return undefined;
+export class OfflineGitHubAdapter implements ProjectEnricher {
+  async enrich(project: Project): Promise<EnrichedProject> {
+    return project;
   }
 }
 
-export function createDefaultProvider(): RepositoryMetadataProvider {
+export function createDefaultEnricher(): ProjectEnricher {
   if (process.env.GITHUB_ENRICHMENT === 'off') {
-    return new OfflineMetadataProvider();
+    return new OfflineGitHubAdapter();
   }
   const fixturePath = process.env.GITHUB_ENRICHMENT_FILE;
   if (fixturePath) {
-    return new FixtureMetadataProvider(fixturePath);
+    return new FixtureGitHubAdapter(fixturePath);
   }
-  return new LiveGitHubProvider();
+  return new LiveGitHubAdapter();
 }
+
+export type RepositoryMetadataProvider = ProjectEnricher;
+export const LiveGitHubProvider = LiveGitHubAdapter;
+export type LiveGitHubProvider = LiveGitHubAdapter;
+export const FixtureMetadataProvider = FixtureGitHubAdapter;
+export type FixtureMetadataProvider = FixtureGitHubAdapter;
+export const OfflineMetadataProvider = OfflineGitHubAdapter;
+export type OfflineMetadataProvider = OfflineGitHubAdapter;
+export const createDefaultProvider = createDefaultEnricher;
 
 export function validateProjectCatalog(catalog: readonly Project[] = loadProjects()): string[] {
   const errors: string[] = [];
@@ -276,66 +365,16 @@ export function sortPublishedProjects(catalog: readonly Project[]): Project[] {
 
 export async function enrichProject(
   project: Project,
-  provider: RepositoryMetadataProvider = createDefaultProvider(),
+  enricher: ProjectEnricher = createDefaultEnricher(),
 ): Promise<EnrichedProject> {
-  const match = project.url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
-  const defaultOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '') || profile.username;
-  const owner = match?.[1] ?? defaultOwner;
-  const repo = match?.[2] ?? project.id;
-  const result = await provider.getMetadata(repo, owner);
-  if (!result || result.status === 403 || result.status === 429 || result.status >= 500) {
-    return project;
-  }
-  if (result.status === 404) {
-    throw new Error(`Published Project repository is private, deleted, or inaccessible: ${project.url}`);
-  }
-  if (result.status !== 200 || !result.body) {
-    return project;
-  }
-
-  const expectedName = `${owner}/${repo}`;
-  if (result.body.private || result.body.visibility !== 'public') {
-    throw new Error(`Published Project repository is not public: ${project.url}`);
-  }
-  if (
-    !result.body.full_name ||
-    !result.body.html_url ||
-    result.body.full_name.toLowerCase() !== expectedName.toLowerCase() ||
-    result.body.html_url.toLowerCase() !== project.url.toLowerCase()
-  ) {
-    throw new Error(`Published Project repository was renamed or moved: ${project.url}`);
-  }
-  const rawLanguages =
-    Array.isArray(result.body.languages) && result.body.languages.length > 0
-      ? result.body.languages.map((language) => language.trim()).filter(Boolean)
-      : result.body.language?.trim()
-        ? [result.body.language.trim()]
-        : [];
-  const languages =
-    rawLanguages.length > 0 ? [...new Set(rawLanguages)].slice(0, 3) : undefined;
-  const language = languages?.[0];
-  const pushedAt = result.body.pushed_at?.slice(0, 10);
-
-  return {
-    ...project,
-    lifecycle: result.body.archived ? 'Archived' : project.lifecycle,
-    ...(languages || pushedAt
-      ? {
-          enrichment: {
-            ...(language ? { language } : {}),
-            ...(languages ? { languages } : {}),
-            ...(pushedAt ? { pushedAt } : {}),
-          },
-        }
-      : {}),
-  } satisfies EnrichedProject;
+  return enricher.enrich(project);
 }
 
 export async function enrichProjects(
   catalog: readonly Project[],
-  provider: RepositoryMetadataProvider = createDefaultProvider(),
+  enricher: ProjectEnricher = createDefaultEnricher(),
 ): Promise<EnrichedProject[]> {
-  return Promise.all(catalog.map((project) => enrichProject(project, provider)));
+  return Promise.all(catalog.map((project) => enricher.enrich(project)));
 }
 
 export interface ProjectCatalog {
@@ -346,7 +385,8 @@ export interface ProjectCatalog {
 
 export interface LoadProjectCatalogOptions {
   catalog?: readonly Project[];
-  provider?: RepositoryMetadataProvider;
+  enricher?: ProjectEnricher;
+  provider?: ProjectEnricher;
 }
 
 export function selectHomepageProjects(published: readonly EnrichedProject[]): {
@@ -366,14 +406,14 @@ export function selectHomepageProjects(published: readonly EnrichedProject[]): {
 
 async function buildProjectCatalog(
   catalog: readonly Project[],
-  provider: RepositoryMetadataProvider,
+  enricher: ProjectEnricher = createDefaultEnricher(),
 ): Promise<ProjectCatalog> {
   const errors = validateProjectCatalog(catalog);
   if (errors.length > 0) {
     throw new Error(`Invalid Project catalog:\n${errors.join('\n')}`);
   }
 
-  const publishedProjects = await enrichProjects(sortPublishedProjects(catalog), provider);
+  const publishedProjects = await enrichProjects(sortPublishedProjects(catalog), enricher);
   const {
     projects: homepageProjects,
     is2x2: isHomepageProjectGrid2x2,
@@ -386,13 +426,14 @@ let defaultProjectCatalog: Promise<ProjectCatalog> | undefined;
 export function loadProjectCatalog(
   options: LoadProjectCatalogOptions = {},
 ): Promise<ProjectCatalog> {
-  if (options.catalog || options.provider) {
+  const enricher = options.enricher ?? options.provider;
+  if (options.catalog || enricher) {
     return buildProjectCatalog(
       options.catalog ?? loadProjects(),
-      options.provider ?? createDefaultProvider(),
+      enricher ?? createDefaultEnricher(),
     );
   }
 
-  defaultProjectCatalog ??= buildProjectCatalog(loadProjects(), createDefaultProvider());
+  defaultProjectCatalog ??= buildProjectCatalog(loadProjects(), createDefaultEnricher());
   return defaultProjectCatalog;
 }

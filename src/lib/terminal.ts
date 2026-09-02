@@ -80,7 +80,96 @@ export interface TerminalCommandResult {
   output?: string;
   action?: 'theme';
 }
+export interface TerminalExecutionResult {
+  commandLine: { html: string; isValid: boolean };
+  response?: {
+    html: string;
+    isHtml: boolean;
+    isMultiLine: boolean;
+    action?: 'theme' | undefined;
+  } | undefined;
+  clear?: boolean | undefined;
+}
 
+export class TerminalSession {
+  private readonly history: TerminalHistory;
+  private readonly context: TerminalContext;
+
+  constructor(context: TerminalContext, historyLimit = 20) {
+    this.context = context;
+    this.history = new TerminalHistory(historyLimit);
+  }
+
+  renderPrompt(commandText: string, isValid = true): string {
+    const { username, promptHost } = this.context.profile;
+    return `<span class="prompt" aria-hidden="true"><span class="prompt-user">${escapeHtml(username)}</span><span class="prompt-at">@</span><span class="prompt-host">${escapeHtml(promptHost)}</span><span class="prompt-colon">:</span><span class="prompt-path">~</span><span class="prompt-dollar">$</span></span> <span class="${isValid ? 'cmd-valid' : 'cmd-invalid'}">${escapeHtml(commandText)}</span>`;
+  }
+
+  getInitialWhoami(): string {
+    return formatWhoamiHtml(this.context);
+  }
+
+  getFormattedUptime(): string {
+    const now = this.context.currentTime ?? Date.now();
+    return formatUptime(now - this.context.buildTime);
+  }
+
+  navigateHistory(direction: 'previous' | 'next'): string {
+    return this.history.navigate(direction);
+  }
+
+  complete(input: string): string | undefined {
+    return completeTerminalCommand(input);
+  }
+
+  submit(rawCommand: string): TerminalExecutionResult | null {
+    const trimmed = rawCommand.trim();
+    if (!trimmed) return null;
+
+    const result = executeTerminalCommand(trimmed, {
+      ...this.context,
+      currentTime: Date.now(),
+    });
+
+    const commandLine = {
+      html: this.renderPrompt(trimmed, result.isValid),
+      isValid: result.isValid,
+    };
+
+    if (!result.isValid) {
+      return {
+        commandLine,
+        response: {
+          html: result.output ?? `Unknown command: ${trimmed}. Type help.`,
+          isHtml: false,
+          isMultiLine: false,
+        },
+      };
+    }
+
+    this.history.record(trimmed);
+
+    if (result.type === 'clear') {
+      return { commandLine, clear: true };
+    }
+
+    const isHtml = result.type === 'html';
+    const output = result.output ?? '';
+    const isMultiLine = output.includes('\n');
+
+    return {
+      commandLine,
+      response: output
+        ? {
+            html: output,
+            isHtml,
+            isMultiLine,
+            action: result.action,
+          }
+        : undefined,
+    };
+  }
+}
 export class TerminalHistory {
   private readonly entries: string[] = [];
   private index = 0;

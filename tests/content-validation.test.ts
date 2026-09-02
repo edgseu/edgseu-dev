@@ -241,6 +241,7 @@ test('sortArticles places pinned articles first, then newest published date', ()
       },
       Content: dummyComponent,
       headings: [],
+      outline: [],
       readingMinutes: 1,
     },
     {
@@ -255,6 +256,7 @@ test('sortArticles places pinned articles first, then newest published date', ()
       },
       Content: dummyComponent,
       headings: [],
+      outline: [],
       readingMinutes: 1,
     },
     {
@@ -269,6 +271,7 @@ test('sortArticles places pinned articles first, then newest published date', ()
       },
       Content: dummyComponent,
       headings: [],
+      outline: [],
       readingMinutes: 1,
     },
   ];

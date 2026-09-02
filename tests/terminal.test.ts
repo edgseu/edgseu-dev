@@ -11,6 +11,7 @@ import {
   TERMINAL_COMMAND_NAMES,
   TERMINAL_COMMANDS,
   TerminalHistory,
+  TerminalSession,
 } from '../src/lib/terminal';
 import type { TerminalContext, TerminalProfile } from '../src/lib/terminal';
 
@@ -150,4 +151,121 @@ test('executeTerminalCommand handles unknown or empty commands gracefully', () =
   assert.equal(unknownResult.isValid, false);
   assert.equal(unknownResult.type, 'text');
   assert.equal(unknownResult.output, 'Unknown command: sudo rm -rf /. Type help.');
+});
+
+test('TerminalSession renders prompt, initial whoami, and formatted uptime', () => {
+  const session = new TerminalSession(mockContext);
+
+  const initialWhoami = session.getInitialWhoami();
+  assert.equal(initialWhoami, formatWhoamiHtml(mockContext));
+  assert.match(initialWhoami, new RegExp(mockProfile.name));
+  assert.match(initialWhoami, new RegExp(mockProfile.username));
+
+  const validPrompt = session.renderPrompt('whoami', true);
+  assert.match(validPrompt, new RegExp(`<span class="prompt-user">${mockProfile.username}</span>`));
+  assert.match(validPrompt, new RegExp(`<span class="prompt-host">${mockProfile.promptHost}</span>`));
+  assert.match(validPrompt, /<span class="cmd-valid">whoami<\/span>/);
+
+  const invalidPrompt = session.renderPrompt('invalid-cmd', false);
+  assert.match(invalidPrompt, /<span class="cmd-invalid">invalid-cmd<\/span>/);
+
+  assert.equal(session.getFormattedUptime(), '2m');
+});
+
+test('TerminalSession handles command submissions for whoami, skills, contact, and help', () => {
+  const session = new TerminalSession(mockContext);
+
+  const whoamiExec = session.submit('whoami');
+  assert.ok(whoamiExec);
+  assert.equal(whoamiExec.commandLine.isValid, true);
+  assert.match(whoamiExec.commandLine.html, /cmd-valid/);
+  assert.equal(whoamiExec.clear, undefined);
+  assert.ok(whoamiExec.response);
+  assert.equal(whoamiExec.response.isHtml, true);
+  assert.equal(whoamiExec.response.isMultiLine, true);
+  assert.match(whoamiExec.response.html, new RegExp(mockProfile.name));
+
+  const skillsExec = session.submit('skills');
+  assert.ok(skillsExec);
+  assert.equal(skillsExec.commandLine.isValid, true);
+  assert.ok(skillsExec.response);
+  assert.equal(skillsExec.response.isHtml, false);
+  assert.equal(skillsExec.response.isMultiLine, true);
+  assert.match(skillsExec.response.html, new RegExp(mockProfile.skills[0] ?? ''));
+
+  const contactExec = session.submit('contact');
+  assert.ok(contactExec);
+  assert.equal(contactExec.commandLine.isValid, true);
+  assert.ok(contactExec.response);
+  assert.equal(contactExec.response.isHtml, true);
+  assert.equal(contactExec.response.isMultiLine, true);
+  assert.match(contactExec.response.html, new RegExp(mockProfile.email));
+
+  const helpExec = session.submit('help');
+  assert.ok(helpExec);
+  assert.equal(helpExec.commandLine.isValid, true);
+  assert.ok(helpExec.response);
+  assert.equal(helpExec.response.isHtml, false);
+  assert.equal(helpExec.response.isMultiLine, false);
+  assert.match(helpExec.response.html, /Available commands:/);
+});
+
+test('TerminalSession handles special command signals (theme, clear)', () => {
+  const session = new TerminalSession(mockContext);
+
+  const themeExec = session.submit('theme');
+  assert.ok(themeExec);
+  assert.equal(themeExec.commandLine.isValid, true);
+  assert.equal(themeExec.clear, undefined);
+  assert.ok(themeExec.response);
+  assert.equal(themeExec.response.action, 'theme');
+  assert.equal(themeExec.response.isHtml, false);
+  assert.equal(themeExec.response.html, 'Switched color theme.');
+
+  const clearExec = session.submit('clear');
+  assert.ok(clearExec);
+  assert.equal(clearExec.commandLine.isValid, true);
+  assert.equal(clearExec.clear, true);
+  assert.equal(clearExec.response, undefined);
+});
+
+test('TerminalSession handles empty and invalid commands', () => {
+  const session = new TerminalSession(mockContext);
+
+  assert.equal(session.submit(''), null);
+  assert.equal(session.submit('   '), null);
+
+  const invalidExec = session.submit('invalid');
+  assert.ok(invalidExec);
+  assert.equal(invalidExec.commandLine.isValid, false);
+  assert.match(invalidExec.commandLine.html, /cmd-invalid/);
+  assert.equal(invalidExec.clear, undefined);
+  assert.ok(invalidExec.response);
+  assert.equal(invalidExec.response.isHtml, false);
+  assert.equal(invalidExec.response.isMultiLine, false);
+  assert.equal(invalidExec.response.html, 'Unknown command: invalid. Type help.');
+});
+
+test('TerminalSession navigates command history and auto-completes inputs', () => {
+  const session = new TerminalSession(mockContext);
+
+  session.submit('whoami');
+  session.submit('skills');
+  session.submit('invalid-cmd'); // invalid command should not be recorded
+
+  assert.equal(session.navigateHistory('previous'), 'skills');
+  assert.equal(session.navigateHistory('previous'), 'whoami');
+  assert.equal(session.navigateHistory('previous'), 'whoami');
+  assert.equal(session.navigateHistory('next'), 'skills');
+  assert.equal(session.navigateHistory('next'), '');
+  assert.equal(session.navigateHistory('next'), '');
+
+  assert.equal(session.complete('who'), 'whoami');
+  assert.equal(session.complete('ski'), 'skills');
+  assert.equal(session.complete('con'), 'contact');
+  assert.equal(session.complete('the'), 'theme');
+  assert.equal(session.complete('cle'), 'clear');
+  assert.equal(session.complete('hel'), 'help');
+  assert.equal(session.complete('c'), undefined);
+  assert.equal(session.complete('xyz'), undefined);
 });

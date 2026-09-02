@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import type { Project } from '../src/data/projects';
 import {
-  enrichProject,
   enrichProjects,
-  FixtureMetadataProvider,
-  LiveGitHubProvider,
+  FixtureGitHubAdapter,
+  LiveGitHubAdapter,
   loadProjectCatalog,
-  OfflineMetadataProvider,
+  OfflineGitHubAdapter,
+  type ProjectEnricher,
   selectHomepageProjects,
   sortPublishedProjects,
   validateProjectCatalog,
@@ -40,8 +40,8 @@ const publicRepository = (id: string, archived = false) => ({
 });
 
 test('enrichment outage / offline provider leaves curated Project intact without enrichment', async () => {
-  const provider = new OfflineMetadataProvider();
-  const enriched = await enrichProject(baseProject, provider);
+  const enricher: ProjectEnricher = new OfflineGitHubAdapter();
+  const enriched = await enricher.enrich(baseProject);
   assert.equal(enriched.id, baseProject.id);
   assert.equal(enriched.lifecycle, 'Active');
   assert.equal(enriched.enrichment, undefined);
@@ -94,10 +94,9 @@ test('live GitHub metadata ranks the three largest repository languages', async 
   }) as typeof fetch;
 
   try {
-    const result = await new LiveGitHubProvider().getMetadata(
-      'devsecops-pipeline-project',
-    );
-    assert.deepEqual(result?.body?.languages, ['TypeScript', 'CSS', 'HTML']);
+    const enricher: ProjectEnricher = new LiveGitHubAdapter();
+    const enriched = await enricher.enrich(baseProject);
+    assert.deepEqual(enriched.enrichment?.languages, ['TypeScript', 'CSS', 'HTML']);
     assert.deepEqual(requests, [
       'https://api.github.com/repos/edgseu/devsecops-pipeline-project',
       'https://api.github.com/repos/edgseu/devsecops-pipeline-project/languages',
@@ -131,16 +130,42 @@ test('language API failure preserves the repository update date and primary lang
   }) as typeof fetch;
 
   try {
-    const metadata = await new LiveGitHubProvider().getMetadata(
-      'devsecops-pipeline-project',
-    );
-    assert.ok(metadata);
-    const enriched = await enrichProject(
-      baseProject,
-      new FixtureMetadataProvider({ 'devsecops-pipeline-project': metadata }),
-    );
+    const enricher: ProjectEnricher = new LiveGitHubAdapter();
+    const enriched = await enricher.enrich(baseProject);
     assert.deepEqual(enriched.enrichment?.languages, ['TypeScript']);
     assert.equal(enriched.enrichment?.pushedAt, '2026-09-01');
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+test('live GitHub network error gracefully falls back to unenriched project', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    throw new Error('network down');
+  }) as typeof fetch;
+
+  try {
+    const enricher: ProjectEnricher = new LiveGitHubAdapter();
+    const enriched = await enricher.enrich(baseProject);
+    assert.equal(enriched.id, baseProject.id);
+    assert.equal(enriched.enrichment, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test('live GitHub 404 throws actionable error', async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = (async () => {
+    return new Response(JSON.stringify({ message: 'Not Found' }), { status: 404 });
+  }) as typeof fetch;
+
+  try {
+    const enricher: ProjectEnricher = new LiveGitHubAdapter();
+    await assert.rejects(
+      async () => enricher.enrich(baseProject),
+      /Published Project repository is private, deleted, or inaccessible/,
+    );
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -156,7 +181,7 @@ test('loadProjectCatalog validates, enriches, and selects through one interface'
   };
   const catalog = await loadProjectCatalog({
     catalog: [baseProject, secondProject],
-    provider: new OfflineMetadataProvider(),
+    enricher: new OfflineGitHubAdapter(),
   });
 
   assert.deepEqual(
@@ -168,19 +193,19 @@ test('loadProjectCatalog validates, enriches, and selects through one interface'
 });
 
 test('enrichProjects processes multiple projects concurrently', async () => {
-  const provider = new FixtureMetadataProvider({
+  const enricher: ProjectEnricher = new FixtureGitHubAdapter({
     'devsecops-pipeline-project': publicRepository('devsecops-pipeline-project', true),
   });
-  const results = await enrichProjects([baseProject], provider);
+  const results = await enrichProjects([baseProject], enricher);
   assert.equal(results.length, 1);
   assert.equal(results[0]?.lifecycle, 'Archived');
 });
 
 test('GitHub archive truth overrides the curated lifecycle and attaches metadata', async () => {
-  const provider = new FixtureMetadataProvider({
+  const enricher: ProjectEnricher = new FixtureGitHubAdapter({
     'devsecops-pipeline-project': publicRepository('devsecops-pipeline-project', true),
   });
-  const enriched = await enrichProject(baseProject, provider);
+  const enriched = await enricher.enrich(baseProject);
   assert.equal(enriched.lifecycle, 'Archived');
   assert.equal(enriched.enrichment?.language, 'HCL');
   assert.deepEqual(enriched.enrichment?.languages, ['HCL', 'Dockerfile', 'Shell']);
@@ -188,17 +213,17 @@ test('GitHub archive truth overrides the curated lifecycle and attaches metadata
 });
 
 test('dead Published repository (404) throws an actionable error', async () => {
-  const provider = new FixtureMetadataProvider({
+  const enricher: ProjectEnricher = new FixtureGitHubAdapter({
     'devsecops-pipeline-project': { status: 404 },
   });
   await assert.rejects(
-    async () => enrichProject(baseProject, provider),
+    async () => enricher.enrich(baseProject),
     /Published Project repository is private, deleted, or inaccessible/,
   );
 });
 
 test('private repository throws an actionable error', async () => {
-  const provider = new FixtureMetadataProvider({
+  const enricher: ProjectEnricher = new FixtureGitHubAdapter({
     'devsecops-pipeline-project': {
       status: 200,
       body: {
@@ -210,13 +235,13 @@ test('private repository throws an actionable error', async () => {
     },
   });
   await assert.rejects(
-    async () => enrichProject(baseProject, provider),
+    async () => enricher.enrich(baseProject),
     /Published Project repository is not public/,
   );
 });
 
 test('renamed or moved repository throws an actionable error', async () => {
-  const provider = new FixtureMetadataProvider({
+  const enricher: ProjectEnricher = new FixtureGitHubAdapter({
     'devsecops-pipeline-project': {
       status: 200,
       body: {
@@ -228,7 +253,7 @@ test('renamed or moved repository throws an actionable error', async () => {
     },
   });
   await assert.rejects(
-    async () => enrichProject(baseProject, provider),
+    async () => enricher.enrich(baseProject),
     /Published Project repository was renamed or moved/,
   );
 });

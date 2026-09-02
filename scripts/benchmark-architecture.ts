@@ -1,7 +1,7 @@
 import { performance } from 'node:perf_hooks';
 import { loadProfile, validateProfileFile, validateBioFile } from '../src/lib/profile';
 import { loadProjects, validateProjectsFile, loadProjectCatalog, OfflineMetadataProvider } from '../src/lib/projects';
-import { allArticles, publishedArticles, articleNeighbors } from '../src/lib/articles';
+import { publishedArticles, articleNeighbors } from '../src/lib/articles';
 import { executeTerminalCommand, completeTerminalCommand, TerminalHistory } from '../src/lib/terminal';
 
 const ITERATIONS = 50;
