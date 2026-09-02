@@ -45,6 +45,18 @@ The main content sources are intentionally small and direct:
 - `src/content/articles/*/index.md` — draft and published articles
 - `public/images/` — public profile and social assets
 
+## Make this your own (Portability)
+
+This repository is designed so anyone can fork/clone it and immediately make it their own by editing only content files:
+
+1. **Site Domain**: Update `canonicalUrl` in `src/data/site.ts`.
+2. **Profile & Identity**: Update `src/content/profile.md` with your name, role, bio, email, GitHub, LinkedIn, skills, and focus areas.
+3. **Projects Catalog**: Update `src/content/projects.md` with your own repositories, summaries, and tags.
+4. **Technical Articles**: Add your Markdown articles in `src/content/articles/<slug>/index.md`.
+5. **Avatar**: Replace `public/images/avatar.png`.
+
+Everything else—including the header, navigation, profile sidebar, terminal introduction commands, meta tags, sitemap, GitHub Discussions comments, GitHub repository live metadata enrichment, and automated quality gates—adapts dynamically at runtime.
+
 ## Run locally
 
 Requirements: Node.js 24 and pnpm 11.24.0.

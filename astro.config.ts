@@ -1,9 +1,10 @@
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import { unified } from '@astrojs/markdown-remark';
+import { site } from './src/data/site';
 
 export default defineConfig({
-  site: 'https://edgseu.dev',
+  site: site.canonicalUrl,
   output: 'static',
   trailingSlash: 'always',
   markdown: {
