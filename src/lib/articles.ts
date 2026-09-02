@@ -10,6 +10,7 @@ import remarkParse from 'remark-parse';
 import { unified } from 'unified';
 import { visit } from 'unist-util-visit';
 
+const markdownProcessor = unified().use(remarkParse).use(remarkGfm);
 export interface ArticleFrontmatter {
   title: string;
   summary: string;
@@ -318,7 +319,7 @@ export function parseAndValidateArticle(
   }
 
   const baseDir = options.baseDirectory ?? (options.file ? dirname(options.file) : undefined);
-  const tree = unified().use(remarkParse).use(remarkGfm).parse(content) as Root;
+  const tree = markdownProcessor.parse(content) as Root;
   let priorDepth = 1;
   const anchors = new Set<string>();
   const links: string[] = [];
