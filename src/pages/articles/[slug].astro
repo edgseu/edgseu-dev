@@ -25,6 +25,9 @@ const isDraft = frontmatter.state === 'Draft';
 const giscusRepoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
 const giscusCategoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
 const commentsConfigured = Boolean(giscusRepoId && giscusCategoryId);
+const githubOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
+const giscusRepo = `${githubOwner}/edgseu-dev`;
+const discussionsUrl = `https://github.com/${githubOwner}/edgseu-dev/discussions/categories/article-comments`;
 const jsonLd = {
   '@context': 'https://schema.org',
   '@type': 'Article',
@@ -84,13 +87,14 @@ const jsonLd = {
           aria-labelledby="comments-heading"
           data-comments
           data-configured={String(commentsConfigured)}
+          data-repo={giscusRepo}
           data-repo-id={giscusRepoId}
           data-category-id={giscusCategoryId}
         >
           <h2 id="comments-heading">Discussion</h2>
           <p class="comments-fallback">
             Comments load from GitHub only when requested. The Article remains available if GitHub is blocked.
-            <a href="https://github.com/h1zardian/edgseu-dev/discussions/categories/article-comments">Open Article discussions on GitHub</a>.
+            <a href={discussionsUrl}>Open Article discussions on GitHub</a>.
           </p>
           {commentsConfigured && <button class="comments-load" type="button">Load comments</button>}
           <div class="giscus-host" aria-live="polite"></div>
@@ -283,11 +287,9 @@ const jsonLd = {
     script.src = 'https://giscus.app/client.js';
     script.async = true;
     script.crossOrigin = 'anonymous';
-    script.dataset.repo = 'h1zardian/edgseu-dev';
+    script.dataset.repo = comments.dataset.repo ?? '';
     script.dataset.repoId = comments.dataset.repoId ?? '';
     script.dataset.category = 'Article comments';
-    script.dataset.categoryId = comments.dataset.categoryId ?? '';
-    script.dataset.mapping = 'pathname';
     script.dataset.strict = '1';
     script.dataset.reactionsEnabled = '1';
     script.dataset.emitMetadata = '0';

@@ -317,7 +317,7 @@ username: edgseu
 role: Cloud Security & Operations Engineer
 location: India
 email: mail@edgseu.dev
-github: https://github.com/h1zardian
+github: https://github.com/edgseu
 linkedin: https://www.linkedin.com/in/amanbs
 avatar: /images/avatar.png
 promptHost: cloud

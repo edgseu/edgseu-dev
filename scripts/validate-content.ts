@@ -7,12 +7,12 @@ import {
   type ParsedArticle,
 } from '../src/lib/articles';
 import { validateProfileFile } from '../src/lib/profile';
-import { validateProjectCatalog } from '../src/lib/projects';
+import { validateProjectsFile } from '../src/lib/projects';
 
 const errors: string[] = [];
 const articleRoot = resolve(process.env.ARTICLE_ROOT ?? 'src/content/articles');
 const profileFile = resolve(process.env.PROFILE_FILE ?? 'src/content/profile.md');
-
+const projectsFile = resolve(process.env.PROJECTS_FILE ?? 'src/content/projects.md');
 function fail(location: string, message: string): void {
   errors.push(`${location}: ${message}`);
 }
@@ -22,8 +22,8 @@ const profileResult = validateProfileFile(profileFile);
 for (const error of profileResult.errors) fail(profileFile, error);
 
 // 2. Validate Projects
-const projectErrors = validateProjectCatalog(projects);
-for (const error of projectErrors) errors.push(error);
+const projectResult = validateProjectsFile(projectsFile);
+for (const error of projectResult.errors) fail(projectsFile, error);
 
 // 3. Validate Articles
 if (!existsSync(articleRoot)) {

@@ -1,8 +1,86 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { Project } from '../data/projects';
-import { projects } from '../data/projects';
+import matter from 'gray-matter';
+import { z } from 'zod';
+import { profile } from '../data/profile';
 
+export type ProjectLifecycle = 'Active' | 'Maintained' | 'Complete' | 'Archived';
+export type PublicationState = 'Draft' | 'Published';
+
+export interface Project {
+  id: string;
+  title: string;
+  summary: string;
+  url: string;
+  state: PublicationState;
+  lifecycle: ProjectLifecycle;
+  tags: readonly string[];
+  order: number;
+  pinned?: boolean | undefined;
+}
+export const projectSchema = z.object({
+  id: z.string().trim().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/u, 'ID must be lowercase kebab-case'),
+  title: z.string().trim().min(1, 'title is required'),
+  summary: z.string().trim().min(1, 'summary is required').max(240, 'summary must be between 1 and 240 characters').refine(
+    (val) => !/[\n\r<>]/.test(val),
+    'summary must not contain line breaks or angle brackets',
+  ),
+  url: z.string().trim().regex(/^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/u, 'Published destination must be a canonical GitHub repository URL'),
+  state: z.enum(['Draft', 'Published']),
+  lifecycle: z.enum(['Active', 'Maintained', 'Complete', 'Archived']),
+  tags: z.array(z.string().trim().min(1)).min(1, 'requires one to six tags').max(6, 'requires one to six tags').superRefine((tags, ctx) => {
+    const normalized = tags.map((t) => t.toLocaleLowerCase());
+    if (new Set(normalized).size !== normalized.length) {
+      ctx.addIssue({ code: 'custom', message: 'tags must be unique ignoring case' });
+    }
+  }),
+  order: z.number().int('display order must be a unique integer'),
+  pinned: z.boolean().optional(),
+});
+
+const projectsFileSchema = z.object({
+  projects: z.array(projectSchema),
+});
+
+export interface ProjectsValidation {
+  projects?: Project[] | undefined;
+  errors: string[];
+}
+
+export function validateProjectsFile(file = process.env.PROJECTS_FILE ?? 'src/content/projects.md'): ProjectsValidation {
+  const projectsFile = resolve(file);
+  let source: string;
+  try {
+    source = readFileSync(projectsFile, 'utf8');
+  } catch (error) {
+    return {
+      errors: [`could not read Projects source: ${error instanceof Error ? error.message : 'unknown error'}`],
+    };
+  }
+
+  const parsed = matter(source);
+  const result = projectsFileSchema.safeParse(parsed.data);
+  if (!result.success) {
+    return {
+      errors: result.error.issues.map((issue) => `${issue.path.join('.') || 'frontmatter'}: ${issue.message}`),
+    };
+  }
+
+  const catalog = result.data.projects;
+  const errors = validateProjectCatalog(catalog);
+  return {
+    projects: errors.length === 0 ? catalog : undefined,
+    errors,
+  };
+}
+
+export function loadProjects(file?: string): Project[] {
+  const result = validateProjectsFile(file);
+  if (!result.projects || result.errors.length > 0) {
+    throw new Error(`Invalid Projects content:\n${result.errors.map((e) => `- ${e}`).join('\n')}`);
+  }
+  return result.projects;
+}
 export interface RepositoryMetadata {
   full_name?: string;
   html_url?: string;
@@ -28,14 +106,17 @@ export interface EnrichedProject extends Project {
 }
 
 export interface RepositoryMetadataProvider {
-  getMetadata(projectId: string): Promise<RepositoryResult | undefined>;
+  getMetadata(projectId: string, owner?: string): Promise<RepositoryResult | undefined>;
 }
 
 export class LiveGitHubProvider implements RepositoryMetadataProvider {
-  constructor(private readonly owner = 'h1zardian', private readonly timeoutMs = 5_000) {}
+  constructor(
+    private readonly defaultOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '') || profile.username,
+    private readonly timeoutMs = 5_000,
+  ) {}
 
-  async getMetadata(projectId: string): Promise<RepositoryResult | undefined> {
-    const repositoryUrl = `https://api.github.com/repos/${this.owner}/${projectId}`;
+  async getMetadata(projectId: string, owner: string = this.defaultOwner): Promise<RepositoryResult | undefined> {
+    const repositoryUrl = `https://api.github.com/repos/${owner}/${projectId}`;
     const headers: Record<string, string> = {
       Accept: 'application/vnd.github+json',
       'User-Agent': 'edgseu-static-build',
@@ -119,7 +200,7 @@ export function createDefaultProvider(): RepositoryMetadataProvider {
   return new LiveGitHubProvider();
 }
 
-export function validateProjectCatalog(catalog: readonly Project[] = projects): string[] {
+export function validateProjectCatalog(catalog: readonly Project[] = loadProjects()): string[] {
   const errors: string[] = [];
   const fail = (location: string, message: string) => {
     errors.push(`${location}: ${message}`);
@@ -167,14 +248,6 @@ export function validateProjectCatalog(catalog: readonly Project[] = projects): 
     fail('projects', 'no more than 4 Published projects may be pinned');
   }
 
-  const publishedOrder = catalog
-    .filter((project) => project.state === 'Published')
-    .toSorted((a, b) => a.order - b.order);
-
-  if (publishedOrder[0]?.id !== 'devsecops-pipeline-project' || publishedOrder[1]?.id !== 'cowrie-sentinel-lab') {
-    fail('projects', 'approved Projects must remain in the fixed display order');
-  }
-
   return errors;
 }
 
@@ -193,7 +266,11 @@ export async function enrichProject(
   project: Project,
   provider: RepositoryMetadataProvider = createDefaultProvider(),
 ): Promise<EnrichedProject> {
-  const result = await provider.getMetadata(project.id);
+  const match = project.url.match(/^https:\/\/github\.com\/([^/]+)\/([^/]+)/);
+  const defaultOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '') || profile.username;
+  const owner = match?.[1] ?? defaultOwner;
+  const repo = match?.[2] ?? project.id;
+  const result = await provider.getMetadata(repo, owner);
   if (!result || result.status === 403 || result.status === 429 || result.status >= 500) {
     return project;
   }
@@ -204,14 +281,18 @@ export async function enrichProject(
     return project;
   }
 
-  const expectedName = `h1zardian/${project.id}`;
+  const expectedName = `${owner}/${repo}`;
   if (result.body.private || result.body.visibility !== 'public') {
     throw new Error(`Published Project repository is not public: ${project.url}`);
   }
-  if (result.body.full_name !== expectedName || result.body.html_url !== project.url) {
+  if (
+    !result.body.full_name ||
+    !result.body.html_url ||
+    result.body.full_name.toLowerCase() !== expectedName.toLowerCase() ||
+    result.body.html_url.toLowerCase() !== project.url.toLowerCase()
+  ) {
     throw new Error(`Published Project repository was renamed or moved: ${project.url}`);
   }
-
   const rawLanguages =
     Array.isArray(result.body.languages) && result.body.languages.length > 0
       ? result.body.languages.map((language) => language.trim()).filter(Boolean)
@@ -295,11 +376,11 @@ export function loadProjectCatalog(
 ): Promise<ProjectCatalog> {
   if (options.catalog || options.provider) {
     return buildProjectCatalog(
-      options.catalog ?? projects,
+      options.catalog ?? loadProjects(),
       options.provider ?? createDefaultProvider(),
     );
   }
 
-  defaultProjectCatalog ??= buildProjectCatalog(projects, createDefaultProvider());
+  defaultProjectCatalog ??= buildProjectCatalog(loadProjects(), createDefaultProvider());
   return defaultProjectCatalog;
 }

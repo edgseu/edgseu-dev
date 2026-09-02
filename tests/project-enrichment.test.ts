@@ -17,7 +17,7 @@ const baseProject: Project = {
   id: 'devsecops-pipeline-project',
   title: 'DevSecOps Pipeline Project',
   summary: 'Security-first AWS EKS GitOps portfolio.',
-  url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+  url: 'https://github.com/edgseu/devsecops-pipeline-project',
   state: 'Published',
   lifecycle: 'Active',
   tags: ['AWS', 'EKS', 'GitOps'],
@@ -28,8 +28,8 @@ const baseProject: Project = {
 const publicRepository = (id: string, archived = false) => ({
   status: 200,
   body: {
-    full_name: `h1zardian/${id}`,
-    html_url: `https://github.com/h1zardian/${id}`,
+    full_name: `edgseu/${id}`,
+    html_url: `https://github.com/edgseu/${id}`,
     visibility: 'public',
     private: false,
     archived,
@@ -81,8 +81,8 @@ test('live GitHub metadata ranks the three largest repository languages', async 
     }
     return new Response(
       JSON.stringify({
-        full_name: 'h1zardian/devsecops-pipeline-project',
-        html_url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+        full_name: 'edgseu/devsecops-pipeline-project',
+        html_url: 'https://github.com/edgseu/devsecops-pipeline-project',
         visibility: 'public',
         private: false,
         archived: false,
@@ -99,8 +99,8 @@ test('live GitHub metadata ranks the three largest repository languages', async 
     );
     assert.deepEqual(result?.body?.languages, ['TypeScript', 'CSS', 'HTML']);
     assert.deepEqual(requests, [
-      'https://api.github.com/repos/h1zardian/devsecops-pipeline-project',
-      'https://api.github.com/repos/h1zardian/devsecops-pipeline-project/languages',
+      'https://api.github.com/repos/edgseu/devsecops-pipeline-project',
+      'https://api.github.com/repos/edgseu/devsecops-pipeline-project/languages',
     ]);
   } finally {
     globalThis.fetch = originalFetch;
@@ -118,8 +118,8 @@ test('language API failure preserves the repository update date and primary lang
     }
     return new Response(
       JSON.stringify({
-        full_name: 'h1zardian/devsecops-pipeline-project',
-        html_url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+        full_name: 'edgseu/devsecops-pipeline-project',
+        html_url: 'https://github.com/edgseu/devsecops-pipeline-project',
         visibility: 'public',
         private: false,
         archived: false,
@@ -151,7 +151,7 @@ test('loadProjectCatalog validates, enriches, and selects through one interface'
     ...baseProject,
     id: 'cowrie-sentinel-lab',
     title: 'Cowrie Sentinel Lab',
-    url: 'https://github.com/h1zardian/cowrie-sentinel-lab',
+    url: 'https://github.com/edgseu/cowrie-sentinel-lab',
     order: 2,
   };
   const catalog = await loadProjectCatalog({
@@ -202,8 +202,8 @@ test('private repository throws an actionable error', async () => {
     'devsecops-pipeline-project': {
       status: 200,
       body: {
-        full_name: 'h1zardian/devsecops-pipeline-project',
-        html_url: 'https://github.com/h1zardian/devsecops-pipeline-project',
+        full_name: 'edgseu/devsecops-pipeline-project',
+        html_url: 'https://github.com/edgseu/devsecops-pipeline-project',
         visibility: 'private',
         private: true,
       },

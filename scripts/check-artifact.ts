@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
 import { extname, join, relative, resolve } from 'node:path';
 import { gzipSync } from 'node:zlib';
 import { load } from 'cheerio';
-
+import { site } from '../src/data/site';
 const dist = resolve(process.env.DIST_DIR ?? 'dist');
 const errors: string[] = [];
 const canonicalUrls = new Map<string, string>();
@@ -52,7 +52,7 @@ for (const file of htmlFiles) {
   const canonical = $('link[rel="canonical"]').attr('href') ?? '';
 
   if (!title) fail(route, 'missing title');
-  if (!canonical.startsWith('https://edgseu.dev/')) fail(route, `invalid canonical: ${canonical || 'missing'}`);
+  if (!canonical.startsWith(`${site.canonicalUrl}/`)) fail(route, `invalid canonical: ${canonical || 'missing'}`);
   if (!isRedirect) {
     if (!description) fail(route, 'missing description');
     if ($('h1').length !== 1) fail(route, `expected exactly one H1, found ${$('h1').length}`);
@@ -125,7 +125,7 @@ else {
   }
 }
 const robotsFile = join(dist, 'robots.txt');
-if (!existsSync(robotsFile) || !readFileSync(robotsFile, 'utf8').includes('Sitemap: https://edgseu.dev/sitemap.xml')) {
+if (!existsSync(robotsFile) || !readFileSync(robotsFile, 'utf8').includes(`Sitemap: ${site.canonicalUrl}/sitemap.xml`)) {
   fail('/robots.txt', 'robots policy or canonical sitemap declaration is missing');
 }
 

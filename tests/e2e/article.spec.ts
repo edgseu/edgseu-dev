@@ -1,11 +1,11 @@
 import { expect, test } from '@playwright/test';
+import { site } from '../../src/data/site';
 
 const articlePath = '/articles/building-a-devsecops-pipeline/';
-
 test('Published Article exposes canonical context and portable body', async ({ page }) => {
   await page.goto(articlePath);
   await expect(page.getByRole('heading', { level: 1 })).toHaveText('Building a verifiable DevSecOps delivery path');
-  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', `https://edgseu.dev${articlePath}`);
+  await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', new URL(articlePath, site.canonicalUrl).href);
   await expect(page.locator('.article-context')).toContainText('Building a verifiable DevSecOps delivery path');
   await expect(page.locator('.article-header time').first()).toHaveText('Published 2026-08-31');
   await expect(page.getByRole('table')).toBeVisible();
@@ -63,7 +63,7 @@ test('old Article path is a static canonical meta-refresh redirect', async ({ re
   expect(response.status()).toBe(200);
   const html = await response.text();
   expect(html).toContain('http-equiv="refresh"');
-  expect(html).toContain(`href="https://edgseu.dev${articlePath}"`);
+  expect(html).toContain(`href="${new URL(articlePath, site.canonicalUrl).href}"`);
   expect(html).toContain(`href="${articlePath}"`);
 });
 

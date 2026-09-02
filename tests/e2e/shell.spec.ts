@@ -1,16 +1,17 @@
 import { expect, test } from '@playwright/test';
-
+import { profile } from '../../src/data/profile';
+import { site } from '../../src/data/site';
 const routes = ['/', '/projects/', '/articles/'];
 
 for (const route of routes) {
   test(`${route} exposes the shared static shell`, async ({ page }) => {
     await page.goto(route);
     await expect(page.locator('a').first()).toHaveText('Skip to content');
-    await expect(page.getByRole('link', { name: 'edgseu', exact: true })).toBeVisible();
+    await expect(page.getByRole('link', { name: profile.username, exact: true })).toBeVisible();
     await expect(page.getByRole('main')).toBeVisible();
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
       'href',
-      `https://edgseu.dev${route}`,
+      new URL(route, site.canonicalUrl).href,
     );
   });
 }
