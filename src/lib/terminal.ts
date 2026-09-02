@@ -279,8 +279,13 @@ export function formatUptime(diffMs: number): string {
   return '< 1m';
 }
 
+const skillsGridCache = new WeakMap<readonly string[], string>();
+const contactHtmlCache = new WeakMap<TerminalProfile | Profile, string>();
+
 export function formatSkillsGrid(items: readonly string[], columns = 2, gap = 4): string {
   if (!items.length) return '';
+  const cached = skillsGridCache.get(items);
+  if (cached !== undefined) return cached;
   const maxLen = Math.max(...items.map((s) => s.length));
   const colWidth = maxLen + gap;
   const lines: string[] = [];
@@ -290,15 +295,21 @@ export function formatSkillsGrid(items: readonly string[], columns = 2, gap = 4)
       row.map((item, idx) => (idx < row.length - 1 ? item.padEnd(colWidth) : item)).join(''),
     );
   }
-  return lines.join('\n');
+  const result = lines.join('\n');
+  skillsGridCache.set(items, result);
+  return result;
 }
 
 export function formatContactHtml(profile: TerminalProfile | Profile): string {
-  return [
+  const cached = contactHtmlCache.get(profile);
+  if (cached !== undefined) return cached;
+  const result = [
     `${renderTerminalIcon('envelope')}Email:    ${profile.email}`,
     `${renderTerminalIcon('github')}GitHub:   ${profile.github.replace(/^https?:\/\//, '')}`,
     `${renderTerminalIcon('linkedin')}LinkedIn: ${profile.linkedin.replace(/^https?:\/\//, '')}`,
   ].join('\n');
+  contactHtmlCache.set(profile, result);
+  return result;
 }
 
 export function formatWhoamiHtml(context: TerminalContext): string {
