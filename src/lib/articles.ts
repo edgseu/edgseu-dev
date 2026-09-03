@@ -118,11 +118,8 @@ export function normalizeDate(value: unknown): string | undefined {
 }
 
 export function calculateReadingMinutes(content: string): number {
-  let words = 0;
-  const re = /\S+/gu;
-  while (re.exec(content) !== null) {
-    words++;
-  }
+  const trimmed = content.trim();
+  const words = trimmed ? trimmed.split(/\s+/u).length : 0;
   return Math.max(1, Math.ceil(words / 220));
 }
 
@@ -183,7 +180,9 @@ export function parseAndValidateArticle(
       if (cached && cached.mtime === mtime) {
         return cached.result;
       }
-    } catch {}
+    } catch {
+      // Missing or unreadable file: fall through and parse without caching.
+    }
   }
 
   const errors: string[] = [];
