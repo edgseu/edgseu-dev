@@ -236,11 +236,13 @@ const jsonLd = [
         }
       });
 
-      // Keep the active entry visible when the outline is taller than its
-      // scroll container (sticky desktop aside or the mobile disclosure).
-      // Scroll only by the overflow amount so the highlight never jumps:
-      // it stays pinned just inside the edge until the outline reaches its
-      // last entries, then walks down the remaining visible items.
+      // Outline autoscroll, in three phases:
+      // 1. While the active entry is above the middle of the scroll
+      //    container, the outline does not move and the bar grows down.
+      // 2. Once the active entry crosses the middle, the outline smooth
+      //    scrolls to keep it centered, so the bar rides in the middle.
+      // 3. When the end of the page is in view, the outline scrolls to its
+      //    end instead, letting the bar grow to the bottom entries.
       if (activeIndex >= 0) {
         const activeLink = links[activeIndex];
         if (activeLink) {
@@ -249,12 +251,16 @@ const jsonLd = [
             activeLink.closest('.article-aside') ??
             outlineNav;
           const bounds = container.getBoundingClientRect();
-          const margin = 8;
           const linkBounds = activeLink.getBoundingClientRect();
-          if (linkBounds.top < bounds.top + margin) {
-            container.scrollTop -= bounds.top + margin - linkBounds.top;
-          } else if (linkBounds.bottom > bounds.bottom - margin) {
-            container.scrollTop += linkBounds.bottom - (bounds.bottom - margin);
+          const pageEndInView =
+            window.innerHeight + window.scrollY >= document.documentElement.scrollHeight - 4;
+          const target = pageEndInView
+            ? container.scrollHeight
+            : container.scrollTop + (linkBounds.top + linkBounds.height / 2) - (bounds.top + bounds.height / 2);
+          const clamped = Math.max(0, Math.min(target, container.scrollHeight - container.clientHeight));
+          if (Math.abs(clamped - container.scrollTop) > 1) {
+            const behavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+            container.scrollTo({ top: clamped, behavior });
           }
         }
       }
