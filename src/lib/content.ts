@@ -1,14 +1,11 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { basename, join, resolve } from 'node:path';
-import { loadProfile, validateBioFile, validateProfileFile, type Profile } from './profile';
-import { loadProjects, validateProjectsFile, type Project } from './projects';
+import { validateBioFile, validateProfileFile } from './profile';
+import { validateProjectsFile } from './projects';
 import {
   parseAndValidateArticle,
   validateArticleCollection,
-  type Article,
   type ParsedArticle,
-  allArticles,
-  publishedArticles,
 } from './articles';
 
 export interface CatalogValidationResult {
@@ -96,35 +93,4 @@ export function validateFullCatalog(options: CatalogOptions = {}): CatalogValida
   };
 }
 
-export interface ContentStore {
-  getProfile(): Profile;
-  getBioNarrative(): string;
-  getProjects(): Project[];
-  getArticles(): Article[];
-  getPublishedArticles(): Article[];
-}
 
-export class DefaultContentStore implements ContentStore {
-  getProfile(): Profile {
-    return loadProfile();
-  }
-
-  getBioNarrative(): string {
-    const res = validateBioFile();
-    return res.narrative ?? '';
-  }
-
-  getProjects(): Project[] {
-    return loadProjects();
-  }
-
-  getArticles(): Article[] {
-    return allArticles;
-  }
-
-  getPublishedArticles(): Article[] {
-    return publishedArticles;
-  }
-}
-
-export const contentStore: ContentStore = new DefaultContentStore();
