@@ -13,7 +13,7 @@ export default defineConfig({
   webServer: {
     command: 'pnpm astro preview --host 127.0.0.1 --port 4321',
     url: 'http://127.0.0.1:4321',
-    reuseExistingServer: true,
+    reuseExistingServer: !process.env.CI,
   },
   projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
 });
