@@ -27,7 +27,7 @@ const links = [
 
 <header class="site-header">
   <div class="header-inner">
-    <a class="wordmark" href="/" aria-label={profile.username}>{profile.username}</a>
+    <a class="wordmark font-mono" href="/" aria-label={profile.username}>{profile.username}</a>
     <nav class="desktop-nav" aria-label="Primary">
       {links.map((link) => (
         <a href={link.href} data-section={link.section} aria-current={link.active ? link.current : undefined}>{link.label}</a>

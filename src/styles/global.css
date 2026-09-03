@@ -167,9 +167,13 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
   font-family: var(--font-mono);
   font-weight: 700;
   font-size: 1.15rem;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  font-feature-settings: normal;
   text-decoration: none;
   transition: color 0.15s ease;
+}
+.wordmark:hover {
+  color: var(--accent-strong);
 }
 .desktop-nav, .header-actions, .site-footer nav { display: flex; align-items: center; gap: 0.35rem; }
 .desktop-nav a, .mobile-menu a, .theme-toggle, .menu-toggle {
