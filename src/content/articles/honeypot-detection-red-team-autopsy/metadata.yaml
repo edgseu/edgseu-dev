@@ -1,0 +1,10 @@
+title: "The Server That Wants to Be Hacked, Part 3: Can They Tell It's Fake? A Red-Team vs Blue-Team Autopsy of My Honeypot"
+summary: "Honeypot detection, hands on: the AWS canary-key account-ID decode, Kippo/Cowrie protocol probes with real commands, banner-vs-handshake analysis, credential-policy statistics, persistence and forensics tests, all run against the cowrie-sentinel-lab configuration."
+state: Published
+publishedAt: "2026-09-03"
+tags:
+  - Red Team
+  - Blue Team
+  - Honeypots
+  - Deception
+series: "The Server That Wants to Be Hacked"

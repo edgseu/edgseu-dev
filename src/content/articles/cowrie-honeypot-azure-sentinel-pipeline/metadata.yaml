@@ -1,0 +1,10 @@
+title: "The Server That Wants to Be Hacked, Part 2: From Fake Shell to Real Alert: Building a Cowrie Honeypot on Azure with Microsoft Sentinel"
+summary: "Two Azure honeypot labs and one lesson: how the DShield sensor phoned home to SANS ISC while my own Sentinel path stayed silent, and how the cowrie-sentinel-lab pipeline works, from load balancer front door to KQL parser, detection rule, and GeoIP workbook."
+state: Published
+publishedAt: "2026-09-03"
+tags:
+  - Azure
+  - Microsoft Sentinel
+  - Terraform
+  - KQL
+series: "The Server That Wants to Be Hacked"

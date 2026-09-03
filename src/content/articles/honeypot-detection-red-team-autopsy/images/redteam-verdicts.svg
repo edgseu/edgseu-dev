@@ -1,0 +1,82 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 560" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <rect data-bg-card="true" x="0.5" y="0.5" width="1179" height="559" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+
+  <text x="590" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#0f172a">Red-team probes vs. this lab, as actually configured</text>
+  <text x="590" y="56" text-anchor="middle" font-size="13" fill="#64748b">Five published detection techniques, run honestly against cowrie-sentinel-lab (Cowrie 3.0.0, default-facing config)</text>
+
+  <!-- header -->
+  <rect x="30" y="80" width="240" height="40" fill="#0f172a"/>
+  <rect x="270" y="80" width="520" height="40" fill="#0f172a"/>
+  <rect x="790" y="80" width="360" height="40" fill="#0f172a"/>
+  <text x="150" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="#e2e8f0">Red-team probe</text>
+  <text x="530" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="#e2e8f0">How it works</text>
+  <text x="970" y="105" text-anchor="middle" font-size="13" font-weight="700" fill="#e2e8f0">Verdict against this lab</text>
+
+  <!-- Row 1 -->
+  <rect x="30" y="120" width="240" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="270" y="120" width="520" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="790" y="120" width="360" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="46" y="150" font-size="12.5" font-weight="700" fill="#0f172a">1 · Protocol stings</text>
+  <text x="46" y="168" font-size="11" fill="#64748b">detect-kippo-cowrie, MSF</text>
+  <text x="46" y="184" font-size="11" fill="#64748b">detect_kippo</text>
+  <text x="286" y="150" font-size="11.5" fill="#334155">Garbage client banner (SSH-1337) + newlines,</text>
+  <text x="286" y="168" font-size="11.5" fill="#334155">real OpenSSH and Cowrie answer with different</text>
+  <text x="286" y="186" font-size="11.5" fill="#334155">disconnect strings, Cowrie suppresses its own</text>
+  <rect x="806" y="136" width="150" height="44" rx="22" fill="#dcfce7" stroke="#16a34a" stroke-width="2"/>
+  <text x="881" y="163" text-anchor="middle" font-size="12.5" font-weight="700" fill="#15803d">Mostly bounces</text>
+
+  <!-- Row 2 -->
+  <rect x="30" y="196" width="240" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="270" y="196" width="520" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="790" y="196" width="360" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="46" y="226" font-size="12.5" font-weight="700" fill="#0f172a">2 · Banner vs handshake</text>
+  <text x="46" y="244" font-size="11" fill="#64748b">KEXINIT comparison,</text>
+  <text x="46" y="260" font-size="11" fill="#64748b">fully scriptable</text>
+  <text x="286" y="226" font-size="11.5" fill="#334155">Default banner claims OpenSSH 9.2p1 (Debian 12) but</text>
+  <text x="286" y="244" font-size="11.5" fill="#334155">offers 3DES / CBC / hmac-md5, impossible on real 9.2,</text>
+  <text x="286" y="262" font-size="11.5" fill="#334155">in-shell ssh -V (7.9p1) contradicts the wire banner too</text>
+  <rect x="806" y="212" width="150" height="44" rx="22" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="881" y="239" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b91c1c">Detected</text>
+
+  <!-- Row 3 -->
+  <rect x="30" y="272" width="240" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="270" y="272" width="520" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="790" y="272" width="360" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="46" y="302" font-size="12.5" font-weight="700" fill="#0f172a">3 · Credential policy</text>
+  <text x="46" y="320" font-size="11" fill="#64748b">no userdb.txt installed →</text>
+  <text x="46" y="336" font-size="11" fill="#64748b">compiled-in defaults</text>
+  <text x="286" y="302" font-size="11.5" fill="#334155">root accepts ANY password (minus "root"/"123456"/</text>
+  <text x="286" y="320" font-size="11.5" fill="#334155">"honeypot"), instantly, every time, no lockout,</text>
+  <text x="286" y="338" font-size="11.5" fill="#334155">public keys always fail, no real box behaves this way</text>
+  <rect x="806" y="288" width="150" height="44" rx="22" fill="#dc2626"/>
+  <text x="881" y="315" text-anchor="middle" font-size="12.5" font-weight="700" fill="#ffffff">Biggest tell</text>
+
+  <!-- Row 4 -->
+  <rect x="30" y="348" width="240" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="270" y="348" width="520" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <rect x="790" y="348" width="360" height="76" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="46" y="378" font-size="12.5" font-weight="700" fill="#0f172a">4 · State persistence test</text>
+  <text x="46" y="396" font-size="11" fill="#64748b">two sessions, one file</text>
+  <text x="286" y="378" font-size="11.5" fill="#334155">touch /tmp/pwned in session 1, gone in session 2,</text>
+  <text x="286" y="396" font-size="11.5" fill="#334155">every visitor gets a private FS copy, deleted at logout,</text>
+  <text x="286" y="414" font-size="11.5" fill="#334155">adduser / crontab / edits never survive</text>
+  <rect x="806" y="364" width="150" height="44" rx="22" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+  <text x="881" y="391" text-anchor="middle" font-size="12.5" font-weight="700" fill="#b91c1c">Detected (inherent)</text>
+
+  <!-- Row 5 -->
+  <rect x="30" y="424" width="240" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="270" y="424" width="520" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="790" y="424" width="360" height="76" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="46" y="454" font-size="12.5" font-weight="700" fill="#0f172a">5 · Shell forensics</text>
+  <text x="46" y="472" font-size="11" fill="#64748b">standard enumeration</text>
+  <text x="46" y="488" font-size="11" fill="#64748b">script sweep</text>
+  <text x="286" y="454" font-size="11.5" fill="#334155">gcc claims 4.7.2 (2012) on a claimed 2024 kernel, apt-installed</text>
+  <text x="286" y="472" font-size="11.5" fill="#334155">binaries always segfault, uptime counts from process start,</text>
+  <text x="286" y="490" font-size="11.5" fill="#334155">ps/free read static snapshots, lies accumulate into a timeline</text>
+  <rect x="806" y="440" width="150" height="44" rx="22" fill="#ffedd5" stroke="#ea580c" stroke-width="2"/>
+  <text x="881" y="467" text-anchor="middle" font-size="12.5" font-weight="700" fill="#c2410c">Detectable (slow)</text>
+
+  <!-- bottom takeaway -->
+  <rect x="30" y="514" width="1120" height="36" rx="8" fill="#eff6ff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="590" y="537" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1d4ed8">Flip side: every probe above arrives at the honeypot as telemetry, fingerprinting attempts are themselves a high-value detection.</text>
+</svg>

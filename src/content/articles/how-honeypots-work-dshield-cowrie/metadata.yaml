@@ -1,0 +1,10 @@
+title: "The Server That Wants to Be Hacked, Part 1: How Honeypots Work, from DShield to Cowrie"
+summary: "How honeypots actually work: the taxonomy, the DShield sensor architecture, and a walkthrough of Cowrie internals, from Twisted state machines to the virtual filesystem and credential policy."
+state: Published
+publishedAt: "2026-09-03"
+tags:
+  - Honeypots
+  - Cowrie
+  - DShield
+  - SSH
+series: "The Server That Wants to Be Hacked"

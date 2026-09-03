@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 640" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+  </defs>
+  <rect data-bg-card="true" x="0.5" y="0.5" width="1179" height="639" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+
+  <text x="590" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#0f172a">The cowrie-sentinel-lab telemetry pipeline</text>
+  <text x="590" y="56" text-anchor="middle" font-size="13" fill="#64748b">One VM, one telemetry path, one parser, one rule, one workbook, data flows top to bottom</text>
+
+  <!-- Internet -->
+  <rect x="380" y="80" width="420" height="52" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="590" y="102" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">Internet, the background noise</text>
+  <text x="590" y="120" text-anchor="middle" font-size="11.5" fill="#b91c1c">continuous SSH/Telnet scanning, credential stuffing</text>
+
+  <line x1="590" y1="132" x2="590" y2="160" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="640" y="150" font-size="11" fill="#475569">TCP 22 / 23</text>
+
+  <!-- Load balancer -->
+  <rect x="330" y="163" width="520" height="72" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="590" y="187" text-anchor="middle" font-size="14" font-weight="700" fill="#1d4ed8">Standard Load Balancer, owns the only public IP</text>
+  <text x="590" y="206" text-anchor="middle" font-size="11.5" fill="#334155">public 22 → Cowrie 2222 (SSH)  ·  public 23 → Cowrie 2223 (Telnet)</text>
+  <text x="590" y="224" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">probes fail closed: if Cowrie dies, the internet gets silence, never the real sshd</text>
+
+  <line x1="590" y1="235" x2="590" y2="263" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- VM -->
+  <rect x="330" y="266" width="520" height="76" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="590" y="290" text-anchor="middle" font-size="14" font-weight="700" fill="#15803d">Private Ubuntu VM, no public NIC (10.42.1.0/24)</text>
+  <text x="590" y="309" text-anchor="middle" font-size="11.5" fill="#334155">Cowrie 3.0.0 as hardened systemd service (Custom Script extension)</text>
+  <text x="590" y="327" text-anchor="middle" font-size="11.5" fill="#334155">emits CEF to local syslog, facility <tspan font-family="Menlo, monospace">user</tspan>  ·  egress restricted to 80/443</text>
+
+  <line x1="590" y1="342" x2="590" y2="370" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <text x="655" y="360" font-size="11" fill="#475569">CEF over syslog</text>
+
+  <!-- AMA / DCR -->
+  <rect x="330" y="373" width="520" height="60" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="590" y="396" text-anchor="middle" font-size="14" font-weight="700" fill="#1d4ed8">Azure Monitor Agent + Data Collection Rule</text>
+  <text x="590" y="415" text-anchor="middle" font-size="11.5" fill="#334155">bouncer at the door: only the <tspan font-family="Menlo, monospace">user</tspan> facility, only Info level, nothing else rides this stream</text>
+
+  <line x1="590" y1="433" x2="590" y2="461" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Log Analytics -->
+  <rect x="330" y="464" width="520" height="60" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="590" y="487" text-anchor="middle" font-size="14" font-weight="700" fill="#1d4ed8">Log Analytics <tspan font-family="Menlo, monospace">Syslog</tspan> table  →  <tspan font-family="Menlo, monospace">CowrieEvents()</tspan> parser</text>
+  <text x="590" y="506" text-anchor="middle" font-size="11.5" fill="#334155">one KQL function parses CEF into EventType / SourceIP / Port / Username / Outcome</text>
+
+  <!-- split arrows -->
+  <line x1="590" y1="524" x2="590" y2="546" stroke="#475569" stroke-width="2.5"/>
+  <line x1="330" y1="546" x2="860" y2="546" stroke="#475569" stroke-width="2.5"/>
+  <line x1="330" y1="546" x2="330" y2="566" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+  <line x1="860" y1="546" x2="860" y2="566" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Rule -->
+  <rect x="120" y="569" width="420" height="58" rx="10" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="330" y="592" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6d28d9">Scheduled Sentinel rule</text>
+  <text x="330" y="611" text-anchor="middle" font-size="11.5" fill="#334155">≥5 connections / 5 min from one IP → Low-severity incident (T1595)</text>
+
+  <!-- Workbook -->
+  <rect x="650" y="569" width="420" height="58" rx="10" fill="#faf5ff" stroke="#7c3aed" stroke-width="2"/>
+  <text x="860" y="592" text-anchor="middle" font-size="13.5" font-weight="700" fill="#6d28d9">GeoIP workbook (30 days)</text>
+  <text x="860" y="611" text-anchor="middle" font-size="11.5" fill="#334155">world-map heatmap + city/country table via geo_info_from_ip_address()</text>
+
+  <!-- Health probe callout -->
+  <rect x="880" y="163" width="280" height="96" rx="10" fill="#fffbeb" stroke="#f59e0b" stroke-width="2"/>
+  <text x="1020" y="187" text-anchor="middle" font-size="12.5" font-weight="700" fill="#92400e">The trap that caught me:</text>
+  <text x="1020" y="205" text-anchor="middle" font-size="11.5" fill="#92400e">health probes from 168.63.129.16</text>
+  <text x="1020" y="221" text-anchor="middle" font-size="11.5" fill="#92400e">open real Cowrie connections,</text>
+  <text x="1020" y="237" text-anchor="middle" font-size="11.5" fill="#92400e">excluded in every query, rule,</text>
+  <text x="1020" y="253" text-anchor="middle" font-size="11.5" fill="#92400e">and map</text>
+</svg>

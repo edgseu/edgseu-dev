@@ -1,0 +1,88 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1180 470" font-family="-apple-system, 'Segoe UI', Helvetica, Arial, sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#475569"/>
+    </marker>
+    <marker id="arrowRed" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#dc2626"/>
+    </marker>
+  </defs>
+  <rect data-bg-card="true" x="0.5" y="0.5" width="1179" height="469" rx="16" fill="#f8fafc" stroke="#e2e8f0" stroke-width="1"/>
+
+  <text x="590" y="34" text-anchor="middle" font-size="21" font-weight="700" fill="#0f172a">One session through Cowrie: a fake server, step by step</text>
+  <text x="590" y="56" text-anchor="middle" font-size="13" fill="#64748b">Nothing an attacker types ever becomes a real process, every stage is Python state machines taking notes</text>
+
+  <!-- Attacker -->
+  <rect x="20" y="185" width="130" height="100" rx="10" fill="#fef2f2" stroke="#dc2626" stroke-width="2"/>
+  <text x="85" y="225" text-anchor="middle" font-size="14" font-weight="700" fill="#dc2626">Attacker</text>
+  <text x="85" y="245" text-anchor="middle" font-size="12" fill="#b91c1c">bot / scanner</text>
+  <text x="85" y="262" text-anchor="middle" font-size="12" fill="#b91c1c">on the internet</text>
+
+  <line x1="150" y1="235" x2="200" y2="235" stroke="#dc2626" stroke-width="2.5" marker-end="url(#arrowRed)"/>
+  <text x="175" y="222" text-anchor="middle" font-size="11" fill="#dc2626">TCP 22/23</text>
+
+  <!-- Stage 1 -->
+  <rect x="205" y="150" width="175" height="170" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="292" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8">1 · The handshake</text>
+  <text x="292" y="200" text-anchor="middle" font-size="11.5" fill="#334155">Banner exchange just</text>
+  <text x="292" y="216" text-anchor="middle" font-size="11.5" fill="#334155">like OpenSSH. Cowrie</text>
+  <text x="292" y="232" text-anchor="middle" font-size="11.5" fill="#334155">logs client version +</text>
+  <text x="292" y="248" text-anchor="middle" font-size="11.5" fill="#334155">key-exchange algorithms</text>
+  <text x="292" y="270" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">→ HASSH fingerprint</text>
+  <text x="292" y="300" text-anchor="middle" font-size="10.5" fill="#64748b">events: client.version</text>
+  <text x="292" y="314" text-anchor="middle" font-size="10.5" fill="#64748b">client.kex</text>
+
+  <line x1="380" y1="235" x2="425" y2="235" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 2 -->
+  <rect x="430" y="150" width="175" height="170" rx="10" fill="#eff6ff" stroke="#2563eb" stroke-width="2"/>
+  <text x="517" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#1d4ed8">2 · The login</text>
+  <text x="517" y="200" text-anchor="middle" font-size="11.5" fill="#334155">Credentials checked</text>
+  <text x="517" y="216" text-anchor="middle" font-size="11.5" fill="#334155">against userdb policy,</text>
+  <text x="517" y="232" text-anchor="middle" font-size="11.5" fill="#334155">the honeypot chooses</text>
+  <text x="517" y="248" text-anchor="middle" font-size="11.5" fill="#334155">how often to say yes</text>
+  <text x="517" y="270" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">"success" is part of</text>
+  <text x="517" y="286" text-anchor="middle" font-size="11.5" font-weight="600" fill="#2563eb">the fiction</text>
+  <text x="517" y="308" text-anchor="middle" font-size="10.5" fill="#64748b">events: login.failed / .success</text>
+
+  <line x1="605" y1="235" x2="650" y2="235" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 3 -->
+  <rect x="655" y="150" width="175" height="170" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="742" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#15803d">3 · The fake shell</text>
+  <text x="742" y="200" text-anchor="middle" font-size="11.5" fill="#334155">Virtual filesystem:</text>
+  <text x="742" y="216" text-anchor="middle" font-size="11.5" fill="#334155">pickle tree + honeyfs</text>
+  <text x="742" y="232" text-anchor="middle" font-size="11.5" fill="#334155">+ txtcmds, a fresh</text>
+  <text x="742" y="248" text-anchor="middle" font-size="11.5" fill="#334155">copy per visitor,</text>
+  <text x="742" y="264" text-anchor="middle" font-size="11.5" fill="#334155">deleted at logout</text>
+  <text x="742" y="286" text-anchor="middle" font-size="11.5" font-weight="600" fill="#16a34a">ls, cat, apt, gcc:</text>
+  <text x="742" y="302" text-anchor="middle" font-size="11.5" font-weight="600" fill="#16a34a">all staged</text>
+
+  <line x1="830" y1="235" x2="875" y2="235" stroke="#475569" stroke-width="2.5" marker-end="url(#arrow)"/>
+
+  <!-- Stage 4 -->
+  <rect x="880" y="150" width="175" height="170" rx="10" fill="#f0fdf4" stroke="#16a34a" stroke-width="2"/>
+  <text x="967" y="176" text-anchor="middle" font-size="13" font-weight="700" fill="#15803d">4 · The receipts</text>
+  <text x="967" y="200" text-anchor="middle" font-size="11.5" fill="#334155">Every keystroke → TTY</text>
+  <text x="967" y="216" text-anchor="middle" font-size="11.5" fill="#334155">log (replay with playlog).</text>
+  <text x="967" y="232" text-anchor="middle" font-size="11.5" fill="#334155">wget/curl make REAL</text>
+  <text x="967" y="248" text-anchor="middle" font-size="11.5" fill="#334155">downloads, saved by</text>
+  <text x="967" y="264" text-anchor="middle" font-size="11.5" fill="#334155">SHA-256, real malware</text>
+  <text x="967" y="280" text-anchor="middle" font-size="11.5" fill="#334155">samples captured</text>
+  <text x="967" y="302" text-anchor="middle" font-size="10.5" fill="#64748b">events: command.input</text>
+  <text x="967" y="316" text-anchor="middle" font-size="10.5" fill="#64748b">file_download / _upload</text>
+
+  <!-- Bottom event bus -->
+  <line x1="292" y1="320" x2="292" y2="392" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="517" y1="320" x2="517" y2="392" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="967" y1="320" x2="967" y2="392" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="292" y1="392" x2="967" y2="392" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4"/>
+  <line x1="630" y1="392" x2="630" y2="405" stroke="#94a3b8" stroke-width="2" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+
+  <rect x="380" y="408" width="500" height="46" rx="10" fill="#0f172a"/>
+  <text x="630" y="437" text-anchor="middle" font-size="13.5" font-weight="600" fill="#e2e8f0">structured event stream  ·  session.connect / .closed  ·  → Part 2 pipeline</text>
+
+  <!-- Top banner note -->
+  <rect x="20" y="95" width="1035" height="34" rx="8" fill="#fffbeb" stroke="#f59e0b" stroke-width="1.5"/>
+  <text x="537" y="117" text-anchor="middle" font-size="12.5" fill="#92400e">Medium interaction: an entire Linux surface emulated in Python, the door opens, and behind it is a stage set</text>
+</svg>
