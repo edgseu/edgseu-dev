@@ -800,7 +800,9 @@ h1, h2, h3 { text-wrap: balance; }
 .prose blockquote { margin: 1.5rem 0; padding: 0.85rem 1.35rem; border-left: 3px solid var(--accent); background: var(--subtle); border-radius: 0 0.5rem 0.5rem 0; font-style: italic; color: var(--text); }
 .prose blockquote > p:last-child { margin-bottom: 0; }
 .prose hr { border: 0; border-top: 1px solid var(--border); margin: 2.5rem 0; }
-.prose table { width: 100%; margin: 1.75rem 0; border-collapse: collapse; border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden; }
+.prose table { width: auto; min-width: 100%; margin: 1.75rem 0; border-collapse: collapse; border: 1px solid var(--border); border-radius: 0.5rem; overflow: hidden; }
+.prose table th, .prose table td { max-width: 30rem; overflow-wrap: normal; }
+.prose table th { white-space: nowrap; }
 .prose th { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); background: var(--subtle); color: var(--text); font-weight: 600; text-align: left; font-size: 0.9rem; }
 .prose td { padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-subtle); text-align: left; font-size: 0.9rem; }
 .prose :not(pre) > code { padding: 0.15rem 0.35rem; border: 1px solid var(--border); border-radius: 0.3rem; background: var(--subtle); font-family: var(--font-mono); font-size: 0.88em; color: var(--accent); }
@@ -814,7 +816,7 @@ h1, h2, h3 { text-wrap: balance; }
 .copy-code { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.55rem; border: 1px solid var(--border); border-radius: 0.3rem; background: var(--surface); color: var(--muted); font-family: inherit; font-size: 0.75rem; cursor: pointer; transition: color 0.15s ease, border-color 0.15s ease, background-color 0.15s ease; }
 .copy-code:hover { color: var(--text); border-color: var(--border-strong); background: var(--subtle); }
 .copy-code svg { flex-shrink: 0; }
-.table-scroll { max-width: 100%; overflow-x: auto; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--surface); box-shadow: var(--shadow-sm), var(--specular-top); }
+.table-scroll { max-width: 100%; margin: 1.75rem 0; overflow-x: auto; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--surface); box-shadow: var(--shadow-sm), var(--specular-top); }
 .table-scroll table { margin: 0; border: none; }
 .comments { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border); }
 .comments-fallback { padding: 1.25rem; border: 1px solid var(--border); border-radius: 0.65rem; background: var(--surface); color: var(--muted); box-shadow: var(--shadow-sm), var(--specular-top); }
