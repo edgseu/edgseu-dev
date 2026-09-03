@@ -238,6 +238,9 @@ const jsonLd = [
 
       // Keep the active entry visible when the outline is taller than its
       // scroll container (sticky desktop aside or the mobile disclosure).
+      // Scroll only by the overflow amount so the highlight never jumps:
+      // it stays pinned just inside the edge until the outline reaches its
+      // last entries, then walks down the remaining visible items.
       if (activeIndex >= 0) {
         const activeLink = links[activeIndex];
         if (activeLink) {
@@ -246,9 +249,12 @@ const jsonLd = [
             activeLink.closest('.article-aside') ??
             outlineNav;
           const bounds = container.getBoundingClientRect();
+          const margin = 8;
           const linkBounds = activeLink.getBoundingClientRect();
-          if (linkBounds.top < bounds.top || linkBounds.bottom > bounds.bottom) {
-            container.scrollTop += linkBounds.top - (bounds.top + bounds.height / 2) + linkBounds.height / 2;
+          if (linkBounds.top < bounds.top + margin) {
+            container.scrollTop -= bounds.top + margin - linkBounds.top;
+          } else if (linkBounds.bottom > bounds.bottom - margin) {
+            container.scrollTop += linkBounds.bottom - (bounds.bottom - margin);
           }
         }
       }
