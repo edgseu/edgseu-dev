@@ -165,9 +165,10 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
   margin-right: auto;
   color: var(--text);
   font-family: var(--font-mono);
-  font-weight: 700;
-  font-size: 1.15rem;
-  letter-spacing: -0.01em;
+  font-weight: 750;
+  font-size: 1.35rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
   font-feature-settings: normal;
   text-decoration: none;
   transition: color 0.15s ease;
