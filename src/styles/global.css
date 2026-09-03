@@ -755,8 +755,8 @@ h1, h2, h3 { text-wrap: balance; }
 .article-header .summary { max-width: 48rem; color: var(--muted); font-size: 1.15rem; line-height: 1.65; text-wrap: pretty; }
 .draft-banner { padding: 0.75rem 1rem; border: 1px solid var(--warning-subtle); border-radius: 0.5rem; background: var(--warning-subtle); color: var(--warning); font-weight: 600; font-family: var(--font-mono); font-size: 0.88rem; }
 .article-grid { display: grid; grid-template-columns: 15rem minmax(0, 48rem); gap: 2.5rem; align-items: start; padding-bottom: 4rem; }
-.article-aside { position: sticky; top: 5.5rem; display: grid; gap: 1rem; align-self: start; max-height: calc(100vh - 6.5rem); overflow: auto; }
-.article-aside .article-outline { position: static; max-height: none; overflow: visible; width: 100%; }
+.article-aside { position: sticky; top: 5.5rem; display: flex; flex-direction: column; gap: 1rem; align-self: start; max-height: calc(100vh - 6.5rem); }
+.article-aside .article-outline { position: static; max-height: none; width: 100%; overflow: auto; min-height: 0; }
 .article-outline { width: 15rem; padding: 1.25rem; border: 1px solid var(--border); border-radius: 0.75rem; background: var(--surface); box-shadow: var(--shadow-sm), var(--specular-top); }
 .article-outline h2 { margin: 0 0 0.75rem; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); font-weight: 600; }
 .outline-list-wrap { position: relative; padding-left: 0.85rem; }
@@ -769,7 +769,7 @@ h1, h2, h3 { text-wrap: balance; }
 .article-outline a[aria-current="location"] { color: var(--accent-strong); font-weight: 600; }
 .outline-disclosure { display: none; position: sticky; z-index: 10; top: 4.4rem; margin-bottom: 1rem; }
 .outline-disclosure > button { width: 100%; padding: 0.65rem 0.8rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--surface); text-align: left; box-shadow: var(--shadow-sm), var(--specular-top); }
-.outline-disclosure .article-outline { position: static; max-height: min(55vh, 24rem); width: 100%; margin-top: 0.35rem; background: var(--surface); }
+.outline-disclosure .article-outline { position: static; max-height: min(55vh, 24rem); width: 100%; margin-top: 0.35rem; background: var(--surface); overflow: auto; }
 
 .series-card { padding: 1.1rem 1.25rem; border: 1px solid var(--border); border-radius: 0.75rem; background: var(--surface); box-shadow: var(--shadow-sm), var(--specular-top); }
 .series-card h2 { margin: 0 0 0.65rem; font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-mono); font-weight: 600; }
