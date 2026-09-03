@@ -28,16 +28,61 @@ const commentsConfigured = Boolean(giscusRepoId && giscusCategoryId);
 const githubOwner = profile.github.replace(/^https?:\/\/github\.com\//, '').replace(/\/$/, '');
 const giscusRepo = `${githubOwner}/edgseu-dev`;
 const discussionsUrl = `https://github.com/${githubOwner}/edgseu-dev/discussions/categories/article-comments`;
-const jsonLd = {
-  '@context': 'https://schema.org',
-  '@type': 'Article',
-  headline: frontmatter.title,
-  description: frontmatter.summary,
-  datePublished: frontmatter.publishedAt,
-  ...(frontmatter.revisedAt ? { dateModified: frontmatter.revisedAt } : {}),
-  author: { '@type': 'Person', name: profile.name, url: site.canonicalUrl },
-  mainEntityOfPage: new URL(article.path, site.canonicalUrl).href,
-};
+const canonicalArticleUrl = new URL(article.path, site.canonicalUrl).href;
+const jsonLd = [
+  {
+    '@context': 'https://schema.org',
+    '@type': 'TechArticle',
+    headline: frontmatter.title,
+    description: frontmatter.summary,
+    inLanguage: 'en-US',
+    mainEntityOfPage: {
+      '@type': 'WebPage',
+      '@id': canonicalArticleUrl,
+    },
+    url: canonicalArticleUrl,
+    image: new URL('/images/social-card.svg', site.canonicalUrl).href,
+    datePublished: frontmatter.publishedAt,
+    dateModified: frontmatter.revisedAt ?? frontmatter.publishedAt,
+    author: {
+      '@type': 'Person',
+      name: profile.name,
+      url: site.canonicalUrl,
+      sameAs: [profile.github, profile.linkedin],
+      jobTitle: profile.role,
+    },
+    publisher: {
+      '@type': 'Person',
+      name: profile.name,
+      url: site.canonicalUrl,
+    },
+    ...(frontmatter.tags && frontmatter.tags.length > 0 ? { keywords: frontmatter.tags.join(', ') } : {}),
+  },
+  {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Overview',
+        item: site.canonicalUrl,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'Articles',
+        item: new URL('/articles/', site.canonicalUrl).href,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: frontmatter.title,
+        item: canonicalArticleUrl,
+      },
+    ],
+  },
+];
 ---
 
 <BaseLayout
@@ -47,6 +92,9 @@ const jsonLd = {
   canonicalPath={article.path}
   noindex={isDraft}
   jsonLd={jsonLd}
+  publishedTime={frontmatter.publishedAt}
+  modifiedTime={frontmatter.revisedAt ?? frontmatter.publishedAt}
+  tags={frontmatter.tags}
 >
   <div class="article-context">
     <a href="/articles/">Articles</a><span aria-hidden="true">/</span><span>{frontmatter.title}</span>
