@@ -1,3 +1,18 @@
+- id: edgseu-dev
+  title: Edgseu.dev Source Code
+  summary: Statically generated personal portfolio and technical writing site built with Astro, TypeScript, Tailwind CSS, and Playwright.
+  url: https://github.com/edgseu/edgseu-dev
+  state: Published
+  lifecycle: Active
+  tags:
+    - Astro
+    - TypeScript
+    - Tailwind CSS
+    - Playwright
+    - CI/CD
+  order: 1
+  pinned: true
+
 - id: devsecops-pipeline-project
   title: DevSecOps Pipeline Project
   summary: "Security-first AWS EKS GitOps portfolio: Terraform, Argo CD, GitHub Actions, Kyverno, Cosign, Trivy, Prometheus, and Grafana."
@@ -10,7 +25,7 @@
     - GitOps
     - Terraform
     - Supply chain security
-  order: 1
+  order: 2
   pinned: true
 
 - id: cowrie-sentinel-lab
@@ -25,22 +40,7 @@
     - Cowrie
     - KQL
     - Terraform
-  order: 2
-  pinned: true
-
-- id: cicd-pipeline-project
-  title: CI/CD Pipeline Project
-  summary: Automated multi-stage GitHub Actions delivery pipeline with integrated static analysis and security scanning.
-  url: https://github.com/edgseu/cicd-pipeline-project
-  state: Published
-  lifecycle: Active
-  tags:
-    - CI/CD
-    - GitHub Actions
-    - Docker
-    - Security scanning
   order: 3
-  pinned: true
 
 - id: cluster-provisioning-pipeline
   title: Cluster Provisioning Pipeline
@@ -54,7 +54,6 @@
     - Ansible
     - Automation
   order: 4
-  pinned: true
 
 - id: container-image-build-pipeline
   title: Container Image Build Pipeline
@@ -82,29 +81,3 @@
     - Threat intelligence
     - KQL
   order: 6
-
-- id: devops-practice-tasks
-  title: DevOps Practice Tasks
-  summary: Practical hands-on automation and configuration exercises covering containerization, orchestration, and CI pipelines.
-  url: https://github.com/edgseu/devops-practice-tasks
-  state: Published
-  lifecycle: Complete
-  tags:
-    - Linux
-    - Docker
-    - Kubernetes
-    - Automation
-  order: 7
-
-- id: devops-notebook
-  title: DevOps Engineering Notebook
-  summary: Curated technical notes, architectural diagrams, and operational runbooks for cloud infrastructure systems.
-  url: https://github.com/edgseu/devops-notebook
-  state: Published
-  lifecycle: Active
-  tags:
-    - Documentation
-    - Architecture
-    - Runbooks
-    - Cloud
-  order: 8

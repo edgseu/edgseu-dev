@@ -10,17 +10,30 @@ promptHost: cloud
 host: cloud-node
 resumeUrl: https://docs.google.com/document/d/e/2PACX-1vSdAwxs14dZlLX1vKwKvBsHMXsgiU_9hdrUzS4VL4mVln7zI-1LfBJnk8vuadpV6rShqo1VoWVaxw5J/pub
 focusAreas:
-  - Cloud infrastructure
-  - DevSecOps
+  - Cloud Infrastructure
+  - DevOps
   - GitOps
-  - Security automation
+  - CI/CD Security
+  - Observability
 shortSkills:
-  - AWS
-  - Azure
   - Kubernetes
+  - Terraform
+  - GitOps
+  - Linux
+  - AWS & Azure
 skills:
-  - AWS EKS
-  - Azure AKS
-  - Azure Monitor
-  - Azure Sentinel
-  - Azure EntraID
+  - Terraform
+  - Kubernetes
+  - AWS (EKS)
+  - Azure (AKS)
+  - Argo CD
+  - Helm
+  - GitHub Actions
+  - Cosign & Syft
+  - Checkov
+  - Kyverno
+  - Trivy & Gitleaks
+  - Microsoft Sentinel
+  - Microsoft EntraID (IAM)
+  - Prometheus
+  - Grafana
