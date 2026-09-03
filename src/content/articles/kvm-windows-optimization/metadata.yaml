@@ -2,12 +2,9 @@ title: "Optimizing Windows VM performance on QEMU and KVM"
 summary: "Configuring VirtIO drivers, Hyper-V enlightenments, hybrid-core CPU pinning, hugepages, NVMe passthrough, multi-queue networking, and display tuning for Windows guests on Linux KVM."
 state: Published
 publishedAt: "2026-09-03"
-revisedAt: "2026-09-03"
 pinned: true
 tags:
   - Linux
   - KVM
   - Virtualization
   - Windows
-aliases:
-  - /articles/windows-kvm-optimization/
