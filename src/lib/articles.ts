@@ -47,7 +47,6 @@ export interface ParsedArticle {
   series?: string;
   seriesSlug?: string;
   part?: number;
-  readingMinutes: number;
 }
 
 export interface ArticleValidationResult {
@@ -64,7 +63,6 @@ export interface Article {
   headings: MarkdownInstance<ArticleFrontmatter>['getHeadings'] extends () => infer T ? T : never;
   outline: ArticleOutlineNode[];
   seriesPart?: number;
-  readingMinutes: number;
 }
 
 export interface ArticleSeriesSummary {
@@ -147,12 +145,6 @@ export function normalizeDate(value: unknown): string | undefined {
   const maxDays = daysInMonth[month - 1];
   if (maxDays === undefined || day > maxDays) return undefined;
   return trimmed;
-}
-
-export function calculateReadingMinutes(content: string): number {
-  const trimmed = content.trim();
-  const words = trimmed ? trimmed.split(/\s+/u).length : 0;
-  return Math.max(1, Math.ceil(words / 220));
 }
 
 const ALLOWED_IMAGE_EXTS: Record<string, true> = {
@@ -455,7 +447,6 @@ export function parseAndValidateArticle(
     links,
     outline,
     ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
-    readingMinutes: calculateReadingMinutes(content),
   };
 
   const validationResult: ArticleValidationResult = {
@@ -616,7 +607,6 @@ const loadedEntries = Object.entries(getAstroModules()).map(([file, markdown]) =
     Content: markdown.Content,
     headings: markdown.getHeadings(),
     outline: parsed.outline ?? extractArticleOutline(markdown.getHeadings()),
-    readingMinutes: parsed.readingMinutes,
   } satisfies Article;
   return { article, parsed };
 });

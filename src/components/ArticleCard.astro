@@ -1,6 +1,5 @@
 ---
 import Icon from './Icon.astro';
-import { profile } from '../data/profile';
 import type { Article } from '../lib/articles';
 interface Props {
   article: Article;
@@ -30,13 +29,12 @@ const { frontmatter } = article;
       {frontmatter.tags?.map((tag) => <li>{tag}</li>)}
     </ul>
   )}
-  <footer class="metadata">
-    <span>By {profile.username}</span>
-    {frontmatter.publishedAt && (
+  {frontmatter.publishedAt && (
+    <footer class="metadata">
       <time datetime={frontmatter.publishedAt}>
         <Icon name="calendar" size={14} />
         <span>{frontmatter.publishedAt}</span>
       </time>
-    )}
-  </footer>
+    </footer>
+  )}
 </article>

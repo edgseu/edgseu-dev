@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
 import {
-  calculateReadingMinutes,
   parseAndValidateArticle,
   sortArticles,
   validateArticleCollection,
@@ -34,7 +33,6 @@ plain output
   assert.equal(result.article?.title, 'Valid Article');
   assert.equal(result.article?.state, 'Published');
   assert.equal(result.article?.publishedAt, '2026-08-30');
-  assert.equal(result.article?.readingMinutes, 1);
 });
 test('structured Article source uses the same validation and normalization interface', () => {
   const result = parseAndValidateArticle({
@@ -50,7 +48,6 @@ test('structured Article source uses the same validation and normalization inter
 
   assert.equal(result.valid, true);
   assert.equal(result.article?.publishedAt, '2026-08-30');
-  assert.equal(result.article?.readingMinutes, 1);
 });
 
 test('article validation rejects loose dates and non-array metadata', () => {
@@ -165,7 +162,6 @@ test('validateArticleCollection catches pin overflow, route collisions, and draf
       publishedAt: '2026-08-01',
       pinned: true,
       links: ['/articles/draft-article/'],
-      readingMinutes: 1,
     },
     {
       slug: 'article-2',
@@ -176,7 +172,6 @@ test('validateArticleCollection catches pin overflow, route collisions, and draf
       pinned: true,
       aliases: ['/articles/article-1/'],
       links: [],
-      readingMinutes: 1,
     },
     {
       slug: 'article-3',
@@ -186,7 +181,6 @@ test('validateArticleCollection catches pin overflow, route collisions, and draf
       publishedAt: '2026-08-03',
       pinned: true,
       links: [],
-      readingMinutes: 1,
     },
     {
       slug: 'draft-article',
@@ -194,7 +188,6 @@ test('validateArticleCollection catches pin overflow, route collisions, and draf
       summary: 'Draft S',
       state: 'Draft' as const,
       links: [],
-      readingMinutes: 1,
     },
   ];
 
@@ -210,7 +203,6 @@ test('validateArticleCollection detects aliases that precede colliding canonical
     summary: 'Summary',
     state: 'Draft' as const,
     links: [],
-    readingMinutes: 1,
   };
   const errors = validateArticleCollection([
     { ...base, slug: 'first', aliases: ['/articles/second/'] },
@@ -218,12 +210,6 @@ test('validateArticleCollection detects aliases that precede colliding canonical
   ]);
 
   assert.match(errors.join('\n'), /alias collides with another Article route/);
-});
-
-test('calculateReadingMinutes calculates word count accurately', () => {
-  assert.equal(calculateReadingMinutes('one two three'), 1);
-  const longText = Array.from({ length: 450 }, () => 'word').join(' ');
-  assert.equal(calculateReadingMinutes(longText), 3);
 });
 
 test('sortArticles places pinned articles first, then newest published date', () => {
@@ -242,7 +228,6 @@ test('sortArticles places pinned articles first, then newest published date', ()
       Content: dummyComponent,
       headings: [],
       outline: [],
-      readingMinutes: 1,
     },
     {
       slug: 'new-unpinned',
@@ -257,7 +242,6 @@ test('sortArticles places pinned articles first, then newest published date', ()
       Content: dummyComponent,
       headings: [],
       outline: [],
-      readingMinutes: 1,
     },
     {
       slug: 'pinned-article',
@@ -272,7 +256,6 @@ test('sortArticles places pinned articles first, then newest published date', ()
       Content: dummyComponent,
       headings: [],
       outline: [],
-      readingMinutes: 1,
     },
   ];
 
@@ -398,7 +381,6 @@ test('series display names must be spelled consistently for the same slug', () =
     links: [] as string[],
     series,
     seriesSlug: 'series-alpha',
-    readingMinutes: 1,
   });
   const errors = validateArticleCollection([
     article('series-alpha', 'Series Alpha'),
@@ -458,7 +440,6 @@ test('series parts must be unique and declared on every member or none', () => {
       links: [] as string[],
       series: 'Series Alpha',
       seriesSlug: 'series-alpha',
-      readingMinutes: 1,
     };
     return part === undefined ? base : { ...base, part };
   };
