@@ -10,7 +10,8 @@
   "scripts": {
     "dev": "astro dev",
     "validate": "tsx scripts/validate-content.ts",
-    "check": "pnpm validate && astro check",
+    "lint": "eslint .",
+    "check": "pnpm validate && pnpm lint && astro check",
     "build": "pnpm check && astro build",
     "preview": "astro preview",
     "test:validation": "tsx --test --test-concurrency=1 tests/*.test.ts",
@@ -34,10 +35,13 @@
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@axe-core/playwright": "4.13.0",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "1.62.1",
     "@types/mdast": "^4.0.4",
     "@types/node": "^24.13.3",
     "cheerio": "1.2.0",
+    "eslint": "^10.9.1",
+    "eslint-plugin-astro": "^3.1.0",
     "gray-matter": "^4.0.3",
     "lighthouse": "13.4.1",
     "mdast-util-to-string": "^4.0.0",
@@ -45,6 +49,7 @@
     "serve-handler": "6.1.7",
     "tsx": "4.23.12",
     "typescript": "6.0.3",
+    "typescript-eslint": "^8.69.0",
     "unified": "^11.0.5"
   }
 }
