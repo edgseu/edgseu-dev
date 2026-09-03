@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
-import { publishedArticles } from '../../src/lib/articles';
+import { publishedArticles } from '../helpers/test-articles';
 
 const dynamicRoutes = ['/', '/projects/', '/articles/'];
 if (publishedArticles.length > 0 && publishedArticles[0]) {

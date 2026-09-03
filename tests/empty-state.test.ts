@@ -1,11 +1,18 @@
 import assert from 'node:assert/strict';
-import { readFileSync, rmSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
-import { allArticles } from '../src/lib/articles';
 
 const output = 'dist-empty';
+
+function listArticleSlugs(): string[] {
+  const root = join(process.cwd(), 'src', 'content', 'articles');
+  if (!existsSync(root)) return [];
+  return readdirSync(root, { withFileTypes: true })
+    .filter((entry) => entry.isDirectory())
+    .map((entry) => entry.name);
+}
 
 test('production build excludes Article routes and renders truthful empty states', () => {
   rmSync(output, { recursive: true, force: true });
@@ -20,9 +27,9 @@ test('production build excludes Article routes and renders truthful empty states
   const sitemap = readFileSync(join(output, 'sitemap.xml'), 'utf8');
   assert.match(homepage, /No articles are published yet/);
   assert.match(articles, /No articles are published yet/);
-  for (const article of allArticles) {
-    assert.doesNotMatch(sitemap, new RegExp(`/articles/${article.slug}/`));
-    assert.throws(() => readFileSync(join(output, `articles/${article.slug}/index.html`)));
+  for (const slug of listArticleSlugs()) {
+    assert.doesNotMatch(sitemap, new RegExp(`/articles/${slug}/`));
+    assert.throws(() => readFileSync(join(output, `articles/${slug}/index.html`)));
   }
   rmSync(output, { recursive: true, force: true });
 });
