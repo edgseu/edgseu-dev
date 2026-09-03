@@ -14,7 +14,6 @@ const languages = (
   project.enrichment?.languages ??
   (project.enrichment?.language ? [project.enrichment.language] : [])
 ).slice(0, 3);
-const pushedAt = project.enrichment?.pushedAt;
 ---
 
 <article class={`project-card ${project.pinned ? 'is-pinned' : ''}`}>
@@ -32,14 +31,9 @@ const pushedAt = project.enrichment?.pushedAt;
   <ul class="tag-list" aria-label={`${project.title} technologies`}>
     {project.tags.map((tag) => <li>{tag}</li>)}
   </ul>
-  {(languages.length > 0 || pushedAt) && (
+  {languages.length > 0 && (
     <footer class="project-card-meta">
-      {languages.length > 0 && (
-        <span class="meta-item"><Icon name="code" size={13} /> {languages.join(', ')}</span>
-      )}
-      {pushedAt && (
-        <span class="meta-item"><Icon name="clock" size={13} /> Updated <time datetime={pushedAt}>{pushedAt}</time></span>
-      )}
+      <span class="meta-item"><Icon name="code" size={13} /> {languages.join(', ')}</span>
     </footer>
   )}
 </article>
