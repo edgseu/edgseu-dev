@@ -126,6 +126,14 @@ export function calculateReadingMinutes(content: string): number {
   return Math.max(1, Math.ceil(words / 220));
 }
 
+const ALLOWED_IMAGE_EXTS: Record<string, true> = {
+  '.png': true,
+  '.jpg': true,
+  '.jpeg': true,
+  '.webp': true,
+  '.svg': true,
+};
+
 function validateLocalTarget(
   target: string,
   isImage: boolean,
@@ -143,10 +151,7 @@ function validateLocalTarget(
   if (!existsSync(path)) {
     return `broken local ${isImage ? 'asset' : 'link'}: ${target}`;
   }
-  if (
-    isImage &&
-    !['.png', '.jpg', '.jpeg', '.webp', '.svg'].includes(extname(path).toLocaleLowerCase())
-  ) {
+  if (isImage && !ALLOWED_IMAGE_EXTS[extname(path).toLocaleLowerCase()]) {
     return `unsupported committed image format: ${target}`;
   }
   return undefined;
