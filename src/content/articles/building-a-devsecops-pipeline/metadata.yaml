@@ -1,7 +1,0 @@
-title: Building a verifiable DevSecOps delivery path
-summary: A practical approach to making security controls visible, repeatable, and useful from commit to deployment.
-state: Draft
-tags:
-  - DevSecOps
-  - GitOps
-  - Supply chain security

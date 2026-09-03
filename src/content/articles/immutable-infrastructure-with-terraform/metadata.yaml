@@ -1,7 +1,0 @@
-title: Immutable infrastructure patterns with Terraform
-summary: Designing reproducible cloud environments with modular Terraform patterns and state isolation.
-state: Draft
-tags:
-  - Terraform
-  - Cloud
-  - Infrastructure as code

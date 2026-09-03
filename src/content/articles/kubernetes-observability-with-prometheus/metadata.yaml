@@ -1,8 +1,0 @@
-title: Kubernetes observability with Prometheus and Grafana
-summary: Establishing actionable metrics, service monitors, and cluster alerts for production Kubernetes workloads.
-state: Draft
-tags:
-  - Kubernetes
-  - Prometheus
-  - Observability
-  - Grafana

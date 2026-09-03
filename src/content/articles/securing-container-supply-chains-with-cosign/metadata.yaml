@@ -1,8 +1,0 @@
-title: Securing container supply chains with Sigstore Cosign
-summary: Cryptographic container image signing and admission policy verification in Kubernetes clusters.
-state: Draft
-tags:
-  - Security
-  - Containers
-  - Cosign
-  - Supply chain
