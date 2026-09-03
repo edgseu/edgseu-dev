@@ -3,6 +3,7 @@ import { mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { chromium } from '@playwright/test';
+import { publishedArticles } from '../src/lib/articles';
 
 interface Measurement {
   performance: number;
@@ -11,7 +12,11 @@ interface Measurement {
   tbt: number;
 }
 
-const routes = ['/', '/projects/', '/articles/', '/articles/kvm-windows-optimization/'];
+const routes = ['/', '/projects/', '/articles/'];
+if (publishedArticles.length > 0 && publishedArticles[0]) {
+  routes.push(publishedArticles[0].path);
+}
+
 const artifactDirectory = 'artifacts';
 mkdirSync(artifactDirectory, { recursive: true });
 const server = spawn('pnpm', ['astro', 'preview', '--host', '127.0.0.1', '--port', '4321'], {

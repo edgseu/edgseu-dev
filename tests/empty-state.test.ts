@@ -3,6 +3,7 @@ import { readFileSync, rmSync } from 'node:fs';
 import { join } from 'node:path';
 import { spawnSync } from 'node:child_process';
 import test from 'node:test';
+import { allArticles } from '../src/lib/articles';
 
 const output = 'dist-empty';
 
@@ -19,9 +20,9 @@ test('production build excludes Article routes and renders truthful empty states
   const sitemap = readFileSync(join(output, 'sitemap.xml'), 'utf8');
   assert.match(homepage, /No articles are published yet/);
   assert.match(articles, /No articles are published yet/);
-  assert.doesNotMatch(sitemap, /building-a-devsecops-pipeline/);
-  assert.throws(() => readFileSync(join(output, 'articles/building-a-devsecops-pipeline/index.html')));
-  assert.doesNotMatch(sitemap, /draft-preview/);
-  assert.throws(() => readFileSync(join(output, 'articles/draft-preview/index.html')));
+  for (const article of allArticles) {
+    assert.doesNotMatch(sitemap, new RegExp(`/articles/${article.slug}/`));
+    assert.throws(() => readFileSync(join(output, `articles/${article.slug}/index.html`)));
+  }
   rmSync(output, { recursive: true, force: true });
 });
