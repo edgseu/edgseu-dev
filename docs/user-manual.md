@@ -553,7 +553,8 @@ Rules:
 - committed article image formats are `.png`, `.jpg`, `.jpeg`, `.webp`, and `.svg`;
 - use relative paths for article-local images; `/images/...` is not accepted by the article link validator;
 - optimize images before committing them;
-- any image loaded as an initial page resource must remain at or below 200 KiB.
+- the build automatically generates responsive `srcset` variants for article images (`image.layout: 'constrained'` in `astro.config.ts`), so commit one reasonably sized source image instead of hand-made size variants; and
+- every article image, including every generated responsive variant, must remain at or below 200 KiB; the artifact gate verifies each `srcset` candidate.
 
 Use empty alt text only for genuinely decorative images that add no information.
 
@@ -702,7 +703,8 @@ Then search the repository for the old hostname, run `pnpm quality`, deploy, ver
 | --- | --- | --- |
 | `pnpm dev` | Starts Astro development mode with draft visibility. | During editing. |
 | `pnpm validate` | Runs repository-specific profile, project, article, Markdown, date, link, and pin validation. | After every content edit. |
-| `pnpm check` | Runs `pnpm validate`, then `astro check`. | After content or TypeScript/Astro changes. |
+| `pnpm lint` | Runs ESLint (with `eslint-plugin-astro`) over `.ts` and `.astro` files. | After TypeScript or component changes. |
+| `pnpm check` | Runs `pnpm validate`, then `pnpm lint`, then `astro check`. | After content or TypeScript/Astro changes. |
 | `pnpm build` | Runs `pnpm check`, then creates `dist/`. | Before preview or tests. |
 | `pnpm preview` | Serves the existing production artifact. | To inspect the exact draft-free build. |
 | `pnpm test:validation` | Runs Node validation and rendering tests in `tests/*.test.ts`. | After changing schemas, loaders, or validation behavior. |
@@ -721,6 +723,7 @@ The release gate covers observable behavior including:
 - profile schema failures and optional résumé/availability rendering;
 - Project catalog validation, network-free module imports, enrichment fallback, archive status, and repository identity failures;
 - Article metadata, heading, code-fence, link, alias-collision, and publication validation;
+- ESLint code-quality rules over TypeScript and `.astro` components;
 - article and project draft exclusion from production;
 - empty article states;
 - Terminal command registry, shared output formatting, completion, and history behavior;
@@ -747,7 +750,7 @@ For each generated HTML route, `scripts/check-artifact.ts` enforces:
 | Gzipped fonts | 100 KiB |
 | Gzipped initial HTML plus first-party resources | 500 KiB |
 | Initial first-party resources | 20 |
-| Individual initially loaded image | 200 KiB uncompressed file size |
+| Individual image, including every responsive `srcset` variant | 200 KiB uncompressed file size |
 
 Do not “fix” a budget failure by raising the threshold without understanding the regression. Optimize or remove the new payload first.
 
@@ -783,14 +786,12 @@ The `.github/workflows/site.yml` workflow runs on:
 The validation job:
 
 1. checks out the repository;
-2. configures pnpm 11.24.0;
-3. configures Node.js 24 with pnpm caching;
-4. installs with `pnpm install --frozen-lockfile`;
-5. installs Chromium and its Linux dependencies;
-6. runs `pnpm quality` with Giscus IDs from Actions variables;
-7. uploads `dist/` only for a push to `main`.
+2. installs pnpm 11.24.0 and Node.js 24 in a single step through `pnpm/setup` (with pnpm store caching and frozen-lockfile install);
+3. installs Chromium and its Linux dependencies;
+4. runs `pnpm quality` with Giscus IDs from Actions variables;
+5. uploads `dist/` only for a push to `main`.
 
-The deploy job runs only after the `main` validation job succeeds. It deploys the uploaded artifact through GitHub Pages using GitHub’s OIDC-based Pages permissions. The `pages` concurrency group does not cancel a deployment already in progress; deployments queue rather than interrupting one another.
+The deploy job runs only after the `main` validation job succeeds. It deploys the uploaded artifact through GitHub Pages using GitHub’s OIDC-based Pages permissions. Concurrency is scoped per ref: pushes to `main` queue behind one another so a deployment never interrupts another, while superseded pull-request runs are cancelled instead of piling up.
 
 ### One-time GitHub Pages settings
 
@@ -868,7 +869,7 @@ It checks:
 - résumé URL when configured;
 - every published project repository URL.
 
-The check follows redirects and uses a 15-second timeout per URL. Its step uses `continue-on-error: true`, so a broken destination requests human review without blocking the workflow as a hard release failure. Open the logs and fix, replace, or intentionally remove stale destinations.
+The check follows redirects and uses a 15-second timeout per URL. A broken destination fails the workflow run so the failure is visible in the Actions tab; open the logs and fix, replace, or intentionally remove stale destinations, then re-run or let the next scheduled run confirm the repair.
 
 ### Dependabot
 
@@ -964,7 +965,7 @@ pnpm build
 pnpm test:e2e
 ```
 
-Also check whether another process occupies port 4321. Playwright reuses an existing server at that URL, so an unrelated or stale server can produce confusing results.
+Also check whether another process occupies port 4321. Playwright reuses an existing server at that URL during local runs (CI runs never reuse one), so an unrelated or stale local server can produce confusing results.
 
 ### Content validation rejects an article image
 

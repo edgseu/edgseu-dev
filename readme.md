@@ -20,8 +20,8 @@ The repository is also an implementation sample. It shows:
 - Curated project data enriched at build time with public GitHub repository metadata
 - Accessible interaction patterns, keyboard navigation, reduced-motion support, and responsive layouts down to 320 CSS pixels
 - Canonical metadata, Open Graph and Twitter metadata, structured data, a generated sitemap, and robots policy
-- Explicit page-weight, request-count, and asset-size budgets
-- Automated content validation, type checking, production builds, browser tests, accessibility checks, and artifact inspection
+- Explicit page-weight, request-count, and asset-size budgets, with responsive image variants generated at build time
+- Automated content validation, linting, type checking, production builds, browser tests, accessibility checks, and artifact inspection
 - GitHub Pages deployment only after the release gate passes
 
 ## Technical overview
@@ -33,6 +33,7 @@ The repository is also an implementation sample. It shows:
 | Styling | Tailwind CSS 4 through Vite, plus the site stylesheet |
 | Content | Markdown with GitHub Flavored Markdown |
 | Validation | Zod and shared in-process content validators |
+| Code quality | ESLint with `eslint-plugin-astro` and `typescript-eslint` |
 | Browser testing | Playwright with Chromium and axe-core |
 | Performance review | Lighthouse runner with repeat measurements |
 | Hosting | GitHub Pages with a custom domain |
@@ -82,7 +83,8 @@ pnpm preview
 
 ```bash
 pnpm validate          # Validate profile, projects, articles, links, and content rules
-pnpm check             # Content validation plus Astro type checking
+pnpm lint              # ESLint over TypeScript and Astro components
+pnpm check             # Content validation, linting, and Astro type checking
 pnpm test              # Build, validation tests, and Playwright end-to-end tests
 pnpm quality           # Complete deterministic release gate, including artifact checks
 pnpm lighthouse        # Three-run performance review across representative routes
