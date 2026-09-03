@@ -71,3 +71,14 @@ test('an article without a series shows no series card', async ({ page }) => {
   await page.goto(plain?.path ?? '/');
   await expect(page.locator('.article-series-card')).toHaveCount(0);
 });
+
+test('a series article leads its card tags with the series part pill', async ({ page }) => {
+  test.skip(seriesNames.length === 0, 'No published article declares a series');
+  const first = seriesArticles.find((article) => article.frontmatter.part === 1) ?? seriesArticles[0];
+  await page.goto('/articles/');
+  const card = page.locator('.article-card', { has: page.locator(`a[href="${first?.path}"]`) });
+  const pill = card.locator('.tag-series');
+  await expect(pill).toBeVisible();
+  await expect(pill).toHaveText(`Series Part: ${first?.frontmatter.part}`);
+  await expect(pill.locator('xpath=preceding-sibling::*')).toHaveCount(0);
+});

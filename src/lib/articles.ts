@@ -22,6 +22,7 @@ export interface ArticleFrontmatter {
   pinned?: boolean;
   series?: string;
   seriesSlug?: string;
+  part?: number;
 }
 
 export interface ArticleOutlineNode {
@@ -45,6 +46,7 @@ export interface ParsedArticle {
   pinned?: boolean;
   series?: string;
   seriesSlug?: string;
+  part?: number;
   readingMinutes: number;
 }
 
@@ -61,6 +63,7 @@ export interface Article {
   Content: MarkdownInstance<ArticleFrontmatter>['Content'];
   headings: MarkdownInstance<ArticleFrontmatter>['getHeadings'] extends () => infer T ? T : never;
   outline: ArticleOutlineNode[];
+  seriesPart?: number;
   readingMinutes: number;
 }
 
@@ -375,6 +378,15 @@ export function parseAndValidateArticle(
   }
   const seriesSlug = series ? slug(series) : undefined;
 
+  let part: number | undefined;
+  if (data.part !== undefined) {
+    if (typeof data.part !== 'number' || !Number.isInteger(data.part) || data.part < 1 || data.part > 99) {
+      fail('part must be an integer between 1 and 99');
+    } else {
+      part = data.part;
+    }
+  }
+
   const baseDir = options.baseDirectory ?? (options.file ? dirname(options.file) : undefined);
   const tree = markdownProcessor.parse(content) as Root;
   let priorDepth = 1;
@@ -439,6 +451,7 @@ export function parseAndValidateArticle(
     ...(tags.length > 0 ? { tags } : {}),
     ...(aliases.length > 0 ? { aliases } : {}),
     ...(series && seriesSlug ? { series, seriesSlug } : {}),
+    ...(part !== undefined ? { part } : {}),
     links,
     outline,
     ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
@@ -483,6 +496,7 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
 
   let pinnedCount = 0;
   const seriesNames = new Map<string, string>();
+  const seriesPartRules = new Map<string, { parts: Map<number, string>; missing: number }>();
   for (const article of articles) {
     const fileLabel = article.file ?? article.slug;
     if (article.state === 'Published') {
@@ -503,6 +517,30 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
       } else {
         seriesNames.set(article.seriesSlug, article.series);
       }
+    }
+    if (article.seriesSlug) {
+      const group = seriesPartRules.get(article.seriesSlug) ?? { parts: new Map(), missing: 0 };
+      if (article.part !== undefined) {
+        const owner = group.parts.get(article.part);
+        if (owner) {
+          errors.push(
+            `${fileLabel}: series part ${article.part} is already claimed by ${owner}`,
+          );
+        } else {
+          group.parts.set(article.part, fileLabel);
+        }
+      } else {
+        group.missing += 1;
+      }
+      seriesPartRules.set(article.seriesSlug, group);
+    }
+  }
+
+  for (const [seriesSlug, group] of seriesPartRules) {
+    if (group.parts.size > 0 && group.missing > 0) {
+      errors.push(
+        `articles: series "${seriesNames.get(seriesSlug) ?? seriesSlug}" must declare part on every article or none (${group.missing} missing)`,
+      );
     }
   }
 
@@ -572,6 +610,7 @@ const loadedEntries = Object.entries(getAstroModules()).map(([file, markdown]) =
       ...(parsed.tags ? { tags: parsed.tags } : {}),
       ...(parsed.aliases ? { aliases: parsed.aliases } : {}),
       ...(parsed.series && parsed.seriesSlug ? { series: parsed.series, seriesSlug: parsed.seriesSlug } : {}),
+      ...(parsed.part !== undefined ? { part: parsed.part } : {}),
       ...(typeof parsed.pinned === 'boolean' ? { pinned: parsed.pinned } : {}),
     },
     Content: markdown.Content,
@@ -590,6 +629,32 @@ if (collectionErrors.length > 0) {
 }
 
 const loaded = loadedEntries.map((entry) => entry.article);
+
+const seriesGroups = new Map<string, Article[]>();
+for (const article of loaded) {
+  const groupSlug = article.frontmatter.seriesSlug;
+  if (!groupSlug) continue;
+  const group = seriesGroups.get(groupSlug) ?? [];
+  group.push(article);
+  seriesGroups.set(groupSlug, group);
+}
+for (const group of seriesGroups.values()) {
+  if (group.every((article) => article.frontmatter.part !== undefined)) {
+    for (const article of group) {
+      const declared = article.frontmatter.part;
+      if (declared !== undefined) {
+        article.seriesPart = declared;
+      }
+    }
+  } else {
+    const ordered = group.toSorted((left, right) =>
+      (left.frontmatter.publishedAt ?? '').localeCompare(right.frontmatter.publishedAt ?? ''),
+    );
+    ordered.forEach((article, index) => {
+      article.seriesPart = index + 1;
+    });
+  }
+}
 
 export const allArticles = sortArticles(loaded);
 export const publishedArticles =

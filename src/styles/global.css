@@ -319,6 +319,11 @@ h1, h2, h3 { text-wrap: balance; }
   padding: 0;
   list-style: none;
 }
+.tag-list li.tag-series {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+  font-weight: 600;
+}
 .focus-list li, .tag-list li {
   display: inline-flex;
   align-items: center;

@@ -413,3 +413,79 @@ test('series display names must be spelled consistently for the same slug', () =
   ]);
   assert.equal(consistent.length, 0);
 });
+
+
+test('Article part must be a positive integer when present', () => {
+  for (const part of [0, -1, 1.5, 'one', true]) {
+    const result = parseAndValidateArticle({
+      frontmatter: {
+        title: 'Part Edge',
+        summary: 'Part validation fixture.',
+        state: 'Published',
+        publishedAt: '2026-08-30',
+        series: 'Series Alpha',
+        part,
+      },
+      content: '## Body\n\nText.',
+    });
+    assert.equal(result.valid, false, `expected part ${JSON.stringify(part)} to be rejected`);
+    assert.match(result.errors.join('\n'), /part must be an integer between 1 and 99/);
+  }
+
+  const valid = parseAndValidateArticle({
+    frontmatter: {
+      title: 'Part Edge',
+      summary: 'Part validation fixture.',
+      state: 'Published',
+      publishedAt: '2026-08-30',
+      series: 'Series Alpha',
+      part: 7,
+    },
+    content: '## Body\n\nText.',
+  });
+  assert.equal(valid.valid, true);
+  assert.equal(valid.article?.part, 7);
+});
+
+test('series parts must be unique and declared on every member or none', () => {
+  const article = (slug: string, part: number | undefined) => {
+    const base = {
+      slug,
+      title: 'T',
+      summary: 'S',
+      state: 'Published' as const,
+      publishedAt: '2026-08-30',
+      links: [] as string[],
+      series: 'Series Alpha',
+      seriesSlug: 'series-alpha',
+      readingMinutes: 1,
+    };
+    return part === undefined ? base : { ...base, part };
+  };
+
+  const duplicate = validateArticleCollection([
+    article('series-alpha', 1),
+    article('series-alpha-two', 1),
+  ]);
+  assert.equal(duplicate.length, 1);
+  assert.match(duplicate[0] ?? '', /series part 1 is already claimed/);
+
+  const partial = validateArticleCollection([
+    article('series-alpha', 1),
+    article('series-alpha-two', undefined),
+  ]);
+  assert.equal(partial.length, 1);
+  assert.match(partial[0] ?? '', /must declare part on every article or none/);
+
+  const complete = validateArticleCollection([
+    article('series-alpha', 1),
+    article('series-alpha-two', 2),
+  ]);
+  assert.equal(complete.length, 0);
+
+  const derived = validateArticleCollection([
+    article('series-alpha', undefined),
+    article('series-alpha-two', undefined),
+  ]);
+  assert.equal(derived.length, 0);
+});

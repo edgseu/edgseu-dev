@@ -20,9 +20,14 @@ const { frontmatter } = article;
   )}
   <Heading><a href={article.path}>{frontmatter.title}</a></Heading>
   <p>{frontmatter.summary}</p>
-  {frontmatter.tags && frontmatter.tags.length > 0 && (
+  {(article.seriesPart || (frontmatter.tags && frontmatter.tags.length > 0)) && (
     <ul class="tag-list" aria-label={`${frontmatter.title} tags`}>
-      {frontmatter.tags.map((tag) => <li>{tag}</li>)}
+      {article.seriesPart && (
+        <li class="tag-series" title={`Part ${article.seriesPart} of the ${frontmatter.series} series`}>
+          Series Part: {article.seriesPart}
+        </li>
+      )}
+      {frontmatter.tags?.map((tag) => <li>{tag}</li>)}
     </ul>
   )}
   <footer class="metadata">

@@ -26,6 +26,7 @@ export interface TestArticle {
     pinned?: boolean;
     series?: string;
     seriesSlug?: string;
+    part?: number;
   };
 }
 
@@ -71,6 +72,7 @@ function readPublishedArticles(): TestArticle[] {
         ...(Array.isArray(data.aliases) ? { aliases: data.aliases.map(String) } : {}),
         ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
         ...(series ? { series, seriesSlug: seriesSlug(series) } : {}),
+        ...(typeof data.part === 'number' ? { part: data.part } : {}),
       },
     });
   }

@@ -464,6 +464,7 @@ Remove fields you do not need. `revisedAt`, `pinned`, `tags`, and `aliases` are 
 | `aliases` | Optional list of old article routes in exact `/articles/lowercase-kebab-case/` form. |
 | `pinned` | Optional boolean. At most two published articles may be pinned. |
 | `series` | Optional nonempty plain text, 80 characters or fewer, without `#`, `<`, `>`, or a line break. Articles sharing a series name form one series and must spell the name identically. |
+| `part` | Optional positive integer (1 to 99), only meaningful with `series`. If any article of a series declares `part`, every member must, and parts must be unique within the series. When no member declares it, the card derives the part from publication order. Article cards lead their tag list with a `Series Part: N` pill. |
 
 ### Series
 
@@ -473,7 +474,7 @@ Articles can belong to a named series by adding `series: <name>` to `metadata.ya
 - `/articles/?series=<slug>` deep-links (including browser back/forward) preselect that filter;
 - on an article page whose metadata declares a series, a small sticky card below the table of contents shows the series name and links back to the filtered index.
 
-Validation requires the same spelling for all articles of one series, so the card and rail always show one canonical name. Drafts participate in development previews the same way.
+Validation requires the same spelling for all articles of one series, so the card and rail always show one canonical name. Drafts participate in development previews the same way. Articles can declare `part: <n>` to pin their position; the article card then leads its tag list with a `Series Part: N` pill. When no member declares `part`, positions derive from publication order.
 
 Use calendar dates deliberately. Do not update `publishedAt` when correcting an article. Add or update `revisedAt` only for a meaningful revision that readers should see.
 
