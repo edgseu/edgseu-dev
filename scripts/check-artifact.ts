@@ -107,14 +107,24 @@ for (const file of htmlFiles) {
   $('img[src]').each((_, element) => {
     const value = $(element).attr('src');
     if (!value?.startsWith('/')) return;
-    const asset = localAsset(value);
-    if (!asset) {
-      fail(route, `missing image asset: ${value}`);
-      return;
+    // Responsive images list every generated breakpoint candidate in srcset;
+    // each one must exist in the artifact and honor the per-image budget.
+    const candidates = new Set<string>([value]);
+    for (const entry of ($(element).attr('srcset') ?? '').split(',')) {
+      const candidate = entry.trim().split(/\s+/u)[0];
+      if (candidate) candidates.add(candidate);
     }
-    const bytes = readFileSync(asset);
-    if (bytes.byteLength > 200 * 1024) {
-      fail(route, `image exceeds 200 KiB: ${value}`);
+    for (const candidate of candidates) {
+      if (!candidate.startsWith('/')) continue;
+      const asset = localAsset(candidate);
+      if (!asset) {
+        fail(route, `missing image asset: ${candidate}`);
+        continue;
+      }
+      const bytes = readFileSync(asset);
+      if (bytes.byteLength > 200 * 1024) {
+        fail(route, `image exceeds 200 KiB: ${candidate}`);
+      }
     }
   });
   if (jsBytes > 40 * 1024) fail(route, `JavaScript budget exceeded: ${jsBytes} gzip bytes`);

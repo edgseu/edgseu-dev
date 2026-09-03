@@ -103,6 +103,7 @@ export default defineConfig({
   site: site.canonicalUrl,
   output: 'static',
   trailingSlash: 'always',
+  image: { layout: 'constrained', responsiveStyles: true },
   markdown: {
     processor: unified({
       gfm: true,
