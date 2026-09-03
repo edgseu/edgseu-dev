@@ -82,7 +82,7 @@ for (const file of htmlFiles) {
   }
 
   const resourceUrls = new Set<string>();
-  $('script[src], link[rel="stylesheet"][href], img[src]').each((_, element) => {
+  $('script[src], link[rel="stylesheet"][href], img[src]:not([loading="lazy"])').each((_, element) => {
     const value = $(element).attr('src') ?? $(element).attr('href');
     if (value?.startsWith('/')) resourceUrls.add(value);
   });
@@ -103,10 +103,20 @@ for (const file of htmlFiles) {
     if (extension === '.js') jsBytes += gzipBytes;
     if (extension === '.css') cssBytes += gzipBytes;
     if (['.woff', '.woff2', '.ttf', '.otf'].includes(extension)) fontBytes += gzipBytes;
-    if (['.png', '.jpg', '.jpeg', '.webp', '.avif', '.svg'].includes(extension) && bytes.byteLength > 200 * 1024) {
-      fail(route, `initial image exceeds 200 KiB: ${url}`);
-    }
   }
+  $('img[src]').each((_, element) => {
+    const value = $(element).attr('src');
+    if (!value?.startsWith('/')) return;
+    const asset = localAsset(value);
+    if (!asset) {
+      fail(route, `missing image asset: ${value}`);
+      return;
+    }
+    const bytes = readFileSync(asset);
+    if (bytes.byteLength > 200 * 1024) {
+      fail(route, `image exceeds 200 KiB: ${value}`);
+    }
+  });
   if (jsBytes > 40 * 1024) fail(route, `JavaScript budget exceeded: ${jsBytes} gzip bytes`);
   if (cssBytes > 50 * 1024) fail(route, `CSS budget exceeded: ${cssBytes} gzip bytes`);
   if (fontBytes > 100 * 1024) fail(route, `font budget exceeded: ${fontBytes} gzip bytes`);

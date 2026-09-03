@@ -1,7 +1,6 @@
 title: Declarative GitOps workflows with Argo CD
 summary: Automating continuous deployment, drift detection, and automated rollback for Kubernetes manifests.
-state: Published
-publishedAt: "2026-08-18"
+state: Draft
 tags:
   - GitOps
   - Argo CD

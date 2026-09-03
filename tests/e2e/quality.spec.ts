@@ -1,7 +1,7 @@
 import AxeBuilder from '@axe-core/playwright';
 import { expect, test } from '@playwright/test';
 
-const routes = ['/', '/projects/', '/articles/', '/articles/building-a-devsecops-pipeline/'];
+const routes = ['/', '/projects/', '/articles/', '/articles/kvm-windows-optimization/'];
 
 for (const route of routes) {
   for (const theme of ['dark', 'light'] as const) {
@@ -34,7 +34,7 @@ test('skip link is first and focus is visibly targetable', async ({ page }) => {
 
 test('reduced motion removes smooth scrolling and transitions', async ({ page }) => {
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.goto('/articles/building-a-devsecops-pipeline/');
+  await page.goto('/articles/kvm-windows-optimization/');
   const styles = await page.evaluate(() => ({
     scroll: getComputedStyle(document.documentElement).scrollBehavior,
     progress: getComputedStyle(document.querySelector('.outline-progress-bar') ?? document.body).transitionDuration,
