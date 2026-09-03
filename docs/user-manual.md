@@ -254,7 +254,7 @@ Inspect the profile rail, terminal `whoami`, terminal `skills`, contact output, 
 
 ## 5. Managing projects
 
-The authoritative project catalog is `src/content/projects.md`. Each entry is curated under the `projects:` frontmatter list and enriched with public repository data during the build.
+The authoritative project catalog is `src/content/projects.yaml`. Each entry is curated in the top-level YAML array and enriched with public repository data during the build.
 
 ### Project template
 
@@ -414,31 +414,43 @@ pnpm dev
 
 Open `/articles/my-article/`. Drafts appear in the local article index and have a visible draft banner. They are not included in production article cards, routes, redirects, article navigation, or the sitemap.
 
-### Published article template
+### Published article templates
 
-```markdown
----
+The repository standard separates structured metadata from the Markdown prose:
+
+#### Published article metadata template (`metadata.yaml`)
+
+```yaml
 title: A plain-text article title
 summary: A unique plain-text description used on cards and in metadata.
 state: Published
-publishedAt: 2026-09-01
-revisedAt: 2026-09-15
+publishedAt: "2026-09-01"
+revisedAt: "2026-09-15"
 pinned: false
 tags:
   - Kubernetes
   - Security
 aliases:
   - /articles/old-article-slug/
----
+```
 
+#### Published article body template (`index.md`)
+
+```markdown
 ## The first section
 
-Article body.
+Write the article in portable Markdown.
+
+### A subsection
+
+Continue with evidence, examples, and operational detail.
 ```
+
+Single-file frontmatter (`---` block at the top of `index.md`) is also supported by the loader for portable standalone imports.
 
 Remove fields you do not need. `revisedAt`, `pinned`, `tags`, and `aliases` are optional. `publishedAt` is mandatory for a published article.
 
-### Frontmatter rules
+### Metadata and frontmatter rules
 
 | Field | Rules |
 | --- | --- |

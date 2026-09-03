@@ -1,6 +1,7 @@
 ---
 import { publishedArticles } from '../lib/articles';
 import { site } from '../data/site';
+import { profile } from '../data/profile';
 
 export function getStaticPaths() {
   return publishedArticles.flatMap((article) =>
@@ -25,7 +26,7 @@ const canonical = new URL(destination, site.canonicalUrl).href;
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Article moved · edgseu</title>
+    <title>Article moved · {profile.username}</title>
     <meta name="robots" content="noindex, follow" />
     <link rel="canonical" href={canonical} />
     <meta http-equiv="refresh" content={`0;url=${destination}`} />
