@@ -77,7 +77,7 @@ root:x:!/honeypot/i
 root:x:*
 phil:x:*
 phil:x:fout
-```text
+```
 
 In other words: `root` accepts any password except the exact strings `root` and `123456`, plus anything matching `honeypot` case-insensitively (plain rules compare the whole password, only `/regex/` rules substring-search). No lockout, no rate limit. My lab ships no `userdb.txt`, so these defaults apply, and that choice turns out to matter a lot in Part 3. Cowrie also offers an `auth_random` mode that accepts only after 2 to 5 distinct attempts per source IP, approximating a real box's failure curve.
 
@@ -134,7 +134,7 @@ listen_endpoints = tcp:2223:interface=0.0.0.0
 enabled = true
 facility = USER
 format = cef
-```text
+```
 
 Note what is *not* set: the SSH wire banner (`version`), the cipher and MAC lists, `kernel_version`, and the in-shell `ssh -V` string. All of those fall back to the 3.0.0 defaults, and the defaults contain internal inconsistencies that Part 3 turns into a detection technique against my own lab.
 
@@ -147,3 +147,4 @@ The overwhelming majority of public SSH/Telnet traffic is automated and runs tha
 ---
 
 *Read Part 2: "From Fake Shell to Real Alert: Building a Cowrie Honeypot on Azure with Microsoft Sentinel", and find the labs at [github.com/edgseu/cowrie-sentinel-lab](https://github.com/edgseu/cowrie-sentinel-lab) and [github.com/edgseu/sentinel-dshield-honeypot-lab](https://github.com/edgseu/sentinel-dshield-honeypot-lab).*
+

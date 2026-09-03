@@ -51,7 +51,7 @@ Private Ubuntu VM running Cowrie
 Log Analytics Syslog table
   -> CowrieEvents() parser
   -> scheduled Sentinel rule  +  GeoIP workbook
-```text
+```
 
 ![The full pipeline: internet to load balancer to private VM, CEF over syslog into Log Analytics, then the Sentinel rule and GeoIP workbook](images/azure-pipeline.svg)
 
@@ -72,7 +72,7 @@ resource "azurerm_lb_rule" "ssh" {
   backend_address_pool_ids       = [azurerm_lb_backend_address_pool.sensor.id]
   probe_id                       = azurerm_lb_probe.ssh.id
 }
-```text
+```
 
 The property that makes this shape right for a honeypot: health probes fail *closed*. A TCP probe checks Cowrie's own ports every five seconds, and two consecutive failures take the backend out of rotation. If Cowrie dies, the load balancer stops forwarding that port entirely. The decoy's failure mode is silence, never the VM's real sshd.
 
@@ -96,7 +96,7 @@ For transport, the lab uses Cowrie's `output_localsyslog` plugin with `format = 
 
 ```text
 CEF:0|Cowrie|Cowrie|3.0.0|cowrie.session.connect|Cowrie session connect|0|src=203.0.113.10 spt=51337 dpt=2222 ...
-```text
+```
 
 rsyslog writes it to `/var/log/syslog` on the `user` facility, and the Azure Monitor Agent (a VM extension) tails it. The Data Collection Rule is the bouncer at the door:
 
@@ -109,7 +109,7 @@ data_sources {
     streams        = ["Microsoft-Syslog"]
   }
 }
-```text
+```
 
 Only the `user` facility, only Info level. Nothing else on the box, cron noise, auth spam, kernel chatter, can ride this stream into Log Analytics. A honeypot's telemetry is only as trustworthy as its containment, and the cheapest containment is a collection filter that physically cannot carry anything else. The workspace pays per GB (`PerGB2018`) with a daily quota cap, because internet background noise is voluminous and this is a hobby budget.
 
@@ -129,7 +129,7 @@ Syslog
 | project TimeGenerated, Computer, EventType,
     SourceIP = src, DestinationPort = toint(dpt),
     Username = duser, Outcome = outcome, SyslogMessage
-```text
+```
 
 Three stages: filter to Cowrie's CEF lines, extract the event id (the fifth pipe-delimited header field) with a regex, then parse the key-value extension with `parse-kv` in `greedy=true` mode so values containing spaces survive. Saved with the alias `CowrieEvents()`, it gives every query in the workspace the same vocabulary: `EventType`, `SourceIP`, `DestinationPort`, `Username`, `Outcome`. The untouched `SyslogMessage` column stays in the projection, which is the debugging escape hatch: when a parsed result looks wrong, check the raw line before touching the parser.
 
@@ -156,7 +156,7 @@ CowrieEvents()
     LastSeen = max(TimeGenerated)
   by SourceIP, Protocol, DestinationPort, WindowStart = bin(TimeGenerated, 5m)
 | where ConnectionAttempts >= 5
-```text
+```
 
 Three judgment calls are embedded in that query:
 
@@ -185,7 +185,7 @@ CowrieEvents()
 | where isnotempty(SourceIP) and SourceIP != "168.63.129.16"
 | extend latitude = geo_info_from_ip_address(SourceIP)[0], longitude = geo_info_from_ip_address(SourceIP)[1]
 | summarize EventCount=count() by latitude, longitude, country = geo_info_from_ip_address(SourceIP)[2]
-```text
+```
 
 The workbook's `mapSettings` (deployed as JSON through `azurerm_application_insights_workbook`) render that as a heatmap: fixed-size markers, green-to-red color scale by event count, with a source-IP, city, and country table beneath, including honest `Unknown` rows where GeoIP has no city-level answer. A single variable, `SelectedEventType`, flips the whole view from connections to `cowrie.login.success` for the accepted-credentials presentation.
 
@@ -208,3 +208,4 @@ Everything here assumes the visitors believe the decoy. The entire pipeline, ale
 ---
 
 *The complete lab, Terraform, KQL queries, workbook, and user guide, is at [github.com/edgseu/cowrie-sentinel-lab](https://github.com/edgseu/cowrie-sentinel-lab). Missed the start? Read Part 1: "How Honeypots Work, from DShield to Cowrie."*
+
