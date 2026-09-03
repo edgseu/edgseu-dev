@@ -111,7 +111,7 @@ export default defineConfig({
       rehypePlugins: [rehypeArticleEnhancements],
     }),
     shikiConfig: {
-      themes: { light: 'github-light', dark: 'github-dark' },
+      themes: { light: 'github-light', dark: 'github-dark-high-contrast' },
       wrap: true,
     },
   },
