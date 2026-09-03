@@ -40,7 +40,7 @@ export const projectSchema = z.object({
     }
   }),
   order: z.number().int('display order must be a unique integer'),
-  pinned: z.boolean().optional(),
+  pinned: z.boolean('pinned must be a boolean').optional(),
 });
 const projectsFileSchema = z.object({
   projects: z.array(projectSchema),
@@ -324,50 +324,40 @@ export const createDefaultProvider = createDefaultEnricher;
 
 export function validateProjectCatalog(catalog: readonly Project[] = loadProjects()): string[] {
   const errors: string[] = [];
-  const fail = (location: string, message: string) => {
-    errors.push(`${location}: ${message}`);
-  };
 
   const ids = new Set<string>();
   const orders = new Set<number>();
+  let pinnedPublishedCount = 0;
 
+  // Per-project rules live in projectSchema; this loop reuses it so both the
+  // YAML gate and direct-catalog checks share one source of truth.
   for (const project of catalog) {
     const location = `project ${project.id}`;
-    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/u.test(project.id)) {
-      fail(location, 'ID must be lowercase kebab-case');
+    const result = projectSchema.safeParse(project);
+    if (!result.success) {
+      for (const issue of result.error.issues) {
+        errors.push(`${location}: ${issue.message}`);
+      }
     }
+
+    // Catalog-level (cross-project) rules that a per-entry schema cannot express.
     if (ids.has(project.id)) {
-      fail(location, 'ID must be unique');
+      errors.push(`${location}: ID must be unique`);
     }
     ids.add(project.id);
-    if (!project.title.trim()) {
-      fail(location, 'title is required');
+    if (Number.isInteger(project.order)) {
+      if (orders.has(project.order)) {
+        errors.push(`${location}: display order must be a unique integer`);
+      }
+      orders.add(project.order);
     }
-    if (!project.summary.trim() || project.summary.length > 240 || /[\n\r<>]/u.test(project.summary)) {
-      fail(location, 'summary must be plain text between 1 and 240 characters');
-    }
-    if (!/^https:\/\/github\.com\/[^/]+\/[^/]+\/?$/u.test(project.url)) {
-      fail(location, 'Published destination must be a canonical GitHub repository URL');
-    }
-    if (!Number.isInteger(project.order) || orders.has(project.order)) {
-      fail(location, 'display order must be a unique integer');
-    }
-    orders.add(project.order);
-    if (project.tags.length < 1 || project.tags.length > 6) {
-      fail(location, 'requires one to six tags');
-    }
-    const tags = project.tags.map((tag) => tag.toLocaleLowerCase());
-    if (new Set(tags).size !== tags.length) {
-      fail(location, 'tags must be unique ignoring case');
-    }
-    if (project.pinned !== undefined && typeof project.pinned !== 'boolean') {
-      fail(location, 'pinned must be a boolean');
+    if (project.state === 'Published' && project.pinned) {
+      pinnedPublishedCount++;
     }
   }
 
-  const pinnedProjects = catalog.filter((project) => project.state === 'Published' && project.pinned);
-  if (pinnedProjects.length > 4) {
-    fail('projects', 'no more than 4 Published projects may be pinned');
+  if (pinnedPublishedCount > 4) {
+    errors.push('projects: no more than 4 Published projects may be pinned');
   }
 
   return errors;
@@ -414,10 +404,7 @@ export function selectHomepageProjects(published: readonly EnrichedProject[]): {
   projects: EnrichedProject[];
   is2x2: boolean;
 } {
-  let pinnedCount = 0;
-  for (const project of published) {
-    if (project.pinned) pinnedCount++;
-  }
+  const pinnedCount = published.filter((project) => project.pinned).length;
   const count = pinnedCount > 2 ? Math.min(4, Math.max(pinnedCount, 2)) : 2;
   const selected = published.slice(0, count);
   return {
