@@ -1,0 +1,17 @@
+---
+interface Props {
+  name: string;
+  slug: string;
+  count: number;
+}
+
+const { name, slug, count } = Astro.props;
+---
+
+<nav class="series-card article-series-card" aria-label="Article series">
+  <h2>Series</h2>
+  <a class="series-link" href={`/articles/?series=${slug}`}>
+    <span class="series-name">{name}</span>
+    <span class="series-count">{count}</span>
+  </a>
+</nav>

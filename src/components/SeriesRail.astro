@@ -1,0 +1,28 @@
+---
+import type { ArticleSeriesSummary } from '../lib/articles';
+
+interface Props {
+  series: ArticleSeriesSummary[];
+}
+
+const { series } = Astro.props;
+---
+
+{series.length > 0 && (
+  <nav class="series-card" aria-label="Filter articles by series" data-series-rail>
+    <h2>Series</h2>
+    <button type="button" class="series-filter" data-series-filter="" aria-pressed="true">
+      <span>Show all</span>
+    </button>
+    <ul class="series-list">
+      {series.map((entry) => (
+        <li>
+          <button type="button" class="series-filter" data-series-filter={entry.slug} aria-pressed="false">
+            <span class="series-name">{entry.name}</span>
+            <span class="series-count">{entry.count}</span>
+          </button>
+        </li>
+      ))}
+    </ul>
+  </nav>
+)}

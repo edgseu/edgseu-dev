@@ -12,7 +12,7 @@ const Heading = `h${headingLevel}` as const;
 const { frontmatter } = article;
 ---
 
-<article class={`article-card ${frontmatter.pinned ? 'is-pinned' : ''}`}>
+<article class={`article-card ${frontmatter.pinned ? 'is-pinned' : ''}`} data-series={frontmatter.seriesSlug}>
   {frontmatter.pinned && (
     <span class="card-pinned-pill" aria-label="Pinned article">
       <Icon name="thumbtack" size={10} /> pinned

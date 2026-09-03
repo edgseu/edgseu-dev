@@ -141,14 +141,18 @@ test('desktop Table of Contents sticks to viewport when scrolling', async ({ pag
     test.skip(true, 'No outline on this article');
     return;
   }
-  const initialPosition = await outline.evaluate((el) => getComputedStyle(el).position);
+  // Stickiness is implemented on the shared aside wrapper that holds the
+  // outline (and optionally the series card) so both rails scroll together.
+  const aside = page.locator('.article-grid .article-aside');
+  const stickyElement = (await aside.count()) > 0 ? aside : outline;
+  const initialPosition = await stickyElement.evaluate((el) => getComputedStyle(el).position);
   expect(initialPosition).toBe('sticky');
 
   const headings = page.locator('.prose h2, .prose h3');
   if ((await headings.count()) > 1) {
     await headings.last().scrollIntoViewIfNeeded();
-    await expect(outline).toBeInViewport();
-    const boundingBox = await outline.boundingBox();
+    await expect(stickyElement).toBeInViewport();
+    const boundingBox = await stickyElement.boundingBox();
     expect(boundingBox).not.toBeNull();
     // Sticky release at the very end of a long article may push the outline's
     // top above the fold while its bottom remains anchored to the article; the

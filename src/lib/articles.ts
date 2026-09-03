@@ -20,6 +20,8 @@ export interface ArticleFrontmatter {
   tags?: string[];
   aliases?: string[];
   pinned?: boolean;
+  series?: string;
+  seriesSlug?: string;
 }
 
 export interface ArticleOutlineNode {
@@ -41,6 +43,8 @@ export interface ParsedArticle {
   links: string[];
   outline?: ArticleOutlineNode[];
   pinned?: boolean;
+  series?: string;
+  seriesSlug?: string;
   readingMinutes: number;
 }
 
@@ -58,6 +62,31 @@ export interface Article {
   headings: MarkdownInstance<ArticleFrontmatter>['getHeadings'] extends () => infer T ? T : never;
   outline: ArticleOutlineNode[];
   readingMinutes: number;
+}
+
+export interface ArticleSeriesSummary {
+  name: string;
+  slug: string;
+  count: number;
+}
+
+export function collectSeries(articles: readonly Article[]): ArticleSeriesSummary[] {
+  const counts = new Map<string, { name: string; count: number }>();
+  for (const article of articles) {
+    const { series, seriesSlug } = article.frontmatter;
+    if (!series || !seriesSlug) continue;
+    const existing = counts.get(seriesSlug);
+    if (existing) {
+      existing.count += 1;
+    } else {
+      counts.set(seriesSlug, { name: series, count: 1 });
+    }
+  }
+  return counts
+    .entries()
+    .map(([slug, { name, count }]) => ({ slug, name, count }))
+    .toArray()
+    .toSorted((left, right) => right.count - left.count || left.name.localeCompare(right.name));
 }
 
 export function extractArticleOutline(
@@ -329,6 +358,23 @@ export function parseAndValidateArticle(
     }
   }
 
+  let series: string | undefined;
+  if (data.series !== undefined) {
+    if (typeof data.series !== 'string') {
+      fail('series must be a string');
+    } else {
+      const trimmedSeries = data.series.trim();
+      if (!trimmedSeries || /[#<>\n\r]/u.test(trimmedSeries)) {
+        fail('series must be nonempty plain text');
+      } else if (trimmedSeries.length > 80) {
+        fail('series must be 80 characters or fewer');
+      } else {
+        series = trimmedSeries;
+      }
+    }
+  }
+  const seriesSlug = series ? slug(series) : undefined;
+
   const baseDir = options.baseDirectory ?? (options.file ? dirname(options.file) : undefined);
   const tree = markdownProcessor.parse(content) as Root;
   let priorDepth = 1;
@@ -392,6 +438,7 @@ export function parseAndValidateArticle(
     ...(revisedAt ? { revisedAt } : {}),
     ...(tags.length > 0 ? { tags } : {}),
     ...(aliases.length > 0 ? { aliases } : {}),
+    ...(series && seriesSlug ? { series, seriesSlug } : {}),
     links,
     outline,
     ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
@@ -435,6 +482,7 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
   }
 
   let pinnedCount = 0;
+  const seriesNames = new Map<string, string>();
   for (const article of articles) {
     const fileLabel = article.file ?? article.slug;
     if (article.state === 'Published') {
@@ -444,6 +492,16 @@ export function validateArticleCollection(articles: readonly ParsedArticle[]): s
         if (target?.state === 'Draft') {
           errors.push(`${fileLabel}: Published Article links to Draft Article: ${link}`);
         }
+      }
+    }
+    if (article.series && article.seriesSlug) {
+      const existingName = seriesNames.get(article.seriesSlug);
+      if (existingName && existingName !== article.series) {
+        errors.push(
+          `${fileLabel}: series must be spelled consistently across its articles: "${article.series}" and "${existingName}"`,
+        );
+      } else {
+        seriesNames.set(article.seriesSlug, article.series);
       }
     }
   }
@@ -513,6 +571,7 @@ const loadedEntries = Object.entries(getAstroModules()).map(([file, markdown]) =
       ...(parsed.revisedAt ? { revisedAt: parsed.revisedAt } : {}),
       ...(parsed.tags ? { tags: parsed.tags } : {}),
       ...(parsed.aliases ? { aliases: parsed.aliases } : {}),
+      ...(parsed.series && parsed.seriesSlug ? { series: parsed.series, seriesSlug: parsed.seriesSlug } : {}),
       ...(typeof parsed.pinned === 'boolean' ? { pinned: parsed.pinned } : {}),
     },
     Content: markdown.Content,

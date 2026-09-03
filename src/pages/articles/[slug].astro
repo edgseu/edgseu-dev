@@ -1,10 +1,11 @@
 ---
 import ArticleOutline from '../../components/ArticleOutline.astro';
+import ArticleSeriesCard from '../../components/ArticleSeriesCard.astro';
 import Icon from '../../components/Icon.astro';
 import { site } from '../../data/site';
 import { profile } from '../../data/profile';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { articleNeighbors, visibleArticles } from '../../lib/articles';
+import { articleNeighbors, collectSeries, visibleArticles } from '../../lib/articles';
 import type { Article } from '../../lib/articles';
 
 export function getStaticPaths() {
@@ -21,6 +22,9 @@ interface Props {
 const { article } = Astro.props;
 const { frontmatter, Content, headings } = article;
 const { newer, older } = articleNeighbors(article);
+const seriesSummary = frontmatter.series && frontmatter.seriesSlug
+  ? collectSeries(visibleArticles(import.meta.env.DEV)).find((entry) => entry.slug === frontmatter.seriesSlug)
+  : undefined;
 const isDraft = frontmatter.state === 'Draft';
 const giscusRepoId = import.meta.env.PUBLIC_GISCUS_REPO_ID;
 const giscusCategoryId = import.meta.env.PUBLIC_GISCUS_CATEGORY_ID;
@@ -127,7 +131,12 @@ const jsonLd = [
     </div>
 
     <div class="article-grid">
-      <ArticleOutline headings={headings} />
+      <div class="article-aside">
+        <ArticleOutline headings={headings} />
+        {seriesSummary && (
+          <ArticleSeriesCard name={seriesSummary.name} slug={seriesSummary.slug} count={seriesSummary.count} />
+        )}
+      </div>
       <div class="prose" data-article-body>
         <Content />
         <section

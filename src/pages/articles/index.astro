@@ -1,9 +1,11 @@
 ---
 import ArticleCard from '../../components/ArticleCard.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { visibleArticles } from '../../lib/articles';
+import SeriesRail from '../../components/SeriesRail.astro';
+import { visibleArticles, collectSeries } from '../../lib/articles';
 
 const articles = visibleArticles(import.meta.env.DEV);
+const series = collectSeries(articles);
 ---
 
 <BaseLayout
@@ -14,11 +16,65 @@ const articles = visibleArticles(import.meta.env.DEV);
     <h1>Articles</h1>
     <p>Long-form notes built from portable Markdown and published in descending original publication order.</p>
   </header>
-  <section aria-label="Published articles">
-    {articles.length > 0 ? (
-      <div class="cards article-index-list">{articles.map((article) => <ArticleCard article={article} headingLevel={2} />)}</div>
-    ) : (
-      <p class="empty-state">No articles are published yet. Approved writing will appear here.</p>
-    )}
-  </section>
+  <div class={series.length > 0 ? 'articles-grid has-rail' : 'articles-grid'} data-series-root>
+    {series.length > 0 && <SeriesRail series={series} />}
+    <section aria-label="Published articles">
+      {articles.length > 0 ? (
+        <div class="cards article-index-list" data-article-list>
+          {articles.map((article) => <ArticleCard article={article} headingLevel={2} />)}
+        </div>
+      ) : (
+        <p class="empty-state">No articles are published yet. Approved writing will appear here.</p>
+      )}
+      <p class="empty-state" data-series-empty hidden>No articles match this series yet.</p>
+    </section>
+  </div>
 </BaseLayout>
+
+<script>
+  const root = document.querySelector<HTMLElement>('[data-series-root]');
+  if (root) {
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-article-list] > .article-card')];
+    const filters = [...root.querySelectorAll<HTMLButtonElement>('[data-series-rail] .series-filter')];
+    const list = root.querySelector<HTMLElement>('[data-article-list]');
+    const emptyNote = root.querySelector<HTMLElement>('[data-series-empty]');
+    const knownFilters = new Set(filters.map((filter) => filter.dataset.seriesFilter ?? ''));
+
+    const applyFilter = (requested: string, updateUrl: boolean) => {
+      const active = requested && knownFilters.has(requested) ? requested : '';
+      let visibleCount = 0;
+      for (const card of cards) {
+        const match = active === '' || card.dataset.series === active;
+        card.hidden = !match;
+        if (match) visibleCount += 1;
+      }
+      for (const filter of filters) {
+        filter.setAttribute('aria-pressed', String((filter.dataset.seriesFilter ?? '') === active));
+      }
+      if (list && emptyNote) {
+        list.hidden = visibleCount === 0;
+        emptyNote.hidden = visibleCount > 0;
+      }
+      if (updateUrl) {
+        const url = new URL(window.location.href);
+        if (active) {
+          url.searchParams.set('series', active);
+        } else {
+          url.searchParams.delete('series');
+        }
+        window.history.replaceState(null, '', url);
+      }
+    };
+
+    for (const filter of filters) {
+      filter.addEventListener('click', () => {
+        applyFilter(filter.dataset.seriesFilter ?? '', true);
+      });
+    }
+    window.addEventListener('popstate', () => {
+      applyFilter(new URLSearchParams(window.location.search).get('series') ?? '', false);
+    });
+
+    applyFilter(new URLSearchParams(window.location.search).get('series') ?? '', true);
+  }
+</script>

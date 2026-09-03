@@ -24,7 +24,18 @@ export interface TestArticle {
     tags?: string[];
     aliases?: string[];
     pinned?: boolean;
+    series?: string;
+    seriesSlug?: string;
   };
+}
+
+export function seriesSlug(name: string): string {
+  return name
+    .normalize('NFKD')
+    .replace(/[\u0300-\u036f]/gu, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/gu, '-')
+    .replace(/^-+|-+$/gu, '');
 }
 
 function readPublishedArticles(): TestArticle[] {
@@ -46,6 +57,7 @@ function readPublishedArticles(): TestArticle[] {
 
     const publishedAt = normalizeDate(data.publishedAt);
     const revisedAt = normalizeDate(data.revisedAt);
+    const series = typeof data.series === 'string' ? data.series.trim() : undefined;
     articles.push({
       slug: entry.name,
       path: `/articles/${entry.name}/`,
@@ -58,6 +70,7 @@ function readPublishedArticles(): TestArticle[] {
         ...(Array.isArray(data.tags) ? { tags: data.tags.map(String) } : {}),
         ...(Array.isArray(data.aliases) ? { aliases: data.aliases.map(String) } : {}),
         ...(typeof data.pinned === 'boolean' ? { pinned: data.pinned } : {}),
+        ...(series ? { series, seriesSlug: seriesSlug(series) } : {}),
       },
     });
   }

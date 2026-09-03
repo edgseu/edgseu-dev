@@ -345,3 +345,71 @@ test('validateProfileFile reads and validates production profile without errors'
   assert.ok(result.profile);
   assert.equal(result.profile?.username, 'edgseu');
 });
+
+test('Article accepts a series and derives its series slug', () => {
+  const result = parseAndValidateArticle(`---
+title: Part One
+summary: First part of a series.
+state: Published
+publishedAt: 2026-08-30
+series: The Server That Wants to Be Hacked
+---
+
+## First section
+
+Portable body.
+`);
+  assert.equal(result.valid, true);
+  assert.equal(result.article?.series, 'The Server That Wants to Be Hacked');
+  assert.equal(result.article?.seriesSlug, 'the-server-that-wants-to-be-hacked');
+});
+
+test('Article series rejects non-strings, empty text, markup, and overlong names', () => {
+  const cases: Array<{ series: unknown; message: RegExp }> = [
+    { series: 7, message: /series must be a string/ },
+    { series: '', message: /series must be nonempty plain text/ },
+    { series: '   ', message: /series must be nonempty plain text/ },
+    { series: 'A <series> #name', message: /series must be nonempty plain text/ },
+    { series: 'x'.repeat(81), message: /series must be 80 characters or fewer/ },
+  ];
+  for (const { series, message } of cases) {
+    const result = parseAndValidateArticle({
+      frontmatter: {
+        title: 'Series Edge',
+        summary: 'Series validation fixture.',
+        state: 'Published',
+        publishedAt: '2026-08-30',
+        series,
+      },
+      content: '## Body\n\nText.',
+    });
+    assert.equal(result.valid, false, `expected series ${JSON.stringify(series)} to be rejected`);
+    assert.match(result.errors.join('\n'), message);
+  }
+});
+
+test('series display names must be spelled consistently for the same slug', () => {
+  const article = (slug: string, series: string) => ({
+    slug,
+    title: 'T',
+    summary: 'S',
+    state: 'Published' as const,
+    publishedAt: '2026-08-30',
+    links: [] as string[],
+    series,
+    seriesSlug: 'series-alpha',
+    readingMinutes: 1,
+  });
+  const errors = validateArticleCollection([
+    article('series-alpha', 'Series Alpha'),
+    article('series-alpha-two', 'Series Alphа'),
+  ]);
+  assert.equal(errors.length, 1);
+  assert.match(errors[0] ?? '', /series must be spelled consistently/);
+
+  const consistent = validateArticleCollection([
+    article('series-alpha', 'Series Alpha'),
+    article('series-alpha-two', 'Series Alpha'),
+  ]);
+  assert.equal(consistent.length, 0);
+});
