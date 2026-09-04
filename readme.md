@@ -91,11 +91,15 @@ pnpm lighthouse        # Three-run performance review across representative rout
 pnpm check:external    # Review owner-approved external destinations
 ```
 
-`pnpm quality` is the same release gate used before GitHub Pages deployment.
+`pnpm quality` is the release gate. It runs locally as a pre-commit hook (`.githooks/pre-commit`), so commits are blocked until the full pipeline passes. Enable the hook after cloning with:
+
+```bash
+git config core.hooksPath .githooks
+```
 
 ## Deployment
 
-Pull requests run the release gate. A successful push to `main` uploads `dist/` and deploys it through GitHub Pages to [edgseu.dev](https://edgseu.dev/). The deployment workflow is defined in `.github/workflows/site.yml`.
+The pre-commit gate is the quality check; the GitHub Actions workflow in `.github/workflows/site.yml` only builds `dist/` and deploys it through GitHub Pages to [edgseu.dev](https://edgseu.dev/) on pushes to `main`. Article comments (giscus) activate when the `GISCUS_REPO_ID` and `GISCUS_CATEGORY_ID` repository variables are set.
 
 ## Owner documentation
 

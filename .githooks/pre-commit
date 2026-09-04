@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# Pre-commit gate: mirrors the GitHub Actions "Site" workflow (pnpm quality).
+# Runs content validation, lint, astro check, production build, unit tests,
+# the Playwright e2e suite, and the artifact quality check. A failing check
+# aborts the commit. Install with: git config core.hooksPath .githooks
+set -euo pipefail
+cd "$(git rev-parse --show-toplevel)"
+echo "pre-commit: running quality gate (build, unit tests, e2e, artifact check)"
+pnpm quality
