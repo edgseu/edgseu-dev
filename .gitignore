@@ -11,3 +11,4 @@ artifacts/
 !.env.example
 local-research/
 .debug/
+.agents/
