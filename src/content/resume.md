@@ -38,7 +38,7 @@ Cloud & DevSecOps Engineer with 3+ years of experience securing and automating m
 
 ### Secure DevSecOps Platform
 
-[github.com/h1zardian/devsecops-pipeline-project](https://github.com/h1zardian/devsecops-pipeline-project)
+[github.com/edgseu/devsecops-pipeline-project](https://github.com/edgseu/devsecops-pipeline-project)
 
 AWS, EKS, Terraform, GitHub Actions, Kyverno, Argo CD
 
@@ -49,7 +49,7 @@ AWS, EKS, Terraform, GitHub Actions, Kyverno, Argo CD
 
 ### Cloud Sentinel & Honeypot Lab
 
-[github.com/h1zardian/cowrie-sentinel-lab](https://github.com/h1zardian/cowrie-sentinel-lab)
+[github.com/edgseu/cowrie-sentinel-lab](https://github.com/edgseu/cowrie-sentinel-lab)
 
 Azure, Microsoft Sentinel, KQL, Cowrie
 
