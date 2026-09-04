@@ -1,0 +1,47 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import { profile } from '../data/profile';
+import { site } from '../data/site';
+import { Content as ResumeContent, frontmatter as resume } from '../content/resume.md';
+
+const siteUrl = site.canonicalUrl.replace(/^https?:\/\//u, '').replace(/\/$/u, '');
+const githubLabel = profile.github.replace(/^https?:\/\/(www\.)?/u, '').replace(/\/$/u, '');
+const linkedinLabel = profile.linkedin.replace(/^https?:\/\/(www\.)?/u, '').replace(/\/$/u, '');
+---
+
+<BaseLayout title={resume.title} description={resume.description}>
+  <div class="resume-page">
+    <header class="resume-header">
+      <div class="resume-header-main">
+        <h1>{profile.name}</h1>
+        <p class="resume-role">{profile.role}</p>
+        <p class="resume-contact">
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+          <span aria-hidden="true">|</span>
+          <a href="/">{siteUrl}</a>
+          <span aria-hidden="true">|</span>
+          <a href={profile.linkedin} target="_blank" rel="noopener noreferrer">{linkedinLabel}</a>
+          <span aria-hidden="true">|</span>
+          <a href={profile.github} target="_blank" rel="noopener noreferrer">{githubLabel}</a>
+          <span aria-hidden="true">|</span>
+          <span>{profile.location}</span>
+        </p>
+      </div>
+      {profile.resumeUrl && (
+        <a
+          class="resume-download-btn"
+          href={profile.resumeUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <Icon name="file-arrow-down" size={14} />
+          <span>Download</span>
+        </a>
+      )}
+    </header>
+    <div class="prose resume-prose">
+      <ResumeContent />
+    </div>
+  </div>
+</BaseLayout>

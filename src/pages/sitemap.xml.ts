@@ -10,6 +10,7 @@ export const GET: APIRoute = () => {
     { path: '/', lastmod: staticLastMod },
     { path: '/projects/', lastmod: staticLastMod },
     { path: '/articles/', lastmod: staticLastMod },
+    { path: '/resume/', lastmod: staticLastMod },
     ...publishedArticles.map((article) => ({
       path: article.path,
       lastmod: article.frontmatter.revisedAt ?? article.frontmatter.publishedAt ?? staticLastMod,
