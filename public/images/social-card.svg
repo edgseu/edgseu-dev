@@ -24,12 +24,12 @@
     <rect x="60" y="54" width="1080" height="522" rx="20" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
   </g>
 
-  <text x="600" y="90" text-anchor="middle" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="21" font-weight="500">cloud-shell ~</text>
+  <text x="600" y="90" text-anchor="middle" fill="#82868e" font-family="'JetBrains Mono Variable','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="21" font-weight="500">cloud-shell ~</text>
   <circle cx="1008" cy="82" r="12" fill="#4bc680" fill-opacity="0.12"/>
   <circle cx="1008" cy="82" r="7" fill="#4bc680"/>
-  <text x="1032" y="89" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">online</text>
+  <text x="1032" y="89" fill="#82868e" font-family="'JetBrains Mono Variable','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">online</text>
 
-  <g font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="26">
+  <g font-family="'JetBrains Mono Variable','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="26">
     <text x="96" y="168" xml:space="preserve"><tspan fill="#b3b8bf" font-weight="600">edgseu</tspan><tspan fill="#82868e">@</tspan><tspan fill="#b3b8bf" font-weight="600">cloud</tspan><tspan fill="#82868e">:</tspan><tspan fill="#38b8f6">~</tspan><tspan fill="#b3b8bf" font-weight="700">$</tspan><tspan fill="#38b8f6" font-weight="600">  whoami</tspan></text>
     <text x="96" y="222" fill="#b0a4f8">cloud-shell</text>
     <text x="96" y="262" fill="#82868e">-----------</text>
@@ -40,8 +40,8 @@
     <text x="96" y="474" fill="#82868e">skills</text><text x="212" y="474" fill="#f0f2f5">Kubernetes · Terraform · GitOps · AWS &amp; Azure</text>
   </g>
 
-  <text x="96" y="560" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">commands:</text>
-  <g font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="17">
+  <text x="96" y="560" fill="#82868e" font-family="'JetBrains Mono Variable','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">commands:</text>
+  <g font-family="'JetBrains Mono Variable','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="17">
     <rect x="240" y="540" width="106" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
     <text x="293" y="559" text-anchor="middle" fill="#b3b8bf">projects</text>
     <rect x="358" y="540" width="106" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
