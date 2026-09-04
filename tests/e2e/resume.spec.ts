@@ -35,7 +35,7 @@ test('resume page is not a top navigation tab', async ({ page }) => {
 test('profile rail resume button links to the internal page', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
-  const railLink = page.locator('.profile-links a', { hasText: 'Résumé' });
+  const railLink = page.locator('.profile-links a', { hasText: 'Resume' });
   await expect(railLink).toBeVisible();
   await expect(railLink).toHaveAttribute('href', '/resume/');
   await railLink.click();

@@ -1,5 +1,5 @@
 ---
-title: "Résumé"
+title: "Resume"
 description: "Cloud and DevSecOps engineer resume: Azure and AWS infrastructure, Terraform, Kubernetes, GitOps, CI/CD security, and Microsoft Sentinel."
 ---
 

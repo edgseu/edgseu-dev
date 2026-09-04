@@ -9,7 +9,7 @@ Personal portfolio and technical writing site for **Aman Bhushan Singh**, a Clou
 - A terminal-style introduction that works without JavaScript and answers real commands
 - Selected public engineering projects, enriched at build time with live GitHub metadata
 - Long-form technical articles with series navigation, per-article tables of contents, and discussion threads
-- A professional profile, skills overview, and a hosted résumé page at [/resume](https://edgseu.dev/resume/) with a print-ready layout and a PDF download action
+- A professional profile, skills overview, and a hosted resume page at [/resume](https://edgseu.dev/resume/) with a print-ready layout and a PDF download action
 
 ## What this repository demonstrates
 
@@ -44,11 +44,11 @@ The repository doubles as an implementation sample. It shows:
 
 The main content inputs are intentionally small and direct:
 
-- `src/content/metadata.yaml`: profile details, links, skills, résumé, and configuration
+- `src/content/metadata.yaml`: profile details, links, skills, resume, and configuration
 - `src/content/bio.md`: pure Markdown homepage biography
 - `src/content/projects.yaml`: curated project catalog
 - `src/content/articles/*/{metadata.yaml,index.md}`: draft and published articles with split metadata and body
-- `src/content/resume.md`: the résumé page body, rendered at `/resume/`
+- `src/content/resume.md`: the resume page body, rendered at `/resume/`
 - `public/images/`: avatar and social assets
 
 Everything else, including navigation, the profile rail, terminal commands, meta tags, sitemap, comments wiring, GitHub enrichment, and theme handling, adapts from those files.
@@ -62,7 +62,7 @@ This repository is designed so anyone can fork or clone it and make it their own
 3. **Bio narrative**: update `src/content/bio.md`.
 4. **Projects catalog**: update `src/content/projects.yaml` with your own repositories, summaries, and tags.
 5. **Technical articles**: add articles under `src/content/articles/<slug>/` with `metadata.yaml` and `index.md`.
-6. **Résumé**: update `src/content/resume.md` and point `resumeUrl` at your own PDF.
+6. **Resume**: update `src/content/resume.md` and point `resumeUrl` at your own PDF.
 7. **Avatar**: replace `public/images/avatar.png`.
 
 ## Run locally
@@ -107,6 +107,6 @@ Article comments (giscus) activate when the `GISCUS_REPO_ID` and `GISCUS_CATEGOR
 
 ## Owner documentation
 
-The detailed operating guide covers content updates, project and article publication, the résumé page, comments, validation, hosting, deployment, dependency management, rollback, and troubleshooting:
+The detailed operating guide covers content updates, project and article publication, the resume page, comments, validation, hosting, deployment, dependency management, rollback, and troubleshooting:
 
 **[Site user manual](docs/user-manual.md)**

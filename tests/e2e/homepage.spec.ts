@@ -15,7 +15,7 @@ test('Homepage keeps identity and destinations useful without JavaScript', async
   await expect(page.getByRole('link', { name: /LinkedIn/ }).first()).toHaveAttribute('href', profile.linkedin);
   await expect(page.locator('#terminal-output p').first()).toContainText('whoami');
   if (profile.resumeUrl) {
-    await expect(page.getByRole('link', { name: 'Résumé' })).toHaveAttribute('href', '/resume/');
+    await expect(page.getByRole('link', { name: 'Resume' })).toHaveAttribute('href', '/resume/');
   }
   await expect(page.locator('#terminal-output')).toContainText(`${profile.username}@${profile.promptHost}:~$`);
   await expect(page.locator('#terminal-output')).toContainText(profile.host);

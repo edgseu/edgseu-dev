@@ -8,7 +8,7 @@ import test from 'node:test';
 
 const output = 'dist-profile';
 
-test('Profile rail publishes a configured résumé destination', () => {
+test('Profile rail publishes a configured resume destination', () => {
   const fixtureRoot = mkdtempSync(join(tmpdir(), 'edgseu-profile-'));
   const profileFile = join(fixtureRoot, 'metadata.yaml');
   writeFileSync(profileFile, `name: Profile Fixture
@@ -36,10 +36,10 @@ skills: [AWS EKS]
     assert.equal(result.status, 0, `${result.stdout}${result.stderr}`);
 
     const homepage = load(readFileSync(join(output, 'index.html'), 'utf8'));
-    const resume = homepage('.profile-links a').filter((_, element) => homepage(element).text().trim() === 'Résumé');
+    const resume = homepage('.profile-links a').filter((_, element) => homepage(element).text().trim() === 'Resume');
     assert.equal(resume.length, 1);
     assert.equal(resume.attr('href'), '/resume/');
-    assert.equal(resume.find('svg').length, 1, 'Résumé link should include the document icon');
+    assert.equal(resume.find('svg').length, 1, 'Resume link should include the document icon');
   } finally {
     rmSync(output, { recursive: true, force: true });
     rmSync(fixtureRoot, { recursive: true, force: true });

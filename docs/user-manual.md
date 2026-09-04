@@ -8,11 +8,11 @@ This is the owner’s operating guide for updating, validating, publishing, host
 
 | What you want to change | Authoritative file |
 | --- | --- |
-| Name, role, location, contact links, résumé PDF target, skills, availability | `src/content/metadata.yaml` |
+| Name, role, location, contact links, resume PDF target, skills, availability | `src/content/metadata.yaml` |
 | Homepage biography Markdown narrative | `src/content/bio.md` |
 | Projects, project order, lifecycle, publication state, tags, and homepage selection | `src/content/projects.yaml` |
 | Articles, drafts, publication dates, tags, series, redirects, and article body | `src/content/articles/<slug>/` (`metadata.yaml` + `index.md`) |
-| Résumé page content rendered at `/resume/` | `src/content/resume.md` |
+| Resume page content rendered at `/resume/` | `src/content/resume.md` |
 
 Do not edit `src/data/profile.ts` or `src/data/projects.ts`; they only load and export the validated content. Do not edit `.astro/` or `dist/`; both are generated.
 
@@ -30,7 +30,7 @@ Make the change and inspect it in the browser. The pre-commit hook runs the full
 ### Important URLs
 
 - Production site: <https://edgseu.dev/>
-- Résumé page: <https://edgseu.dev/resume/>
+- Resume page: <https://edgseu.dev/resume/>
 - Repository: <https://github.com/edgseu/edgseu-dev>
 - GitHub Actions: <https://github.com/edgseu/edgseu-dev/actions>
 - Article discussions: <https://github.com/edgseu/edgseu-dev/discussions/categories/article-comments>
@@ -67,13 +67,13 @@ The Astro configuration uses static output and trailing slashes. Internal URLs a
 
 | Path | Purpose |
 | --- | --- |
-| `src/content/` | Owner-authored profile, articles, and résumé |
+| `src/content/` | Owner-authored profile, articles, and resume |
 | `src/data/` | Canonical site URL, profile export, and project catalog |
 | `src/lib/` | Shared profile, Project catalog, Article authoring, and Terminal command modules |
 | `src/pages/` | Public routes and page-specific behavior |
 | `src/components/` | Cards, header, profile rail, terminal, icons, and article outline |
 | `src/layouts/BaseLayout.astro` | Shared metadata, fonts, header, footer, theme initialization, and page shell |
-| `src/styles/global.css` | Site-wide design, theming, résumé layout, and print styles |
+| `src/styles/global.css` | Site-wide design, theming, resume layout, and print styles |
 | `public/` | Files copied directly to the built site |
 | `scripts/` | Content, artifact, performance, and external-link checks |
 | `tests/` | Validation, rendering, and browser behavior tests |
@@ -166,13 +166,13 @@ Do not hand-edit these:
 
 Delete generated output only when troubleshooting a stale local build; the next command recreates it.
 
-## 4. Updating the profile, biography, and résumé
+## 4. Updating the profile, biography, and resume
 
 The profile is split into dedicated files:
 
 1. `src/content/metadata.yaml` — structured identity, links, skills, and configuration.
 2. `src/content/bio.md` — pure GitHub Flavored Markdown homepage biography narrative.
-3. `src/content/resume.md` — the résumé page body.
+3. `src/content/resume.md` — the resume page body.
 
 ### Profile metadata template (`src/content/metadata.yaml`)
 
@@ -244,16 +244,16 @@ The biography in `src/content/bio.md` must not be empty. It is rendered below th
 
 The rendered avatar is declared at 72 × 72 CSS pixels. Use a square source image to avoid awkward cropping or distortion.
 
-### The résumé page and the PDF target
+### The resume page and the PDF target
 
-The résumé has two halves with different jobs:
+The resume has two halves with different jobs:
 
 - `/resume/` is a real page rendered from `src/content/resume.md`. Edit that Markdown to change the summary, skills, experience, projects, education, or certifications. The page adds its own header (name, role, contact links from the profile), a Download action at the top right, and a print stylesheet that renders a clean paper document when the visitor prints or saves as PDF.
-- `resumeUrl` in `metadata.yaml` is the PDF target. The rail’s Résumé button always opens `/resume/` when `resumeUrl` is configured, and both Download actions hand the visitor the file at that URL.
+- `resumeUrl` in `metadata.yaml` is the PDF target. The rail’s Resume button always opens `/resume/` when `resumeUrl` is configured, and both Download actions hand the visitor the file at that URL.
 
 For an automatic PDF download from Google Docs, link the export endpoint rather than the published viewer: `https://docs.google.com/document/d/<DOCUMENT_ID>/export?format=pdf`. The document must be shared as anyone-with-the-link. A self-hosted `resume.pdf` under `public/` is the most durable option because it removes Google from the chain.
 
-To remove the résumé everywhere without touching components, use:
+To remove the resume everywhere without touching components, use:
 
 ```yaml
 resumeUrl: null
@@ -268,7 +268,7 @@ pnpm validate
 pnpm dev
 ```
 
-Inspect the profile rail, terminal `whoami`, terminal `skills`, contact output, footer, page title and description, avatar, résumé rail link, `/resume/`, and both light and dark themes.
+Inspect the profile rail, terminal `whoami`, terminal `skills`, contact output, footer, page title and description, avatar, resume rail link, `/resume/`, and both light and dark themes.
 
 ## 5. Managing projects
 
@@ -557,7 +557,7 @@ Use trailing slashes for route links. Relative file links must resolve to a real
 
 A published article cannot link to a draft article. The validator resolves canonical article routes and aliases to enforce this.
 
-The monthly external-link workflow checks profile links, the résumé URL, and published project destinations. It does not currently crawl every external URL inside article prose, so manually open important article references before publishing.
+The monthly external-link workflow checks profile links, the resume URL, and published project destinations. It does not currently crawl every external URL inside article prose, so manually open important article references before publishing.
 
 ### Article images
 
@@ -735,7 +735,7 @@ Quality is enforced locally by `.githooks/pre-commit`, which runs `pnpm quality`
 | `pnpm test` | Builds, runs validation tests, then Playwright. | Before release. |
 | `pnpm quality` | Runs `pnpm test`, then inspects the built artifact. | The release gate, run by the pre-commit hook. |
 | `pnpm lighthouse` | Runs repeated Lighthouse measurements on representative routes and writes a summary. | After layout, script, CSS, image, or dependency changes. |
-| `pnpm check:external` | Performs network requests to approved profile, résumé, and published project URLs. | Before publishing link changes or while reviewing the monthly job. |
+| `pnpm check:external` | Performs network requests to approved profile, resume, and published project URLs. | Before publishing link changes or while reviewing the monthly job. |
 
 Running `pnpm test:e2e` by itself assumes `dist/` already exists because Playwright starts `astro preview`, not a build. When unsure, use `pnpm test` or `pnpm quality`.
 
@@ -743,10 +743,10 @@ Running `pnpm test:e2e` by itself assumes `dist/` already exists because Playwri
 
 The release gate covers observable behavior including:
 
-- profile schema failures and optional résumé/availability rendering;
+- profile schema failures and optional resume/availability rendering;
 - Project catalog validation, network-free module imports, enrichment fallback, archive status, and repository identity failures;
 - Article metadata, heading, code-fence, link, alias-collision, series, and part validation;
-- résumé page rendering and the rail’s internal `/resume/` link;
+- resume page rendering and the rail’s internal `/resume/` link;
 - ESLint code-quality rules over TypeScript and `.astro` components;
 - article and project draft exclusion from production;
 - empty article states;
@@ -873,7 +873,7 @@ It checks:
 
 - GitHub profile URL;
 - LinkedIn profile URL;
-- résumé URL when configured;
+- resume URL when configured;
 - every published project repository URL.
 
 The check follows redirects and uses a 15-second timeout per URL. A broken destination fails the workflow run so the failure is visible in the Actions tab; open the logs and fix, replace, or intentionally remove stale destinations, then re-run or let the next scheduled run confirm the repair.
@@ -1056,7 +1056,7 @@ hello
 
 - [ ] Review the external-link workflow logs.
 - [ ] Review any Dependabot pull request and release notes.
-- [ ] Check the résumé page, PDF destination, and contact links manually.
+- [ ] Check the resume page, PDF destination, and contact links manually.
 - [ ] Check whether project lifecycle labels still reflect reality.
 - [ ] Check GitHub Pages and domain renewal status.
 - [ ] Review open article discussions and moderation needs.
@@ -1065,7 +1065,7 @@ hello
 
 - [ ] `pnpm quality` passes.
 - [ ] `pnpm lighthouse` has no unexplained regression.
-- [ ] Homepage, projects, article index, résumé page, and a full article checked locally.
+- [ ] Homepage, projects, article index, resume page, and a full article checked locally.
 - [ ] Light theme, dark theme, keyboard navigation, and 320 px layout checked.
 - [ ] Production preview contains no drafts.
 - [ ] Generated sitemap and robots policy checked.
