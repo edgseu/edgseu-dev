@@ -168,7 +168,7 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
   font-weight: 750;
   font-size: 1.35rem;
   line-height: 1.2;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.005em;
   font-feature-settings: normal;
   text-decoration: none;
   transition: color 0.15s ease;
@@ -231,11 +231,11 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
 main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 h1, h2, h3 { text-wrap: balance; }
 .page-header { max-width: 52rem; padding: 3.75rem 0 2.5rem; }
-.page-header h1 { margin: 0 0 0.65rem; font-size: clamp(2.1rem, 4.5vw, 2.85rem); font-weight: 720; letter-spacing: -0.035em; line-height: 1.08; color: var(--text); }
+.page-header h1 { margin: 0 0 0.65rem; font-size: clamp(2.1rem, 4.5vw, 2.85rem); font-weight: 720; letter-spacing: -0.02em; line-height: 1.08; color: var(--text); }
 .page-header p { max-width: 46rem; color: var(--muted); font-size: 1.05rem; line-height: 1.65; margin: 0; text-wrap: pretty; }
 .eyebrow { margin: 0 0 0.4rem; color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--font-mono); }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 3.25rem 0 1.25rem; }
-.section-heading h2 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.025em; line-height: 1.15; color: var(--text); }
+.section-heading h2 { margin: 0; font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; color: var(--text); }
 .section-heading a { flex: none; font-size: 0.88rem; font-weight: 500; }
 
 .home-grid { display: grid; grid-template-columns: minmax(15rem, 18rem) minmax(0, 1fr); gap: 2.25rem; padding: 3rem 0 4rem; align-items: start; }
@@ -292,7 +292,7 @@ h1, h2, h3 { text-wrap: balance; }
   margin: 0;
   font-size: 1.5rem;
   font-weight: 700;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.01em;
   line-height: 1.15;
   color: var(--text);
   font-family: inherit;
@@ -335,7 +335,7 @@ h1, h2, h3 { text-wrap: balance; }
   font-family: var(--font-mono);
   font-size: 0.75rem;
   line-height: 1.3;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
 }
 .profile-card .focus-list li {
   border-color: var(--border);
@@ -398,7 +398,7 @@ h1, h2, h3 { text-wrap: balance; }
   font-weight: 500;
   color: var(--muted);
   font-family: inherit;
-  letter-spacing: -0.01em;
+  letter-spacing: 0;
   text-align: center;
 }
 .terminal-status {
@@ -651,7 +651,7 @@ h1, h2, h3 { text-wrap: balance; }
   font-size: 1.15rem;
   font-weight: 700;
   line-height: 1.3;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.005em;
 }
 
 .article-card :is(h2, h3) a,
@@ -753,7 +753,7 @@ h1, h2, h3 { text-wrap: balance; }
 
 .article-context { display: flex; flex-wrap: wrap; gap: 0.75rem; padding: 1.25rem 0; border-bottom: 1px solid var(--border); color: var(--muted); font-family: var(--font-mono); font-size: 0.82rem; }
 .article-header { max-width: 52rem; padding: 3.25rem 0 2.25rem; }
-.article-header h1 { margin: 0.4rem 0 1rem; font-size: clamp(2.35rem, 6vw, 3.65rem); letter-spacing: -0.04em; line-height: 1.05; color: var(--text); }
+.article-header h1 { margin: 0.4rem 0 1rem; font-size: clamp(2.35rem, 6vw, 3.65rem); letter-spacing: -0.02em; line-height: 1.05; color: var(--text); }
 .article-header .summary { max-width: 48rem; color: var(--muted); font-size: 1.15rem; line-height: 1.65; text-wrap: pretty; }
 .draft-banner { padding: 0.75rem 1rem; border: 1px solid var(--warning-subtle); border-radius: 0.5rem; background: var(--warning-subtle); color: var(--warning); font-weight: 600; font-family: var(--font-mono); font-size: 0.88rem; }
 .article-grid { display: grid; grid-template-columns: 15rem minmax(0, 48rem); gap: 2.5rem; align-items: start; padding-bottom: 4rem; }
@@ -793,8 +793,8 @@ h1, h2, h3 { text-wrap: balance; }
 .prose { min-width: 0; max-width: 48rem; line-height: 1.75; padding: 0; border: none; background: transparent; color: var(--text-secondary); font-size: 1.05rem; }
 .prose > *:first-child { margin-top: 0; }
 .prose > *:last-child { margin-bottom: 0; }
-.prose h2 { font-size: 1.55rem; font-weight: 700; line-height: 1.25; margin: 2.75rem 0 1rem; color: var(--text); letter-spacing: -0.025em; scroll-margin-top: 6rem; }
-.prose h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 2rem 0 0.75rem; color: var(--text); letter-spacing: -0.015em; scroll-margin-top: 6rem; }
+.prose h2 { font-size: 1.55rem; font-weight: 700; line-height: 1.25; margin: 2.75rem 0 1rem; color: var(--text); letter-spacing: -0.01em; scroll-margin-top: 6rem; }
+.prose h3 { font-size: 1.25rem; font-weight: 600; line-height: 1.3; margin: 2rem 0 0.75rem; color: var(--text); letter-spacing: -0.005em; scroll-margin-top: 6rem; }
 .prose h4 { font-size: 1.05rem; font-weight: 600; line-height: 1.35; margin: 1.5rem 0 0.5rem; color: var(--text); scroll-margin-top: 6rem; }
 .prose p { margin: 0 0 1.25rem; text-wrap: pretty; }
 .prose ul { list-style-type: disc; margin: 0 0 1.25rem; padding-left: 1.5rem; }
