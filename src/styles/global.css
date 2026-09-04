@@ -12,7 +12,7 @@
   --color-accent-strong: var(--accent-strong);
   --color-secondary: var(--secondary);
   --color-success: var(--success);
-  --font-sans: "Roboto Variable", "Roboto", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
+  --font-sans: "Adwaita Sans", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Arial, sans-serif;
   --font-mono: "JetBrains Mono Variable", "JetBrains Mono", ui-monospace, SFMono-Regular, "Cascadia Code", "Liberation Mono", Menlo, Consolas, monospace;
   --radius-panel: 0.5rem;
   --radius-squarcle: 0.85rem;
@@ -165,7 +165,7 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
   margin-right: auto;
   color: var(--text);
   font-family: var(--font-mono);
-  font-weight: 750;
+  font-weight: 700;
   font-size: 1.35rem;
   line-height: 1.2;
   letter-spacing: -0.005em;
@@ -231,7 +231,7 @@ code, pre, .metadata, .eyebrow { font-family: var(--font-mono); }
 main { width: min(75rem, calc(100% - 2rem)); min-height: 70vh; margin: 0 auto; }
 h1, h2, h3 { text-wrap: balance; }
 .page-header { max-width: 52rem; padding: 3.75rem 0 2.5rem; }
-.page-header h1 { margin: 0 0 0.65rem; font-size: clamp(2.1rem, 4.5vw, 2.85rem); font-weight: 720; letter-spacing: -0.02em; line-height: 1.08; color: var(--text); }
+.page-header h1 { margin: 0 0 0.65rem; font-size: clamp(2.1rem, 4.5vw, 2.85rem); font-weight: 700; letter-spacing: -0.02em; line-height: 1.08; color: var(--text); }
 .page-header p { max-width: 46rem; color: var(--muted); font-size: 1.05rem; line-height: 1.65; margin: 0; text-wrap: pretty; }
 .eyebrow { margin: 0 0 0.4rem; color: var(--muted); font-size: 0.75rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; font-family: var(--font-mono); }
 .section-heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; margin: 3.25rem 0 1.25rem; }
