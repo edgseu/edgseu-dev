@@ -38,8 +38,8 @@ skills: [AWS EKS]
     const homepage = load(readFileSync(join(output, 'index.html'), 'utf8'));
     const resume = homepage('.profile-links a').filter((_, element) => homepage(element).text().trim() === 'Résumé');
     assert.equal(resume.length, 1);
-    assert.equal(resume.attr('href'), 'https://example.com/resume.pdf');
-    assert.equal(resume.find('svg').length, 2, 'Résumé link should include document and external-link icons');
+    assert.equal(resume.attr('href'), '/resume/');
+    assert.equal(resume.find('svg').length, 1, 'Résumé link should include the document icon');
   } finally {
     rmSync(output, { recursive: true, force: true });
     rmSync(fixtureRoot, { recursive: true, force: true });
