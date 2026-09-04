@@ -1,9 +1,54 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
   <title id="title">edgseu</title>
   <desc id="desc">Cloud and DevSecOps engineering</desc>
-  <rect width="1200" height="630" fill="#0d1117"/>
-  <rect x="70" y="70" width="1060" height="490" rx="18" fill="#161b22" stroke="#30363d" stroke-width="3"/>
-  <text x="130" y="290" fill="#7ee7f2" font-family="ui-monospace, monospace" font-size="112" font-weight="700">edgseu</text>
-  <text x="134" y="380" fill="#e6edf3" font-family="system-ui, sans-serif" font-size="48">Cloud &amp; DevSecOps engineering</text>
-  <circle cx="1040" cy="170" r="36" fill="#a78bfa"/>
+  <defs>
+    <clipPath id="win">
+      <rect x="60" y="54" width="1080" height="522" rx="20"/>
+    </clipPath>
+    <filter id="ds" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="14" stdDeviation="22" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="630" fill="#050709"/>
+  <ellipse cx="1010" cy="70" rx="430" ry="210" fill="#38b8f6" opacity="0.05"/>
+
+  <g filter="url(#ds)">
+    <rect x="60" y="54" width="1080" height="522" rx="20" fill="#0c0e13"/>
+    <g clip-path="url(#win)">
+      <rect x="60" y="54" width="1080" height="56" fill="#171a1e"/>
+      <rect x="60" y="528" width="1080" height="48" fill="#171a1e"/>
+      <line x1="60" y1="110" x2="1140" y2="110" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+      <line x1="60" y1="528" x2="1140" y2="528" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+    </g>
+    <rect x="60" y="54" width="1080" height="522" rx="20" fill="none" stroke="#FFFFFF" stroke-opacity="0.08" stroke-width="2"/>
+  </g>
+
+  <text x="600" y="90" text-anchor="middle" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="21" font-weight="500">cloud-shell ~</text>
+  <circle cx="1054" cy="83" r="12" fill="#4bc680" fill-opacity="0.12"/>
+  <circle cx="1054" cy="83" r="7" fill="#4bc680"/>
+  <text x="1074" y="90" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">online</text>
+
+  <g font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="26">
+    <text x="96" y="168" xml:space="preserve"><tspan fill="#b3b8bf" font-weight="600">edgseu</tspan><tspan fill="#82868e">@</tspan><tspan fill="#b3b8bf" font-weight="600">cloud</tspan><tspan fill="#82868e">:</tspan><tspan fill="#38b8f6">~</tspan><tspan fill="#b3b8bf" font-weight="700">$</tspan><tspan fill="#38b8f6" font-weight="600">  whoami</tspan></text>
+    <text x="96" y="222" fill="#b0a4f8">cloud-shell</text>
+    <text x="96" y="262" fill="#82868e">-----------</text>
+    <text x="96" y="306" fill="#82868e">user</text><text x="212" y="306" fill="#f0f2f5">Aman Bhushan Singh (edgseu)</text>
+    <text x="96" y="348" fill="#82868e">host</text><text x="212" y="348" fill="#f0f2f5">cloud-node</text>
+    <text x="96" y="390" fill="#82868e">role</text><text x="212" y="390" fill="#f0f2f5">Cloud Security &amp; Operations Engineer</text>
+    <text x="96" y="432" fill="#82868e">loc</text><text x="212" y="432" fill="#f0f2f5">India</text>
+    <text x="96" y="474" fill="#82868e">skills</text><text x="212" y="474" fill="#f0f2f5">Kubernetes · Terraform · GitOps · AWS &amp; Azure</text>
+  </g>
+
+  <text x="96" y="560" fill="#82868e" font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="20">commands:</text>
+  <g font-family="'Geist Mono Variable','Geist Mono','JetBrains Mono',ui-monospace,Menlo,Consolas,monospace" font-size="17">
+    <rect x="240" y="540" width="106" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <text x="293" y="559" text-anchor="middle" fill="#b3b8bf">projects</text>
+    <rect x="358" y="540" width="106" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <text x="411" y="559" text-anchor="middle" fill="#b3b8bf">articles</text>
+    <rect x="476" y="540" width="85" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <text x="518.5" y="559" text-anchor="middle" fill="#b3b8bf">skills</text>
+    <rect x="573" y="540" width="85" height="28" rx="6" fill="#0c0e13" stroke="#FFFFFF" stroke-opacity="0.08"/>
+    <text x="615.5" y="559" text-anchor="middle" fill="#b3b8bf">whoami</text>
+  </g>
 </svg>
