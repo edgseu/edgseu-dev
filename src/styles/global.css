@@ -937,6 +937,7 @@ h1, h2, h3 { text-wrap: balance; }
 .resume-download-btn:hover { color: var(--text); border-color: var(--accent); }
 .resume-prose .prose, .resume-prose h2, .resume-prose h3 { scroll-margin-top: 6rem; }
 .resume-prose h2 { border-bottom: 1px solid var(--border); padding-bottom: 0.45rem; }
+.resume-prose > h2:first-child { margin-top: 2.75rem; }
 .resume-prose h3 { color: var(--text); }
 @media print {
   :root, :root[data-theme="dark"], :root[data-theme="light"] {
