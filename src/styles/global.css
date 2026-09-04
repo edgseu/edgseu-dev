@@ -966,3 +966,10 @@ h1, h2, h3 { text-wrap: balance; }
   .resume-prose h2 { font-size: 13pt; }
   .resume-prose h3 { font-size: 11.5pt; }
 }
+
+.resume-prose p + ul { list-style: none; margin-bottom: 1.5rem; padding-left: 0; }
+.resume-prose p + ul > li { position: relative; margin-bottom: 0.65rem; padding-left: 1.4rem; }
+.resume-prose p + ul > li:last-child { margin-bottom: 0; }
+.resume-prose p + ul > li::before { content: ''; position: absolute; left: 0; top: 0.62em; width: 0.42rem; height: 0.42rem; border-radius: 50%; background: var(--muted); }
+.resume-prose p + ul > li::after { content: ''; position: absolute; left: 0.2rem; top: calc(0.62em + 0.55rem); bottom: calc(-0.65rem - 0.62em); width: 1px; background: var(--border-strong); }
+.resume-prose p + ul > li:last-child::after { display: none; }
