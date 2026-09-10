@@ -32,6 +32,12 @@ import { profile } from '../data/profile';
     {profile.focusAreas.map((area) => <li>{area}</li>)}
   </ul>
   <nav class="profile-links" aria-label="Profile links">
+    {profile.resumeUrl && (
+      <a href="/resume/">
+        <Icon name="file-lines" size={14} />
+        <span>Resume</span>
+      </a>
+    )}
     <a href={`mailto:${profile.email}`}>
       <Icon name="envelope" size={14} />
       <span>{profile.email}</span>
@@ -46,11 +52,5 @@ import { profile } from '../data/profile';
       <span>LinkedIn</span>
       <Icon name="arrow-up-right-from-square" size={12} class="external-icon" />
     </a>
-    {profile.resumeUrl && (
-      <a href="/resume/">
-        <Icon name="file-lines" size={14} />
-        <span>Resume</span>
-      </a>
-    )}
   </nav>
 </aside>
