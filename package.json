@@ -22,36 +22,36 @@
     "check:external": "tsx scripts/check-external-links.ts"
   },
   "dependencies": {
-    "@astrojs/markdown-remark": "7.2.4",
+    "@astrojs/markdown-remark": "7.3.1",
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@fontsource/adwaita-sans": "^5.3.0",
     "@tailwindcss/vite": "4.3.3",
-    "astro": "7.2.9",
+    "astro": "7.3.5",
     "github-slugger": "2.0.0",
     "remark-gfm": "4.0.1",
-    "sharp": "0.35.4",
+    "sharp": "0.35.5",
     "tailwindcss": "4.3.3",
     "unist-util-visit": "5.1.0",
-    "zod": "4.5.4"
+    "zod": "4.6.5"
   },
   "devDependencies": {
     "@astrojs/check": "0.9.10",
     "@axe-core/playwright": "4.13.0",
     "@eslint/js": "^10.0.1",
-    "@playwright/test": "1.62.1",
+    "@playwright/test": "1.63.0",
     "@types/mdast": "^4.0.4",
-    "@types/node": "^24.13.3",
+    "@types/node": "^24.19.0",
     "cheerio": "1.2.0",
-    "eslint": "^10.9.1",
-    "eslint-plugin-astro": "^3.1.0",
+    "eslint": "^10.11.0",
+    "eslint-plugin-astro": "^3.2.1",
     "gray-matter": "^4.0.3",
-    "lighthouse": "13.4.1",
+    "lighthouse": "13.5.0",
     "mdast-util-to-string": "^4.0.0",
     "remark-parse": "^11.0.0",
     "serve-handler": "6.1.7",
-    "tsx": "4.23.12",
+    "tsx": "4.23.15",
     "typescript": "6.0.3",
-    "typescript-eslint": "^8.69.0",
+    "typescript-eslint": "^8.70.1",
     "unified": "^11.0.5"
   }
 }
